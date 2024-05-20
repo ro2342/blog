@@ -9,8 +9,8 @@
 
 <channel>
 	<title>Sem categoria &#8211; Rod</title>
-	<atom:link href="https://ro2342.github.io/blog/category/sem-categoria/feed/" rel="self" type="application/rss+xml" />
-	<link>https://ro2342.github.io/blog</link>
+	<atom:link href="https://rodcarvalho.com/category/sem-categoria/feed/" rel="self" type="application/rss+xml" />
+	<link>https://rodcarvalho.com</link>
 	<description></description>
 	<lastBuildDate>Mon, 20 May 2024 00:35:07 +0000</lastBuildDate>
 	<language>pt-BR</language>
@@ -21,12 +21,12 @@
 	<generator>https://wordpress.org/?v=6.5.3</generator>
 	<item>
 		<title>Olá, mundo!</title>
-		<link>https://ro2342.github.io/blog/2024/05/19/ola-mundo/</link>
+		<link>https://rodcarvalho.com/2024/05/19/ola-mundo/</link>
 		
 		<dc:creator><![CDATA[rod]]></dc:creator>
 		<pubDate>Mon, 20 May 2024 00:07:48 +0000</pubDate>
 				<category><![CDATA[Sem categoria]]></category>
-		<guid isPermaLink="false">https://ro2342.github.io/blog/?p=1</guid>
+		<guid isPermaLink="false">https://rodcarvalho.com/?p=1</guid>
 
 					<description><![CDATA[Essa é mais uma das milhões de tentativas de eu manter um blog. Parece que já se passaram milhares de anos desde que eu comecei a escrever alguma coisa. Bem&#8230; Parece que chegou o momento, não é? 🙂]]></description>
 										<content:encoded><![CDATA[
