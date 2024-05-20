@@ -12,7 +12,7 @@
 	<atom:link href="https://ro2342.github.io/blog/category/sem-categoria/feed/" rel="self" type="application/rss+xml" />
 	<link>https://ro2342.github.io/blog</link>
 	<description></description>
-	<lastBuildDate>Mon, 20 May 2024 00:07:48 +0000</lastBuildDate>
+	<lastBuildDate>Mon, 20 May 2024 00:35:07 +0000</lastBuildDate>
 	<language>pt-BR</language>
 	<sy:updatePeriod>
 	hourly	</sy:updatePeriod>
@@ -22,20 +22,21 @@
 	<item>
 		<title>Olá, mundo!</title>
 		<link>https://ro2342.github.io/blog/2024/05/19/ola-mundo/</link>
-					<comments>https://ro2342.github.io/blog/2024/05/19/ola-mundo/#comments</comments>
 		
 		<dc:creator><![CDATA[rod]]></dc:creator>
 		<pubDate>Mon, 20 May 2024 00:07:48 +0000</pubDate>
 				<category><![CDATA[Sem categoria]]></category>
 		<guid isPermaLink="false">https://ro2342.github.io/blog/?p=1</guid>
 
-					<description><![CDATA[Boas-vindas ao WordPress. Esse é o seu primeiro post. Edite-o ou exclua-o, e então comece a escrever!]]></description>
+					<description><![CDATA[Essa é mais uma das milhões de tentativas de eu manter um blog. Parece que já se passaram milhares de anos desde que eu comecei a escrever alguma coisa. Bem&#8230; Parece que chegou o momento, não é? 🙂]]></description>
 										<content:encoded><![CDATA[
-<p>Boas-vindas ao WordPress. Esse é o seu primeiro post. Edite-o ou exclua-o, e então comece a escrever!</p>
+<p>Essa é mais uma das milhões de tentativas de eu manter um blog. Parece que já se passaram milhares de anos desde que eu comecei a escrever alguma coisa.</p>
+
+
+
+<p>Bem&#8230; Parece que chegou o momento, não é? <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p>
 ]]></content:encoded>
 					
-					<wfw:commentRss>https://ro2342.github.io/blog/2024/05/19/ola-mundo/feed/</wfw:commentRss>
-			<slash:comments>1</slash:comments>
 		
 		
 			</item>
