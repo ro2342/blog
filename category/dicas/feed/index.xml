@@ -8,8 +8,8 @@
 	>
 
 <channel>
-	<title>Página Inicial</title>
-	<atom:link href="https://rodcarvalho.com/feed/" rel="self" type="application/rss+xml" />
+	<title>dicas &#8211; Página Inicial</title>
+	<atom:link href="https://rodcarvalho.com/category/dicas/feed/" rel="self" type="application/rss+xml" />
 	<link>https://rodcarvalho.com</link>
 	<description></description>
 	<lastBuildDate>Mon, 27 May 2024 00:40:35 +0000</lastBuildDate>
@@ -20,27 +20,6 @@
 	1	</sy:updateFrequency>
 	<generator>https://wordpress.org/?v=6.5.3</generator>
 	<item>
-		<title>Olá, mundo!</title>
-		<link>https://rodcarvalho.com/2024/05/19/ola-mundo/</link>
-		
-		<dc:creator><![CDATA[rod]]></dc:creator>
-		<pubDate>Mon, 20 May 2024 00:07:48 +0000</pubDate>
-				<category><![CDATA[Sem categoria]]></category>
-		<guid isPermaLink="false">https://rodcarvalho.com/?p=1</guid>
-
-					<description><![CDATA[Essa é mais uma das milhões de tentativas de eu manter um blog. Parece que já se passaram milhares de anos desde que eu comecei a escrever alguma coisa. Bem&#8230; Parece que chegou o momento, não é? 🙂]]></description>
-										<content:encoded><![CDATA[
-<p>Essa é mais uma das milhões de tentativas de eu manter um blog. Parece que já se passaram milhares de anos desde que eu comecei a escrever alguma coisa.</p>
-
-
-
-<p>Bem&#8230; Parece que chegou o momento, não é? <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p>
-]]></content:encoded>
-					
-		
-		
-			</item>
-		<item>
 		<title>Leituras para o seu Halloween (2 livros nacionais e 1 internacional)</title>
 		<link>https://rodcarvalho.com/2023/10/19/leituras-para-o-seu-halloween-2-livros-nacionais-e-1-internacional/</link>
 		
@@ -334,69 +313,6 @@
 		
 			</item>
 		<item>
-		<title>Janeiro acabou e eu não voltei mais aqui&#8230;</title>
-		<link>https://rodcarvalho.com/2023/02/09/janeiro-acabou-e-eu-nao-voltei-mais-aqui/</link>
-		
-		<dc:creator><![CDATA[rod]]></dc:creator>
-		<pubDate>Thu, 09 Feb 2023 12:36:00 +0000</pubDate>
-				<category><![CDATA[blog]]></category>
-		<category><![CDATA[c. s. lewis]]></category>
-		<category><![CDATA[inteligência artificial]]></category>
-		<category><![CDATA[textos]]></category>
-		<guid isPermaLink="false">https://rodcarvalho.com/2023/02/09/janeiro-acabou-e-eu-nao-voltei-mais-aqui/</guid>
-
-					<description><![CDATA[Gente, já estamos em fevereiro e eu não voltei mais aqui desde o começo de janeiro. Mil desculpas! Muita coisa tem acontecido desde então. 🙂 Acho que a maior novidade de todas é que eu pedi demissão de um lugar que já não estava feliz há muito tempo. Não tive tanta coragem pra fazer isso [&#8230;]]]></description>
-										<content:encoded><![CDATA[</p>
-<div style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiEkx9dmG9XtQ4ClzLTyaGmJXDVKRqDfsz4JOgWYU3H_uqqENwrG5n_FQGkd1ZMATy01f0DIgvypjx0pMJTL9OPHhnJJvy9ruuKdVex5Je5S83pRCfbCMHpMY3FZpTscA9iMwjyCYhfg7fEhMVZ2fwvsBcmiK9BWlLOIyOZGqclNpOJndoYXAycqmzpew/s3084/B6ECBC9D-ED78-4676-8A76-8B19CC95A470.JPG" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em; text-align: justify;"><img loading="lazy" decoding="async" border="0" data-original-height="3084" data-original-width="1734" height="320" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiEkx9dmG9XtQ4ClzLTyaGmJXDVKRqDfsz4JOgWYU3H_uqqENwrG5n_FQGkd1ZMATy01f0DIgvypjx0pMJTL9OPHhnJJvy9ruuKdVex5Je5S83pRCfbCMHpMY3FZpTscA9iMwjyCYhfg7fEhMVZ2fwvsBcmiK9BWlLOIyOZGqclNpOJndoYXAycqmzpew/s320/B6ECBC9D-ED78-4676-8A76-8B19CC95A470.JPG" width="180" /></a></div>
-<div style="text-align: justify;">Gente, já estamos em fevereiro e eu não voltei mais aqui desde o começo de janeiro. Mil desculpas! Muita coisa tem acontecido desde então. <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></div>
-</p>
-<p style="text-align: justify;">Acho que a maior novidade de todas é que eu pedi demissão de um lugar que já não estava feliz há muito tempo. Não tive tanta coragem pra fazer isso mas chegou um ponto que não dava mais. Acho que agora vai ficar mais fácil de eu fazer as coisas que eu quero fazer e voltar pro blog é uma delas.</p>
-<h3 style="text-align: justify;">Inteligência artificial</h3>
-<p style="text-align: justify;">Comecei a pegar o gosto por inteligência artificial. Gostei de conversar com ela e ver como se comporta, criando conteúdos e histórias.&nbsp;</p>
-<p style="text-align: justify;">Eu pedi para uma inteligência artificial criar pautas para esse blog, então, vou compartilhar elas com vocês. Quem sabe eu não escreva sobre elas aqui? As pautas foram boas e as de 1 a 10 são as primeiras, enquanto as de 11 a 20 foi uma resposta refeita. Eu também pedi para que fossem de forma pessoal e que eu pudesse criar vídeos em cima também.</p>
-<p style="text-align: justify;">Bora ver?</p>
-</p>
-<ol style="text-align: left;">
-<li style="text-align: justify;">&#8220;Minha jornada como leitor de literatura YA: comecei a ler e não parei mais&#8221;</li>
-<li style="text-align: justify;">&#8220;Por que eu amo a literatura YA: uma reflexão pessoal&#8221;</li>
-<li style="text-align: justify;">&#8220;Livros YA que mudaram a minha vida&#8221;</li>
-<li style="text-align: justify;">&#8220;Como eu escolho os livros YA que vou ler&#8221;</li>
-<li style="text-align: justify;">&#8220;Minhas opiniões sobre o amadurecimento dos personagens em livros YA&#8221;</li>
-<li style="text-align: justify;">&#8220;As histórias YA que mais me emocionaram&#8221;</li>
-<li style="text-align: justify;">&#8220;Por que eu acho importante compartilhar sobre literatura YA com os jovens&#8221;</li>
-<li style="text-align: justify;">&#8220;Livros YA que eu quero reler na vida adulta&#8221;</li>
-<li style="text-align: justify;">&#8220;Minha lista de personagens YA preferidos&#8221;</li>
-<li style="text-align: justify;">&#8220;A importância dos temas representativos em livros YA para jovens&#8221;.</li>
-<li style="text-align: justify;">&#8220;Minha jornada de leitura: como os livros YA mudaram minha vida&#8221;</li>
-<li style="text-align: justify;">&#8220;Por que eu amo a literatura young adult: uma reflexão pessoal&#8221;</li>
-<li style="text-align: justify;">&#8220;Como eu escolho os livros que quero ler: dicas pessoais&#8221;</li>
-<li style="text-align: justify;">&#8220;Livros YA que me fizeram chorar: uma lista pessoal&#8221;</li>
-<li style="text-align: justify;">&#8220;Meus personagens YA favoritos: uma análise pessoal&#8221;</li>
-<li style="text-align: justify;">&#8220;O impacto dos livros YA na minha formação emocional&#8221;</li>
-<li style="text-align: justify;">&#8220;Livros YA que eu recomendo para todos os tipos de leitor&#8221;</li>
-<li style="text-align: justify;">&#8220;Minhas expectativas x realidade: revisão de livros YA que li recentemente&#8221;</li>
-<li style="text-align: justify;">&#8220;Como os livros YA me ajudaram a lidar com a adolescência&#8221;</li>
-<li style="text-align: justify;">&#8220;Minhas reflexões sobre o futuro da literatura young adult&#8221;.</li>
-</ol>
-</p>
-<p style="text-align: justify;">Eu também pedi para a IA escrever uma postagem sobre As Crônicas de Nárnia. Eu adorei como ficou. Ainda bem que não é com o meu estilo de escrever.&nbsp;</p>
-</p>
-<p style="text-align: justify; padding-left: 35px;">O livro &#8220;O Leão, a Feiticeira e o Guarda-roupa&#8221; é o primeiro volume da série &#8220;As Crônicas de Nárnia&#8221;, escrito por C. S. Lewis. A história se passa durante a Segunda Guerra Mundial e segue quatro irmãos que são transportados para um mundo mágico através de um guarda-roupa. Este mundo é conhecido como Nárnia e é governado pelo Leão Aslan.</p>
-<p style="text-align: justify; padding-left: 35px;">A história é repleta de aventura e magia, com os irmãos lutando contra a Feiticeira Branca para libertar Nárnia de seu domínio maligno. Ao longo da jornada, eles descobrem que Nárnia é um lugar cheio de criaturas mágicas, como faunos, centauros e unicórnios, e aprendem valiosas lições sobre amizade, coragem e fé.</p>
-<p style="text-align: justify; padding-left: 35px;">Além da ação e da aventura, &#8220;O Leão, a Feiticeira e o Guarda-roupa&#8221; também oferece uma profunda reflexão sobre questões morais e espirituais. O personagem Aslan é frequentemente visto como uma metáfora para Jesus, e a história explora temas como perdão, sacrifício e fé.</p>
-<p style="text-align: justify; padding-left: 35px;">A escrita de C. S. Lewis é poética e detalhada, criando uma atmosfera envolvente e imersiva. A história é adequada para crianças e adultos, e muitos leitores afirmam que &#8220;O Leão, a Feiticeira e o Guarda-roupa&#8221; os marcou profundamente durante a infância e que ainda é uma leitura significativa para eles na idade adulta.</p>
-<p style="text-align: justify; padding-left: 35px;">A série &#8220;As Crônicas de Nárnia&#8221; é uma das obras literárias mais influentes e bem-amadas de todos os tempos. É uma série de livros encantadores e cativantes que oferece uma mistura perfeita de aventura, magia e reflexão profunda. Se você ainda não leu &#8220;O Leão, a Feiticeira e o Guarda-roupa&#8221;, definitivamente vale a pena dar uma chance!</p>
-<p style="text-align: justify; padding-left: 35px;">Em resumo, &#8220;O Leão, a Feiticeira e o Guarda-roupa&#8221; é um livro encantador e cativante, cheio de aventura e magia, com uma profunda reflexão sobre questões morais e espirituais. Uma leitura obrigatória para todos, independentemente da idade!</p>
-</p>
-<p style="text-align: justify;">Eu não escreveria positivamente sobre a parte cristã do livro de C. S. Lewis, então&#8230;&nbsp;</p>
-<h3 style="text-align: justify;">The Last of Us</h3>
-<p style="text-align: justify;">Comecei a ver a série da HBO porque um amigo me pediu e eu estou adorando. Mas vou fazer uma outra postagem sobre isso no fim de semana contando tudo o que eu li, assisti e ouvi em janeiro. Fiquei com muita vontade de jogar o jogo mas eu não tenho a plataforma&#8230;</p>
-]]></content:encoded>
-					
-		
-		
-			</item>
-		<item>
 		<title>O que eu tenho visto, ouvido e lido &#8211; Janeiro #01</title>
 		<link>https://rodcarvalho.com/2023/01/11/o-que-eu-tenho-visto-ouvido-e-lido-janeiro-01/</link>
 		
@@ -482,55 +398,80 @@
 		
 			</item>
 		<item>
-		<title>CHEGOU 2023!</title>
-		<link>https://rodcarvalho.com/2023/01/10/chegou-2023/</link>
+		<title>O QUE EU TENHO OUVIDO, VISTO E LIDO &#8211; DEZEMBRO #3</title>
+		<link>https://rodcarvalho.com/2022/12/25/o-que-eu-tenho-ouvido-visto-e-lido-dezembro-3/</link>
 		
 		<dc:creator><![CDATA[rod]]></dc:creator>
-		<pubDate>Tue, 10 Jan 2023 04:59:00 +0000</pubDate>
-				<category><![CDATA[blog]]></category>
-		<category><![CDATA[c. s. lewis]]></category>
+		<pubDate>Mon, 26 Dec 2022 00:08:00 +0000</pubDate>
+				<category><![CDATA[dicas]]></category>
 		<category><![CDATA[filmes]]></category>
-		<category><![CDATA[fronteiras do universo]]></category>
-		<category><![CDATA[his dark materials]]></category>
 		<category><![CDATA[livros]]></category>
-		<category><![CDATA[nárnia]]></category>
-		<category><![CDATA[philip pullman]]></category>
-		<guid isPermaLink="false">https://rodcarvalho.com/2023/01/10/chegou-2023/</guid>
+		<category><![CDATA[música]]></category>
+		<guid isPermaLink="false">https://rodcarvalho.com/2022/12/25/o-que-eu-tenho-ouvido-visto-e-lido-dezembro-3/</guid>
 
-					<description><![CDATA[&#160; Essa foi a minha última foto em 2022. Nem parece que foi um ano caótico. Mas foi. Muita coisa mudou na minha vida. Mas foi, também, um dos melhores anos dessa vida que eu levo. Nesse ano, eu assumi a coordenação pedagógica de duas escolas, continuei como professore de Educação Fundamental II em Língua [&#8230;]]]></description>
-										<content:encoded><![CDATA[<p style="text-align: justify;">&nbsp;</p>
-<div style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgCRt-z9TTWvfyvQqsaoEW0qYaZoXaHJWi8ZtYO6hm72yIlTMVcl56fhtzw83qsutHcTIRp4Lv2mYNSb-eZW9SxQWbqxBVir8rKSKFbLjkuaNochT0k96wRwAWthopvjVR-lja2xdZtDGvaFVZD5v1O4NN-9EJpNwN6QrrZbXLdd4HueOkES9Z47HcLEw/s3088/camphoto_1903590565.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em; text-align: justify;"><img loading="lazy" decoding="async" border="0" data-original-height="3088" data-original-width="2316" height="320" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgCRt-z9TTWvfyvQqsaoEW0qYaZoXaHJWi8ZtYO6hm72yIlTMVcl56fhtzw83qsutHcTIRp4Lv2mYNSb-eZW9SxQWbqxBVir8rKSKFbLjkuaNochT0k96wRwAWthopvjVR-lja2xdZtDGvaFVZD5v1O4NN-9EJpNwN6QrrZbXLdd4HueOkES9Z47HcLEw/s320/camphoto_1903590565.jpg" width="240" /></a></div>
-<div style="text-align: justify;">Essa foi a minha última foto em 2022. Nem parece que foi um ano caótico. Mas foi. Muita coisa mudou na minha vida.</div>
+					<description><![CDATA[Eu tirei essa foto no dia 1 de novembro de 2022 e desde então eu tenho poucas fotos minhas no meu celular. Acho que eu não tenho me sentido muito bem com minha aparência e isso justifica demais eu não ter essa alegria para tirar fotos minhas. Coisa boba, né? Fiquei um tempinho tentando decidir [&#8230;]]]></description>
+										<content:encoded><![CDATA[</p>
+<div style="text-align: justify;"></div>
+<div style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhdPKQg5giQMOt2LyEJXnQDQZeJPZrBW3c_mY7lLf8tBkEaKxm9C0-TcFwJNh2UNENku6w3zcuywGz2jHlJL4ZG86ShkmGli6Ds1J7U8hbNew5YjEtXnaCUXW6b2VCwLvhb4dMwO6GXeEJDvdq3tMli0tCh474sUW0hBw1l8FQTZGXuHXheUoL63AJZJg/s1472/64171321-1CCC-455B-AADB-DC2603F1ED21.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em; text-align: justify;"><img loading="lazy" decoding="async" border="0" data-original-height="1472" data-original-width="828" height="320" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhdPKQg5giQMOt2LyEJXnQDQZeJPZrBW3c_mY7lLf8tBkEaKxm9C0-TcFwJNh2UNENku6w3zcuywGz2jHlJL4ZG86ShkmGli6Ds1J7U8hbNew5YjEtXnaCUXW6b2VCwLvhb4dMwO6GXeEJDvdq3tMli0tCh474sUW0hBw1l8FQTZGXuHXheUoL63AJZJg/s320/64171321-1CCC-455B-AADB-DC2603F1ED21.jpg" width="180" /></a></div>
+<div style="text-align: justify;">Eu tirei essa foto no dia 1 de novembro de 2022 e desde então eu tenho poucas fotos minhas no meu celular. Acho que eu não tenho me sentido muito bem com minha aparência e isso justifica demais eu não ter essa alegria para tirar fotos minhas.</div>
 </p>
-<p style="text-align: justify;">Mas foi, também, um dos melhores anos dessa vida que eu levo. Nesse ano, eu assumi a coordenação pedagógica de <b>duas </b>escolas, continuei como professore de Educação Fundamental II em Língua Inglesa e não escrevi nenhum livro&#8230; Essa última parte não é tão boa, confesso. Eu amo escrever. Mas há algum tempo eu não tenho mais sentido vontade alguma. Até sento para escrever e não vem nada. 0 inspiração. 0 motivação. Dizem que às vezes é assim mesmo, porém, eu não gostaria de acreditar que seja assim. Philip Pullman disse uma vez que como escrever era o trabalho dele, ele se forçada a escrever todos os dias uma vez. Às vezes não acontecia muita coisa mas ele sempre deixava uma página já escrita sempre todos os dias, não importando o tamanho dela.&nbsp;</p>
-<p style="text-align: justify;">Quem sabe eu não precise dessa motivação?</p>
-<p style="text-align: justify;"></p>
-<h2 style="text-align: justify;">E o que aconteceu para Philip Pullman substituir C. S. Lewis em minha vida?</h2>
-<div style="text-align: justify;">C. S. Lewis sempre foi um dos meus autores favoritos desde que eu conheci <i>As Crônicas de Nárnia</i>, conforme eu já relatei <a href="https://www.rodcarvalho.com/2022/12/blog-post.html">aqui</a> em meu blog. O problema é que Lewis é muito cristão. E, olha, não tem problema a religião (ou a falta dela) no âmbito individual. Mas a questão toda é que a literatura fantástica de Lewis é só um pretexto para catequizar. E isso é um pouco chato. Você tem a série de Nárnia, a Trilogia Fantástica e O Grande Divórcio (chamo de O Grande Abismo anteriormente) e todos eles são livros para catequizar. No meio dessa situação, a gente teve também com a escritora transfóbica. Quando eu me entendi como pessoa não binária (essa situação vai aparecer aqui bastante nesse ano, principalmente em textos que falam da minha vida pessoal), eu perdi completamente a vontade de consumir qualquer coisa que tenha a ver com qualquer um dos livros dela.</div>
+<p style="text-align: justify;">Coisa boba, né?</p>
+<p style="text-align: justify;">Fiquei um tempinho tentando decidir qual seria o título desta postagem pois eu simplesmente não sei.</p>
+<p style="text-align: justify;">Eu tinha tudo planejado para o fim desse ano. Fiz um post antes mesmo dele ir pro ar para criar uma rotina de postagens por aqui (mesmo ninguém vindo ler, é claro), mas, a vida prega surpresas na gente. E, apesar daqui ser um espaço completamente meu, tem coisas que eu não quero sair divulgando por ai.</p>
+<p style="text-align: justify;">E a gente fica assim por aqui. Quem estiver me lendo, mil desculpas pela demora nas postagens. Este blog vai ter postagens regulares a partir de agora. <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /> Então, vamos voltar para a minha listinha de coisas que eu tenho ouvido, visto e lido.</p>
+<h2 style="text-align: justify;">Ouvindo</h2>
+<div style="text-align: justify;">Eu voltei a ouvir música há pouco tempo. Taylor Swift continua tocando por aqui mas eu tenho escutado algumas outras coisas também. Tenho ouvido Jão de novo. Mas só.</div>
 <div style="text-align: justify;"></div>
-<div style="text-align: justify;">
-<div style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/a/AVvXsEihNe1e_OpxvRFCO--9iftRnJLSF4Qcz6pt6dVCAv-LbDErbXq6j1N2BsN3EJUZHto9gL-5JkQmDGq0S-njwXzG_F4P3CXpSDCIJbWRN0G9_WLLr7gBB7b8Gf7MuXnfIp_fUj0KLkJ7wt0mizsjzCH6-88T8eEx-sshvpwXYTPFP_MlD8wmEf9a7UMV9w" style="margin-left: 1em; margin-right: 1em;"><img loading="lazy" decoding="async" alt="" data-original-height="159" data-original-width="318" height="160" src="https://blogger.googleusercontent.com/img/a/AVvXsEihNe1e_OpxvRFCO--9iftRnJLSF4Qcz6pt6dVCAv-LbDErbXq6j1N2BsN3EJUZHto9gL-5JkQmDGq0S-njwXzG_F4P3CXpSDCIJbWRN0G9_WLLr7gBB7b8Gf7MuXnfIp_fUj0KLkJ7wt0mizsjzCH6-88T8eEx-sshvpwXYTPFP_MlD8wmEf9a7UMV9w" width="320" /></a></div>
-</div>
+<h2 style="text-align: justify;">Lendo</h2>
+<div style="text-align: justify;">Eu não li absolutamente nada esse mês depois de Rádio Silêncio. Mas acabei relendo Heartstopper #1 e #2. Estou pensando em ler <b>A mão esquerda da escuridão</b>&nbsp;mas sem pressão, principalmente porque meu Kindle tá estragando&#8230;</div>
 <div style="text-align: justify;"></div>
-<div style="text-align: justify;">Eu estava na maratona de assistir His Dark Materials quando meu avô morreu. Foi ele quem me deu a maior parte dos meus livros da referida autora e eu só não vou me desfazer deles exatamente por isso. Mas ele também me deu o livro A Faca Sutil, da série His Dark Materials, publicada aqui como Fronteiras do Universo, que, curiosamente, é meu favorito da série. A série também falava muito sobre essa questão de vida e morte e do que acontece no que vem depois. O pensamento da série moldou tanto o meu pensar sobre isso que foi até um dos motivos que fez com que eu me tornasse umbandista.&nbsp;</div>
+<h2 style="text-align: justify;">Vendo</h2>
+<div style="text-align: justify;">Eu terminei a última temporada de His Dark Materials e eu amei. Eu nunca achei que ia ver os mulefa em uma produção audiovisual e muito menos o desfecho de uma das minhas séries literárias favoritas. As mudanças em relação ao livro também foram muito boas. Não tem muito o que falar sem dar spoiler, mas foi uma das melhores coisas que eu assisti esse ano. Como se eu tivesse assistido muita coisa, né? Ultimamente eu só fico assistindo vídeos aleatórios no YouTube mesmo, então&#8230;</div>
+<h2 style="text-align: justify;">Tá com formiga no c&#8230;</h2>
+<div style="text-align: justify;">Em dois dias eu resolvi que ia tentar instalar o MacOS no meu laptop e agora eu estou aqui com o Fedora. Não que o Windows 11 estivesse ruim (não estava) mas até que demorou pra eu querer fazer alguma coisa idiota no meu laptop. O MacOS não deu certo. Eu só vou sossegar quanto tiver um MacOS, certeza. Enquanto isso, aproveito enquanto dura cada momento em um dos meus sistemas operacionais. Eu gosto do Linux, de verdade. É só que&#8230; às vezes falta alguma coisa, né? Sei lá. Uma hora muda. Ou não.</div>
 <div style="text-align: justify;"></div>
-<div style="text-align: justify;">Curiosamente, tudo começou, pois, um divulgador de Nárnia fazia propagandas contra a série de Pullman. E eu, como um fã de Lewis da época, concordava. Até conhecer Fronteiras do Universo por conta própria. Parece que foi um <i>universo paralelo</i> que se abriu pra mim (desculpa, eu precisava fazer essa piada) e isso aconteceu várias e várias vezes na minha vida &#8211; mas, contarei isso depois. Philip Pullman foi um desencadeador de tantas coisas positivas.&nbsp;</div>
+<div style="text-align: justify;">Vou tentar voltar aqui antes de 2022 acabar. Se eu não conseguir, feliz ano novo. Até 2023. <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></div>
+]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>O que eu tenho ouvido, visto e lido &#8211; Dezembro #2</title>
+		<link>https://rodcarvalho.com/2022/12/14/o-que-eu-tenho-ouvido-visto-e-lido-dezembro-2/</link>
+		
+		<dc:creator><![CDATA[rod]]></dc:creator>
+		<pubDate>Wed, 14 Dec 2022 03:00:00 +0000</pubDate>
+				<category><![CDATA[dicas]]></category>
+		<category><![CDATA[filmes]]></category>
+		<category><![CDATA[livros]]></category>
+		<category><![CDATA[música]]></category>
+		<guid isPermaLink="false">https://rodcarvalho.com/2022/12/14/o-que-eu-tenho-ouvido-visto-e-lido-dezembro-2/</guid>
+
+					<description><![CDATA[A segunda semana de dezembro chegou e eu vou fingir que eu comecei a fazer isso na semana passada, só pra poder dar aquela sensação de rotina maneira.&#160; E bora de giro de notícias&#8230; quer dizer&#8230; bom, ainda não tenho um nome pra esse quadro, mas vamos lá! Eu decidi que não vou dar nenhuma [&#8230;]]]></description>
+										<content:encoded><![CDATA[<p style="text-align: justify;">
+<div style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiBpmo-y6Vvs5L86yDnSV9RoZu0Kvm0l7ZNfY4whwy9uxmT_tBp3ZHPZvCHpVlnG_nKbVNE_t7oTx25D4FZcPPaWPfW3Gl-4-arD6DcUjM3rLoZw8BEdTwkquOrEEmDsOPm0KKe-9k4jV2u0QdHZf8C3e5_v4du9mnHKJaDGSWIXJwy82EbtXLyaPTT1Q/s1440/29B40471-BD7A-498E-B347-BFC448E7F670.jpg" style="clear: left; float: left; margin-bottom: 1em; margin-right: 1em;"><img loading="lazy" decoding="async" border="0" data-original-height="1439" data-original-width="1440" height="320" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiBpmo-y6Vvs5L86yDnSV9RoZu0Kvm0l7ZNfY4whwy9uxmT_tBp3ZHPZvCHpVlnG_nKbVNE_t7oTx25D4FZcPPaWPfW3Gl-4-arD6DcUjM3rLoZw8BEdTwkquOrEEmDsOPm0KKe-9k4jV2u0QdHZf8C3e5_v4du9mnHKJaDGSWIXJwy82EbtXLyaPTT1Q/s320/29B40471-BD7A-498E-B347-BFC448E7F670.jpg" width="320" /></a></div>
+<p>A segunda semana de dezembro chegou e eu vou fingir que eu comecei a fazer isso na semana passada, só pra poder dar aquela sensação de rotina maneira.&nbsp;</p>
+<p style="text-align: justify;">E bora de giro de notícias&#8230; quer dizer&#8230; bom, ainda não tenho um nome pra esse quadro, mas vamos lá! Eu decidi que não vou dar nenhuma nota pra nada. Vamos lá!</p>
+<h3 style="text-align: justify;">Lendo</h3>
+<div style="text-align: justify;">Eu acabei de terminar de reler <b>Radio Silêncio</b>, de Alice Oseman e traduzido por Carolina Caires Coelho. Alice é uma das minhas maiores inspirações, desde Heartstopper, claro, e reler esse livro me deu um quentinho no coração. A história gira em torno de Frances, que é fascinada por um podcast chamado <i>Universe City</i>, e ela faz fan arts do programa por diversão no Tumblr. As coisas começam a mudar quando o Criador do podcast resolve chamar ela pra fazer artes para o projeto de forma oficial. Frances não aparece na história de Heartstopper mas Aled é um dos amigos de Charlie.</div>
 <div style="text-align: justify;"></div>
-<div style="text-align: justify;">
-<div style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/a/AVvXsEgWroGtgaYP8sVujkBAt8XPTLnQs5X9xvlhPZRoHSfYwydAbYa1ZzEIj6CEbhuPZgPXDDqOIv7AmUb-Rowuk1mJym6uYLeP05YXq1gufQHawpjOMdFPWBokKp8Z2s1PRaMoPaj92vJMtqlrqKU8SC37dVuERKy4ZDSD5xBOhhEWZcI1h8ZGZwwril7qRA" style="margin-left: 1em; margin-right: 1em;"><img loading="lazy" decoding="async" alt="" data-original-height="1413" data-original-width="2258" height="200" src="https://blogger.googleusercontent.com/img/a/AVvXsEgWroGtgaYP8sVujkBAt8XPTLnQs5X9xvlhPZRoHSfYwydAbYa1ZzEIj6CEbhuPZgPXDDqOIv7AmUb-Rowuk1mJym6uYLeP05YXq1gufQHawpjOMdFPWBokKp8Z2s1PRaMoPaj92vJMtqlrqKU8SC37dVuERKy4ZDSD5xBOhhEWZcI1h8ZGZwwril7qRA" width="320" /></a></div>
-</div>
+<div style="text-align: justify;"><b></p>
+<div style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEguog2aa81ohiBZQBvEEA7sbVetkyYECSgGxjP2KW_Teu1x5EpZlfc9Mps1J5PGQwEo_z78WMt4FK9qIV_5KmkQYmYXy8-ZO5KXdGN8Qj5awmJwc1V_9WgYsqBdV5sN4YerZ82HpRZU1zytYH2kvLFhaTF-Tbfc4mc7-UHy_zdDUqsfWLkDMWL-vkZ0iA/s2489/81Ch3hA454L.jpg" style="clear: right; float: right; margin-bottom: 1em; margin-left: 1em;"><img loading="lazy" decoding="async" border="0" data-original-height="2489" data-original-width="1685" height="320" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEguog2aa81ohiBZQBvEEA7sbVetkyYECSgGxjP2KW_Teu1x5EpZlfc9Mps1J5PGQwEo_z78WMt4FK9qIV_5KmkQYmYXy8-ZO5KXdGN8Qj5awmJwc1V_9WgYsqBdV5sN4YerZ82HpRZU1zytYH2kvLFhaTF-Tbfc4mc7-UHy_zdDUqsfWLkDMWL-vkZ0iA/s320/81Ch3hA454L.jpg" width="217" /></a></div>
+<p>O que eu achei?</b></div>
+<div style="text-align: justify;"><b><br /></b></div>
+<div style="text-align: justify;">Rádio Silêncio pra mim é uma das maiores histórias. Eu sei que vou para a ficção em diversos momentos da minha vida e dessa vez não foi diferente. Eu acho que me vejo um pouco em Frances, mas, principalmente em Aled, que luta pra sua arte sobreviver. E cá estou eu. O livro tem todos os elementos que a gente adora na escrita de Alice Oseman e, diferente dos quadrinhos e das histórias de Nick &amp; Charlie, nenhum de seus romances tratam especificamente do amor romântico &#8211; e isso é maravilhoso.</div>
 <div style="text-align: justify;"></div>
-<div style="text-align: justify;">O primeiro livro que eu finalizei não foi por causa de Nárnia ou de um livro de um herói bruxo. Foi por causa de <a href="https://amzn.to/3inxKtA" target="_blank" rel="noopener">A Borboleta Tatuada</a> de Pullman. Muitas das minhas crenças pessoais acabaram tomando forma por causa de Fronteiras do Universo: elas já existiam, porém, foram refinadas por causa dos livros.</div>
+<h3 style="text-align: justify;">Ouvindo</h3>
+<div style="text-align: justify;">Eu não parei de ouvir o álbum Midnights de Taylor Swift, a loirinha que completou 33 anos ontem, 13 de dezembro. Depois de duas regravações, Fearless (Taylor&#8217;s Version) e Red (Taylor&#8217;s Version), a cantora norte-americana nos presenteia com um álbum completamente inédito, feito em parceria com o produtor Jack Antonoff. Com uma música com participação especial de Lana Del Rey, a doutora mostra toda a versatilidade musical que seu trabalho é conhecido, indo do pop ao folk, uma música um pouco mais triste e para uma música sobre o Karma que não tem nada a ver com o lado <b>Reputation</b>&nbsp;que esperaríamos que a diretora fosse trazer. A compositora também nos presenteia com a melhor música da sua carreira até agora (na minha opinião) que é Midnight Rain. Falei que não ia dar nota mas esse álbum é 13.</div>
 <div style="text-align: justify;"></div>
-<h2 style="text-align: justify;">E hoje?</h2>
-<div style="text-align: justify;">Eu não tenho certeza de como C. S. Lewis reagiria à causa trans. Existe um <a href="https://medium.com/@billhoard_34685/bareface-c-s-lewis-and-the-identity-claims-of-transgender-people-e53afad806a4" target="_blank" rel="noopener">texto</a> que diz que Lewis apoiaria nossa existência, porém, tudo fica no campo das ideias, não é? Ele não está aqui para falar. Lewis foi amigo de uma pessoa <i>gay</i>&nbsp;e, apesar de ser cristão, era bem progressista para a época.&nbsp;</div>
+<div style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjIpVNolw7xhGDdmfykklg_EBxe9-bCdf16eKwnE3BuHxDYfxcqk79Jl1NbmtFCTGy4kFSetpo7Udx8JWWxLRgMXdbgooFIUUvj6_0JHA4Cpqb1qmGX7diNJwlFgM9OC5VtJTtyqn39HrMACudIevF2QA7YKxrWFfSAGSbetqSrG3zZfsojt9c69lzodA/s980/Taylor-Swift-Midnights-breaks-records-for-the-most-streamed-song-in-a-week-on-Apple-Music-and-Spotify.jpeg" style="margin-left: 1em; margin-right: 1em;"><img loading="lazy" decoding="async" border="0" data-original-height="560" data-original-width="980" height="183" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjIpVNolw7xhGDdmfykklg_EBxe9-bCdf16eKwnE3BuHxDYfxcqk79Jl1NbmtFCTGy4kFSetpo7Udx8JWWxLRgMXdbgooFIUUvj6_0JHA4Cpqb1qmGX7diNJwlFgM9OC5VtJTtyqn39HrMACudIevF2QA7YKxrWFfSAGSbetqSrG3zZfsojt9c69lzodA/s320/Taylor-Swift-Midnights-breaks-records-for-the-most-streamed-song-in-a-week-on-Apple-Music-and-Spotify.jpeg" width="320" /></a></div>
 <div style="text-align: justify;"></div>
-<div style="text-align: justify;">Pullman, por outro lado, parece estar do nosso lado. Algumas mudanças na série <i>His Dark Materials</i>&nbsp;para deixá-la mais inclusiva e <a href="https://twitter.com/PhilipPullman/status/1417455238039150626?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1418484087610875905%7Ctwgr%5E44b17bc914b1afbedbc43dbc9ae89b20548e2210%7Ctwcon%5Es3_&amp;ref_url=https%3A%2F%2Fwww.thepinknews.com%2F2021%2F07%2F23%2Fphilip-pullman-jk-rowling-trans%2F" target="_blank" rel="noopener">seu apoio</a> à causa trans são explícitos.</div>
+<h3 style="text-align: justify;">Assistindo</h3>
+<div style="text-align: justify;">Eu não tenho mais o costume de assistir coisas. Filmes, séries e etc. Mas a nova temporada de <b>His Dark Materials</b>&nbsp;lançou na HBO e eu estou como? Surtando! Alguém pode perguntar aqui &#8220;como, se você não falou nada disso no seu Twitter&#8221;&#8230; Bom, o motivo é que eu ainda não comecei a assistir! Mas, mas, eu já vou dar o play assim que eu terminar de escrever esse texto (publicado no dia 14/12 mas escrito no dia 13/12) e depois eu volto aqui pra poder falar o que eu achei. Prometo.</div>
 <div style="text-align: justify;"></div>
-<div style="text-align: justify;">No fim do dia, é muito mais fácil decidir de que &#8220;lado&#8221; você vai estar. <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></div>
-<div style="text-align: justify;"></div>
-<div style="text-align: justify;"><i>His Dark Materials </i>está disponível na HBO Max. Você pode comprar os livros <a href="https://amzn.to/3k4WN52" target="_blank" rel="noopener">aqui</a>.</div>
-<div style="text-align: justify;"><i>As Crônicas de Nárnia</i>&nbsp;está disponível no Disney+. Você pode comprar os livros <a href="https://amzn.to/3H2e0VX" target="_blank" rel="noopener">aqui</a>.</div>
+<h3 style="text-align: justify;">Escrevendo</h3>
+<div style="text-align: justify;">Esse blog! Eu não sei por quanto tempo vai durar esse empolgação, mas, eu to gostando demais de escrever aqui, principalmente por não ter pressão de números nem nada.&nbsp;</div>
 ]]></content:encoded>
 					
 		

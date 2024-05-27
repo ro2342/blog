@@ -8,7 +8,7 @@
 	>
 
 <channel>
-	<title>Sem categoria &#8211; Rod</title>
+	<title>Sem categoria &#8211; Página Inicial</title>
 	<atom:link href="https://rodcarvalho.com/category/sem-categoria/feed/" rel="self" type="application/rss+xml" />
 	<link>https://rodcarvalho.com</link>
 	<description></description>
@@ -35,6 +35,22 @@
 
 
 <p>Bem&#8230; Parece que chegou o momento, não é? <img src="https://s.w.org/images/core/emoji/15.0.3/72x72/1f642.png" alt="🙂" class="wp-smiley" style="height: 1em; max-height: 1em;" /></p>
+]]></content:encoded>
+					
+		
+		
+			</item>
+		<item>
+		<title>oi :)</title>
+		<link>https://rodcarvalho.com/2022/08/10/oi/</link>
+		
+		<dc:creator><![CDATA[rod]]></dc:creator>
+		<pubDate>Wed, 10 Aug 2022 13:28:00 +0000</pubDate>
+				<category><![CDATA[Sem categoria]]></category>
+		<guid isPermaLink="false">https://rodcarvalho.com/2022/08/10/oi/</guid>
+
+					<description><![CDATA[&#160;este é um teste]]></description>
+										<content:encoded><![CDATA[<p>&nbsp;este é um teste</p>
 ]]></content:encoded>
 					
 		
