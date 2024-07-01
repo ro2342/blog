@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Verbkonjugationen auf Deutsch</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
@@ -36,10 +37,8 @@ th {
 }
 
 .conteudo {
-  margin-top: 0px;
-  margin-left: 150px;
-  margin-right: 150px;
-  margin-bottom: 150px;
+margin-left: 100px !important; 
+margin-right: 100px !important; 
 }
 
 .navbar {
@@ -59,7 +58,7 @@ th {
   color: #475B5A;
   text-align: center;
   flex: 1;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .menu-icon {
@@ -119,24 +118,28 @@ th {
 }
 
 
-/* Media Query para Mobile */
-@media screen and (max-width: 768px) {
-  .conteudo {
-    margin-left: 20px;
-    margin-right: 20px;
-  }
+@media screen and (max-width: 480px) {
 
   .navbar h1 {
     font-size: 15px;
   }
 
+  .menu-icon {
+    font-size: 25px;
+    margin-left: 10px;
+  }
+
   .menu {
     width: 100%;
+    max-height: calc(100vh - 60px); /* Ajuste para telas menores */
   }
 
   table th, table td {
-    font-size: 12px;
+    font-size: 10px;
+    padding: 5px; /* Ajuste do padding para telas menores */
   }
+.conteudo {
+width: 80%;
 }
 </style>
 </head>
@@ -206,7 +209,7 @@ function hideMenu() {
 }
 </script>
 
-<div id="conteudo" style="margin-left: 100px;margin-right: 100px;">
+<div id="conteudo" style="margin-left: 10%;margin-right: 10%;">
 
 <h3 id="heißen">heißen</h3>
     <table>
