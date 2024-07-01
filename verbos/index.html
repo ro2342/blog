@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Verbkonjugationen auf Deutsch</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+body {
+  font-family: 'Ubuntu', sans-serif;
+  margin: 0;
+  padding-top: 60px; /* Espaçamento para a navbar */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  width: 25%; /* Colunas com o mesmo tamanho */
+}
+
+h3 {
+  padding-top: 100px;
+  border-top-width: 100px;
+  border-top-style: transparent;
+}
+
+
+th {
+  background-color: #f2f2f2;
+}
+
+.conteudo {
+margin-top: 0px !important; 
+margin-left: 100px !important; 
+margin-right: 100px !important; 
+}
+
+.navbar {
+  background-color: #52D1DC;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.navbar h1 {
+  margin: 0;
+  color: #475B5A;
+  text-align: center;
+  flex: 1;
+  font-size: 16px;
+}
+
+.menu-icon {
+  color: #475B5A;
+  font-size: 30px;
+  cursor: pointer;
+  margin-left: 20px;
+}
+
+.menu {
+  display: none;
+  position: fixed;
+  top: 50px;
+  left: 0; /* Alinhamento à esquerda */
+  width: 250px;
+  background-color: #52D1DC;
+  z-index: 999;
+  max-height: calc(100vh - 50px);
+  overflow-y: auto;
+  transition: max-height 0.3s ease-out;
+}
+
+.menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu ul li {
+  padding: 10px;
+  border-bottom: 1px solid #FFFFFF;
+}
+
+.menu ul li a {
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+.menu ul li:hover {
+  background-color: #475B5A;
+}
+
+.show {
+  display: block;
+}
+
+.fixed-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
+
+</head>
+<body>
+<div class="navbar">
+  <div class="menu-icon" onclick="toggleMenu()">☰</div>
+  <h1>rodcarvalho.com</h1>
+</div>
+
+<div class="menu" id="menu">
+  <ul>
+    <li><a href="#heißen" onclick="hideMenu()">heißen</a></li>
+    <li><a href="#sein" onclick="hideMenu()">sein</a></li>
+    <li><a href="#kommen" onclick="hideMenu()">kommen</a></li>
+    <li><a href="#wohnen" onclick="hideMenu()">wohnen</a></li>
+    <li><a href="#lernen" onclick="hideMenu()">lernen</a></li>
+    <li><a href="#sprechen" onclick="hideMenu()">sprechen</a></li>
+    <li><a href="#arbeiten" onclick="hideMenu()">arbeiten</a></li>
+    <li><a href="#studieren" onclick="hideMenu()">studieren</a></li>
+    <li><a href="#lesen" onclick="hideMenu()">lesen</a></li>
+    <li><a href="#schreiben" onclick="hideMenu()">schreiben</a></li>
+    <li><a href="#wollen" onclick="hideMenu()">wollen</a></li>
+    <li><a href="#verstehen" onclick="hideMenu()">verstehen</a></li>
+    <li><a href="#machen" onclick="hideMenu()">machen</a></li>
+    <li><a href="#haben" onclick="hideMenu()">haben</a></li>
+    <li><a href="#essen" onclick="hideMenu()">essen</a></li>
+    <li><a href="#trinken" onclick="hideMenu()">trinken</a></li>
+    <li><a href="#kaufen" onclick="hideMenu()">kaufen</a></li>
+    <li><a href="#verkaufen" onclick="hideMenu()">verkaufen</a></li>
+    <li><a href="#nehmen" onclick="hideMenu()">nehmen</a></li>
+    <li><a href="#bringen" onclick="hideMenu()">bringen</a></li>
+    <li><a href="#hören" onclick="hideMenu()">hören</a></li>
+    <li><a href="#sehen" onclick="hideMenu()">sehen</a></li>
+    <li><a href="#spielen" onclick="hideMenu()">spielen</a></li>
+    <li><a href="#mögen" onclick="hideMenu()">mögen</a></li>
+    <li><a href="#treffen" onclick="hideMenu()">treffen</a></li>
+    <li><a href="#besuchen" onclick="hideMenu()">besuchen</a></li>
+    <li><a href="#können" onclick="hideMenu()">können</a></li>
+    <li><a href="#brauchen" onclick="hideMenu()">brauchen</a></li>
+    <li><a href="#dürfen" onclick="hideMenu()">dürfen</a></li>
+    <li><a href="#müssen" onclick="hideMenu()">müssen</a></li>
+    <li><a href="#finden" onclick="hideMenu()">finden</a></li>
+    <li><a href="#suchen" onclick="hideMenu()">suchen</a></li>
+    <li><a href="#muss" onclick="hideMenu()">muss</a></li>
+    <li><a href="#helfen" onclick="hideMenu()">helfen</a></li>
+    <li><a href="#reisen" onclick="hideMenu()">reisen</a></li>
+    <li><a href="#möchten" onclick="hideMenu()">möchten</a></li>
+    <li><a href="#reden" onclick="hideMenu()">reden</a></li>
+    <li><a href="#gehen" onclick="hideMenu()">gehen</a></li>
+    <li><a href="#fahren" onclick="hideMenu()">fahren</a></li>
+    <li><a href="#bleiben" onclick="hideMenu()">bleiben</a></li>
+    <li><a href="#telefonieren" onclick="hideMenu()">telefonieren</a></li>
+    <li><a href="#schwimmen" onclick="hideMenu()">schwimmen</a></li>
+    <li><a href="#verstehen2" onclick="hideMenu()">verstehen (hat verstanden)</a></li>
+  </ul>
+</div>
+
+<script>
+function toggleMenu() {
+  var menu = document.getElementById('menu');
+  menu.classList.toggle('show');
+}
+
+function hideMenu() {
+  var menu = document.getElementById('menu');
+  menu.classList.remove('show');
+}
+</script>
+
+<div id="conteudo" style="margin-left: 100px;margin-right: 100px;">
+
+<h3 id="heißen">heißen</h3>
+    <table>
+    <tr>
+        <th>Pessoa</th>
+        <th>Presente</th>
+        <th>Perfeito</th>
+    </tr>
+    <tr><td>ich</td><td>heiße</td><td>habe geheißen</td></tr><tr><td>du</td><td>heißt</td><td>hast geheißen</td></tr><tr><td>er/sie/es</td><td>heißt</td><td>hat geheißen</td></tr><tr><td>wir</td><td>heißen</td><td>haben geheißen</td></tr><tr><td>ihr</td><td>heißt</td><td>habt geheißen</td></tr><tr><td>sie/Sie</td><td>heißen</td><td>haben geheißen</td></tr></table><h3 id="sein">sein</h3>
+    <table>
+    <tr>
+        <th>Pessoa</th>
+        <th>Presente</th>
+        <th>Perfeito</th>
+    </tr>
+    <tr><td>ich</td><td>bin</td><td>bin gewesen</td></tr><tr><td>du</td><td>bist</td><td>bist gewesen</td></tr><tr><td>er/sie/es</td><td>ist</td><td>ist gewesen</td></tr><tr><td>wir</td><td>sind</td><td>sind gewesen</td></tr><tr><td>ihr</td><td>seid</td><td>seid gewesen</td></tr><tr><td>sie/Sie</td><td>sind</td><td>sind gewesen</td></tr></table><h3 id="kommen">kommen</h3>
+    <table>
+    <tr>
+        <th>Pessoa</th>
+        <th>Presente</th>
+        <th>Perfeito</th>
+    </tr>
+    <tr><td>ich</td><td>komme</td><td>bin gekommen</td></tr><tr><td>du</td><td>kommst</td><td>bist gekommen</td></tr><tr><td>er/sie/es</td><td>kommt</td><td>ist gekommen</td></tr><tr><td>wir</td><td>kommen</td><td>sind gekommen</td></tr><tr><td>ihr</td><td>kommt</td><td>seid gekommen</td></tr><tr><td>sie/Sie</td><td>kommen</td><td>sind gekommen</td></tr></table><h3 id="wohnen">wohnen</h3>
+    <table>
+    <tr>
+        <th>Pessoa</th>
+        <th>Presente</th>
+        <th>Perfeito</th>
+    </tr>
+    <tr><td>ich</td><td>wohne</td><td>habe gewohnt</td></tr><tr><td>du</td><td>wohnst</td><td>hast gewohnt</td></tr><tr><td>er/sie/es</td><td>wohnt</td><td>hat gewohnt</td></tr><tr><td>wir</td><td>wohnen</td><td>haben gewohnt</td></tr><tr><td>ihr</td><td>wohnt</td><td>habt gewohnt</td></tr><tr><td>sie/Sie</td><td>wohnen</td><td>haben gewohnt</td></tr></table>
+
+
+
+<h3 id="treffen">treffen (encontrar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>treffe</td><td>habe getroffen</td></tr>
+<tr><td>du</td><td>triffst</td><td>hast getroffen</td></tr>
+<tr><td>er/sie/es</td><td>trifft</td><td>hat getroffen</td></tr>
+<tr><td>wir</td><td>treffen</td><td>haben getroffen</td></tr>
+<tr><td>ihr</td><td>trefft</td><td>habt getroffen</td></tr>
+<tr><td>sie/Sie</td><td>treffen</td><td>haben getroffen</td></tr>
+</table>
+
+
+<h3 id="besuchen">besuchen (visitar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>besuche</td><td>habe besucht</td></tr>
+<tr><td>du</td><td>besuchst</td><td>hast besucht</td></tr>
+<tr><td>er/sie/es</td><td>besucht</td><td>hat besucht</td></tr>
+<tr><td>wir</td><td>besuchen</td><td>haben besucht</td></tr>
+<tr><td>ihr</td><td>besucht</td><td>habt besucht</td></tr>
+<tr><td>sie/Sie</td><td>besuchen</td><td>haben besucht</td></tr>
+</table>
+
+
+<h3 id="können">können (poder)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>kann</td><td>habe gekonnt</td></tr>
+<tr><td>du</td><td>kannst</td><td>hast gekonnt</td></tr>
+<tr><td>er/sie/es</td><td>kann</td><td>hat gekonnt</td></tr>
+<tr><td>wir</td><td>können</td><td>haben gekonnt</td></tr>
+<tr><td>ihr</td><td>könnt</td><td>habt gekonnt</td></tr>
+<tr><td>sie/Sie</td><td>können</td><td>haben gekonnt</td></tr>
+</table>
+
+
+<h3 id="brauchen">brauchen (precisar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>brauche</td><td>habe gebraucht</td></tr>
+<tr><td>du</td><td>brauchst</td><td>hast gebraucht</td></tr>
+<tr><td>er/sie/es</td><td>braucht</td><td>hat gebraucht</td></tr>
+<tr><td>wir</td><td>brauchen</td><td>haben gebraucht</td></tr>
+<tr><td>ihr</td><td>braucht</td><td>habt gebraucht</td></tr>
+<tr><td>sie/Sie</td><td>brauchen</td><td>haben gebraucht</td></tr>
+</table>
+
+
+<h3 id="dürfen">dürfen (ter permissão)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>darf</td><td>habe gedurft</td></tr>
+<tr><td>du</td><td>darfst</td><td>hast gedurft</td></tr>
+<tr><td>er/sie/es</td><td>darf</td><td>hat gedurft</td></tr>
+<tr><td>wir</td><td>dürfen</td><td>haben gedurft</td></tr>
+<tr><td>ihr</td><td>dürft</td><td>habt gedurft</td></tr>
+<tr><td>sie/Sie</td><td>dürfen</td><td>haben gedurft</td></tr>
+</table>
+
+
+<h3 id="müssen">müssen (ter que)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>muss</td><td>habe gemusst</td></tr>
+<tr><td>du</td><td>musst</td><td>hast gemusst</td></tr>
+<tr><td>er/sie/es</td><td>muss</td><td>hat gemusst</td></tr>
+<tr><td>wir</td><td>müssen</td><td>haben gemusst</td></tr>
+<tr><td>ihr</td><td>müsst</td><td>habt gemusst</td></tr>
+<tr><td>sie/Sie</td><td>müssen</td><td>haben gemusst</td></tr>
+</table>
+
+
+<h3 id="finden">finden (encontrar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>finde</td><td>habe gefunden</td></tr>
+<tr><td>du</td><td>findest</td><td>hast gefunden</td></tr>
+<tr><td>er/sie/es</td><td>findet</td><td>hat gefunden</td></tr>
+<tr><td>wir</td><td>finden</td><td>haben gefunden</td></tr>
+<tr><td>ihr</td><td>findet</td><td>habt gefunden</td></tr>
+<tr><td>sie/Sie</td><td>finden</td><td>haben gefunden</td></tr>
+</table>
+
+
+<h3 id="suchen">suchen (procurar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>suche</td><td>habe gesucht</td></tr>
+<tr><td>du</td><td>suchst</td><td>hast gesucht</td></tr>
+<tr><td>er/sie/es</td><td>sucht</td><td>hat gesucht</td></tr>
+<tr><td>wir</td><td>suchen</td><td>haben gesucht</td></tr>
+<tr><td>ihr</td><td>sucht</td><td>habt gesucht</td></tr>
+<tr><td>sie/Sie</td><td>suchen</td><td>haben gesucht</td></tr>
+</table>
+
+
+<h3 id="muss">muss (ter que)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>muss</td><td>habe gemusst</td></tr>
+<tr><td>du</td><td>musst</td><td>hast gemusst</td></tr>
+<tr><td>er/sie/es</td><td>muss</td><td>hat gemusst</td></tr>
+<tr><td>wir</td><td>müssen</td><td>haben gemusst</td></tr>
+<tr><td>ihr</td><td>müsst</td><td>habt gemusst</td></tr>
+<tr><td>sie/Sie</td><td>müssen</td><td>haben gemusst</td></tr>
+</table>
+
+
+<h3 id="helfen">helfen (ajudar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>helfe</td><td>habe geholfen</td></tr>
+<tr><td>du</td><td>hilfst</td><td>hast geholfen</td></tr>
+<tr><td>er/sie/es</td><td>hilft</td><td>hat geholfen</td></tr>
+<tr><td>wir</td><td>helfen</td><td>haben geholfen</td></tr>
+<tr><td>ihr</td><td>helft</td><td>habt geholfen</td></tr>
+<tr><td>sie/Sie</td><td>helfen</td><td>haben geholfen</td></tr>
+</table>
+
+
+<h3 id="wollen">wollen (querer)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>will</td><td>habe gewollt</td></tr>
+<tr><td>du</td><td>willst</td><td>hast gewollt</td></tr>
+<tr><td>er/sie/es</td><td>will</td><td>hat gewollt</td></tr>
+<tr><td>wir</td><td>wollen</td><td>haben gewollt</td></tr>
+<tr><td>ihr</td><td>wollt</td><td>habt gewollt</td></tr>
+<tr><td>sie/Sie</td><td>wollen</td><td>haben gewollt</td></tr>
+</table>
+
+
+<h3 id="reisen">reisen (viajar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>reise</td><td>bin gereist</td></tr>
+<tr><td>du</td><td>reist</td><td>bist gereist</td></tr>
+<tr><td>er/sie/es</td><td>reist</td><td>ist gereist</td></tr>
+<tr><td>wir</td><td>reisen</td><td>sind gereist</td></tr>
+<tr><td>ihr</td><td>reist</td><td>seid gereist</td></tr>
+<tr><td>sie/Sie</td><td>reisen</td><td>sind gereist</td></tr>
+</table>
+
+
+<h3 id="möchten">möchten (gostaria de)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>möchte</td><td>habe gemocht</td></tr>
+<tr><td>du</td><td>möchtest</td><td>hast gemocht</td></tr>
+<tr><td>er/sie/es</td><td>möchte</td><td>hat gemocht</td></tr>
+<tr><td>wir</td><td>möchten</td><td>haben gemocht</td></tr>
+<tr><td>ihr</td><td>möchtet</td><td>habt gemocht</td></tr>
+<tr><td>sie/Sie</td><td>möchten</td><td>haben gemocht</td></tr>
+</table>
+
+
+<h3 id="reden">reden (falar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>rede</td><td>habe geredet</td></tr>
+<tr><td>du</td><td>redest</td><td>hast geredet</td></tr>
+<tr><td>er/sie/es</td><td>redet</td><td>hat geredet</td></tr>
+<tr><td>wir</td><td>reden</td><td>haben geredet</td></tr>
+<tr><td>ihr</td><td>redet</td><td>habt geredet</td></tr>
+<tr><td>sie/Sie</td><td>reden</td><td>haben geredet</td></tr>
+</table>
+
+
+<h3 id="gehen">gehen (ir)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>gehe</td><td>bin gegangen</td></tr>
+<tr><td>du</td><td>gehst</td><td>bist gegangen</td></tr>
+<tr><td>er/sie/es</td><td>geht</td><td>ist gegangen</td></tr>
+<tr><td>wir</td><td>gehen</td><td>sind gegangen</td></tr>
+<tr><td>ihr</td><td>geht</td><td>seid gegangen</td></tr>
+<tr><td>sie/Sie</td><td>gehen</td><td>sind gegangen</td></tr>
+</table>
+
+
+<h3 id="fahren">fahren (dirigir)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>fahre</td><td>bin gefahren</td></tr>
+<tr><td>du</td><td>fährst</td><td>bist gefahren</td></tr>
+<tr><td>er/sie/es</td><td>fährt</td><td>ist gefahren</td></tr>
+<tr><td>wir</td><td>fahren</td><td>sind gefahren</td></tr>
+<tr><td>ihr</td><td>fahrt</td><td>seid gefahren</td></tr>
+<tr><td>sie/Sie</td><td>fahren</td><td>sind gefahren</td></tr>
+</table>
+
+
+<h3 id="bleiben">bleiben (ficar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>bleibe</td><td>bin geblieben</td></tr>
+<tr><td>du</td><td>bleibst</td><td>bist geblieben</td></tr>
+<tr><td>er/sie/es</td><td>bleibt</td><td>ist geblieben</td></tr>
+<tr><td>wir</td><td>bleiben</td><td>sind geblieben</td></tr>
+<tr><td>ihr</td><td>bleibt</td><td>seid geblieben</td></tr>
+<tr><td>sie/Sie</td><td>bleiben</td><td>sind geblieben</td></tr>
+</table>
+
+
+<h3 id="telefonieren">telefonieren (telefonar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>telefoniere</td><td>habe telefoniert</td></tr>
+<tr><td>du</td><td>telefonierst</td><td>hast telefoniert</td></tr>
+<tr><td>er/sie/es</td><td>telefoniert</td><td>hat telefoniert</td></tr>
+<tr><td>wir</td><td>telefonieren</td><td>haben telefoniert</td></tr>
+<tr><td>ihr</td><td>telefoniert</td><td>habt telefoniert</td></tr>
+<tr><td>sie/Sie</td><td>telefonieren</td><td>haben telefoniert</td></tr>
+</table>
+
+
+<h3 id="schwimmen">schwimmen (nadar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>schwimme</td><td>bin geschwommen</td></tr>
+<tr><td>du</td><td>schwimmst</td><td>bist geschwommen</td></tr>
+<tr><td>er/sie/es</td><td>schwimmt</td><td>ist geschwommen</td></tr>
+<tr><td>wir</td><td>schwimmen</td><td>sind geschwommen</td></tr>
+<tr><td>ihr</td><td>schwimmt</td><td>seid geschwommen</td></tr>
+<tr><td>sie/Sie</td><td>schwimmen</td><td>sind geschwommen</td></tr>
+</table>
+
+
+<h3 id="verstehen2">verstehen (compreender - hat verstanden)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>verstehe</td><td>habe verstanden</td></tr>
+<tr><td>du</td><td>verstehst</td><td>hast verstanden</td></tr>
+<tr><td>er/sie/es</td><td>versteht</td><td>hat verstanden</td></tr>
+<tr><td>wir</td><td>verstehen</td><td>haben verstanden</td></tr>
+<tr><td>ihr</td><td>versteht</td><td>habt verstanden</td></tr>
+<tr><td>sie/Sie</td><td>verstehen</td><td>haben verstanden</td></tr>
+</table>
+
+
+<h3 id="lernen">lernen (aprender)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>lerne</td><td>habe gelernt</td></tr>
+<tr><td>du</td><td>lernst</td><td>hast gelernt</td></tr>
+<tr><td>er/sie/es</td><td>lernt</td><td>hat gelernt</td></tr>
+<tr><td>wir</td><td>lernen</td><td>haben gelernt</td></tr>
+<tr><td>ihr</td><td>lernt</td><td>habt gelernt</td></tr>
+<tr><td>sie/Sie</td><td>lernen</td><td>haben gelernt</td></tr>
+</table>
+
+
+<h3 id="sprechen">sprechen (falar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>spreche</td><td>habe gesprochen</td></tr>
+<tr><td>du</td><td>sprichst</td><td>hast gesprochen</td></tr>
+<tr><td>er/sie/es</td><td>spricht</td><td>hat gesprochen</td></tr>
+<tr><td>wir</td><td>sprechen</td><td>haben gesprochen</td></tr>
+<tr><td>ihr</td><td>sprecht</td><td>habt gesprochen</td></tr>
+<tr><td>sie/Sie</td><td>sprechen</td><td>haben gesprochen</td></tr>
+</table>
+
+
+<h3 id="arbeiten">arbeiten (trabalhar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>arbeite</td><td>habe gearbeitet</td></tr>
+<tr><td>du</td><td>arbeitest</td><td>hast gearbeitet</td></tr>
+<tr><td>er/sie/es</td><td>arbeitet</td><td>hat gearbeitet</td></tr>
+<tr><td>wir</td><td>arbeiten</td><td>haben gearbeitet</td></tr>
+<tr><td>ihr</td><td>arbeitet</td><td>habt gearbeitet</td></tr>
+<tr><td>sie/Sie</td><td>arbeiten</td><td>haben gearbeitet</td></tr>
+</table>
+
+
+<h3 id="studieren">studieren (estudar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>studiere</td><td>habe studiert</td></tr>
+<tr><td>du</td><td>studierst</td><td>hast studiert</td></tr>
+<tr><td>er/sie/es</td><td>studiert</td><td>hat studiert</td></tr>
+<tr><td>wir</td><td>studieren</td><td>haben studiert</td></tr>
+<tr><td>ihr</td><td>studiert</td><td>habt studiert</td></tr>
+<tr><td>sie/Sie</td><td>studieren</td><td>haben studiert</td></tr>
+</table>
+
+
+<h3 id="lesen">lesen (ler)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>lese</td><td>habe gelesen</td></tr>
+<tr><td>du</td><td>liest</td><td>hast gelesen</td></tr>
+<tr><td>er/sie/es</td><td>liest</td><td>hat gelesen</td></tr>
+<tr><td>wir</td><td>lesen</td><td>haben gelesen</td></tr>
+<tr><td>ihr</td><td>lest</td><td>habt gelesen</td></tr>
+<tr><td>sie/Sie</td><td>lesen</td><td>haben gelesen</td></tr>
+</table>
+
+
+<h3 id="schreiben">schreiben (escrever)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>schreibe</td><td>habe geschrieben</td></tr>
+<tr><td>du</td><td>schreibst</td><td>hast geschrieben</td></tr>
+<tr><td>er/sie/es</td><td>schreibt</td><td>hat geschrieben</td></tr>
+<tr><td>wir</td><td>schreiben</td><td>haben geschrieben</td></tr>
+<tr><td>ihr</td><td>schreibt</td><td>habt geschrieben</td></tr>
+<tr><td>sie/Sie</td><td>schreiben</td><td>haben geschrieben</td></tr>
+</table>
+
+
+<h3 id="wollen">wollen (querer)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>will</td><td>habe gewollt</td></tr>
+<tr><td>du</td><td>willst</td><td>hast gewollt</td></tr>
+<tr><td>er/sie/es</td><td>will</td><td>hat gewollt</td></tr>
+<tr><td>wir</td><td>wollen</td><td>haben gewollt</td></tr>
+<tr><td>ihr</td><td>wollt</td><td>habt gewollt</td></tr>
+<tr><td>sie/Sie</td><td>wollen</td><td>haben gewollt</td></tr>
+</table>
+
+
+<h3 id="verstehen">verstehen (compreender)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>verstehe</td><td>habe verstanden</td></tr>
+<tr><td>du</td><td>verstehst</td><td>hast verstanden</td></tr>
+<tr><td>er/sie/es</td><td>versteht</td><td>hat verstanden</td></tr>
+<tr><td>wir</td><td>verstehen</td><td>haben verstanden</td></tr>
+<tr><td>ihr</td><td>versteht</td><td>habt verstanden</td></tr>
+<tr><td>sie/Sie</td><td>verstehen</td><td>haben verstanden</td></tr>
+</table>
+
+
+<h3 id="machen">machen (fazer)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>mache</td><td>habe gemacht</td></tr>
+<tr><td>du</td><td>machst</td><td>hast gemacht</td></tr>
+<tr><td>er/sie/es</td><td>macht</td><td>hat gemacht</td></tr>
+<tr><td>wir</td><td>machen</td><td>haben gemacht</td></tr>
+<tr><td>ihr</td><td>macht</td><td>habt gemacht</td></tr>
+<tr><td>sie/Sie</td><td>machen</td><td>haben gemacht</td></tr>
+</table>
+
+
+<h3 id="haben">haben (ter)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>habe</td><td>habe gehabt</td></tr>
+<tr><td>du</td><td>hast</td><td>hast gehabt</td></tr>
+<tr><td>er/sie/es</td><td>hat</td><td>hat gehabt</td></tr>
+<tr><td>wir</td><td>haben</td><td>haben gehabt</td></tr>
+<tr><td>ihr</td><td>habt</td><td>habt gehabt</td></tr>
+<tr><td>sie/Sie</td><td>haben</td><td>haben gehabt</td></tr>
+</table>
+
+
+<h3 id="essen">essen (comer)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>esse</td><td>habe gegessen</td></tr>
+<tr><td>du</td><td>isst</td><td>hast gegessen</td></tr>
+<tr><td>er/sie/es</td><td>isst</td><td>hat gegessen</td></tr>
+<tr><td>wir</td><td>essen</td><td>haben gegessen</td></tr>
+<tr><td>ihr</td><td>esst</td><td>habt gegessen</td></tr>
+<tr><td>sie/Sie</td><td>essen</td><td>haben gegessen</td></tr>
+</table>
+
+
+<h3 id="trinken">trinken (beber)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>trinke</td><td>habe getrunken</td></tr>
+<tr><td>du</td><td>trinkst</td><td>hast getrunken</td></tr>
+<tr><td>er/sie/es</td><td>trinkt</td><td>hat getrunken</td></tr>
+<tr><td>wir</td><td>trinken</td><td>haben getrunken</td></tr>
+<tr><td>ihr</td><td>trinkt</td><td>habt getrunken</td></tr>
+<tr><td>sie/Sie</td><td>trinken</td><td>haben getrunken</td></tr>
+</table>
+
+
+<h3 id="kaufen">kaufen (comprar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>kaufe</td><td>habe gekauft</td></tr>
+<tr><td>du</td><td>kaufst</td><td>hast gekauft</td></tr>
+<tr><td>er/sie/es</td><td>kauft</td><td>hat gekauft</td></tr>
+<tr><td>wir</td><td>kaufen</td><td>haben gekauft</td></tr>
+<tr><td>ihr</td><td>kauft</td><td>habt gekauft</td></tr>
+<tr><td>sie/Sie</td><td>kaufen</td><td>haben gekauft</td></tr>
+</table>
+
+
+<h3 id="verkaufen">verkaufen (vender)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>verkaufe</td><td>habe verkauft</td></tr>
+<tr><td>du</td><td>verkaufst</td><td>hast verkauft</td></tr>
+<tr><td>er/sie/es</td><td>verkauft</td><td>hat verkauft</td></tr>
+<tr><td>wir</td><td>verkaufen</td><td>haben verkauft</td></tr>
+<tr><td>ihr</td><td>verkauft</td><td>habt verkauft</td></tr>
+<tr><td>sie/Sie</td><td>verkaufen</td><td>haben verkauft</td></tr>
+</table>
+
+
+<h3 id="nehmen">nehmen (pegar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>nehme</td><td>habe genommen</td></tr>
+<tr><td>du</td><td>nimmst</td><td>hast genommen</td></tr>
+<tr><td>er/sie/es</td><td>nimmt</td><td>hat genommen</td></tr>
+<tr><td>wir</td><td>nehmen</td><td>haben genommen</td></tr>
+<tr><td>ihr</td><td>nehmt</td><td>habt genommen</td></tr>
+<tr><td>sie/Sie</td><td>nehmen</td><td>haben genommen</td></tr>
+</table>
+
+
+<h3 id="bringen">bringen (trazer)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>bringe</td><td>habe gebracht</td></tr>
+<tr><td>du</td><td>bringst</td><td>hast gebracht</td></tr>
+<tr><td>er/sie/es</td><td>bringt</td><td>hat gebracht</td></tr>
+<tr><td>wir</td><td>bringen</td><td>haben gebracht</td></tr>
+<tr><td>ihr</td><td>bringt</td><td>habt gebracht</td></tr>
+<tr><td>sie/Sie</td><td>bringen</td><td>haben gebracht</td></tr>
+</table>
+
+
+<h3 id="hören">hören (ouvir)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>höre</td><td>habe gehört</td></tr>
+<tr><td>du</td><td>hörst</td><td>hast gehört</td></tr>
+<tr><td>er/sie/es</td><td>hört</td><td>hat gehört</td></tr>
+<tr><td>wir</td><td>hören</td><td>haben gehört</td></tr>
+<tr><td>ihr</td><td>hört</td><td>habt gehört</td></tr>
+<tr><td>sie/Sie</td><td>hören</td><td>haben gehört</td></tr>
+</table>
+
+
+<h3 id="sehen">sehen (ver)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>sehe</td><td>habe gesehen</td></tr>
+<tr><td>du</td><td>siehst</td><td>hast gesehen</td></tr>
+<tr><td>er/sie/es</td><td>sieht</td><td>hat gesehen</td></tr>
+<tr><td>wir</td><td>sehen</td><td>haben gesehen</td></tr>
+<tr><td>ihr</td><td>seht</td><td>habt gesehen</td></tr>
+<tr><td>sie/Sie</td><td>sehen</td><td>haben gesehen</td></tr>
+</table>
+
+
+<h3 id="spielen">spielen (jogar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>spiele</td><td>habe gespielt</td></tr>
+<tr><td>du</td><td>spielst</td><td>hast gespielt</td></tr>
+<tr><td>er/sie/es</td><td>spielt</td><td>hat gespielt</td></tr>
+<tr><td>wir</td><td>spielen</td><td>haben gespielt</td></tr>
+<tr><td>ihr</td><td>spielt</td><td>habt gespielt</td></tr>
+<tr><td>sie/Sie</td><td>spielen</td><td>haben gespielt</td></tr>
+</table>
+
+
+<h3 id="mögen">mögen (gostar)</h3>
+<table>
+<tr><th>Pessoa</th><th>Presente</th><th>Perfeito</th></tr>
+<tr><td>ich</td><td>mag</td><td>habe gemocht</td></tr>
+<tr><td>du</td><td>magst</td><td>hast gemocht</td></tr>
+<tr><td>er/sie/es</td><td>mag</td><td>hat gemocht</td></tr>
+<tr><td>wir</td><td>mögen</td><td>haben gemocht</td></tr>
+<tr><td>ihr</td><td>mögt</td><td>habt gemocht</td></tr>
+<tr><td>sie/Sie</td><td>mögen</td><td>haben gemocht</td></tr>
+</table>
+
+
+</div>
+
+<button class="fixed-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">Zum Anfang</button>
+
+</body>
+</html>
