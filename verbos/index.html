@@ -10,6 +10,7 @@ body {
   font-family: 'Ubuntu', sans-serif;
   margin: 0;
   padding-top: 60px; /* Espaçamento para a navbar */
+  padding-bottom: 60px;
 }
 
 table {
@@ -25,20 +26,20 @@ th, td {
 }
 
 h3 {
-  padding-top: 100px;
-  border-top-width: 100px;
+  padding-top: 70px;
+  border-top-width: 70px;
   border-top-style: transparent;
 }
-
 
 th {
   background-color: #f2f2f2;
 }
 
 .conteudo {
-margin-top: 0px !important; 
-margin-left: 100px !important; 
-margin-right: 100px !important; 
+  margin-top: 0px;
+  margin-left: 150px;
+  margin-right: 150px;
+  margin-bottom: 150px;
 }
 
 .navbar {
@@ -58,7 +59,7 @@ margin-right: 100px !important;
   color: #475B5A;
   text-align: center;
   flex: 1;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .menu-icon {
@@ -116,8 +117,28 @@ margin-right: 100px !important;
   border-radius: 5px;
   cursor: pointer;
 }
-</style>
 
+
+/* Media Query para Mobile */
+@media screen and (max-width: 768px) {
+  .conteudo {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+
+  .navbar h1 {
+    font-size: 15px;
+  }
+
+  .menu {
+    width: 100%;
+  }
+
+  table th, table td {
+    font-size: 12px;
+  }
+}
+</style>
 </head>
 <body>
 <div class="navbar">
