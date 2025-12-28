@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Swiftie Poly Mobile</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --panel: #1e1e1e;
+            --accent: #d4af37;
+            --text: #ffffff;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg); color: var(--text); margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden;
+        }
+
+        /* Tela de Início */
+        #setup-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+        }
+        .setup-btn {
+            background: var(--accent); border: none; padding: 15px 30px; margin: 10px;
+            border-radius: 10px; font-weight: bold; width: 200px; font-size: 1.1rem;
+        }
+
+        /* Tabuleiro Mobile */
+        #game-board {
+            position: relative; width: 95vw; height: 95vw; max-width: 400px; max-height: 400px;
+            margin-top: 20px; background: #2a2a2a; border: 4px solid var(--accent);
+            display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);
+        }
+        .tile { 
+            background: #fff; color: #000; border: 0.5px solid #ccc; font-size: 8px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; font-weight: bold; position: relative;
+        }
+        .tile .owner-mark { position: absolute; bottom: 2px; width: 80%; height: 4px; border-radius: 2px; }
+
+        /* HUD Jogador */
+        #player-hud {
+            width: 100%; padding: 15px; background: var(--panel); border-radius: 20px 20px 0 0;
+            margin-top: auto; box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+        .player-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .turn-indicator { color: var(--accent); font-weight: bold; font-size: 1.2rem; }
+        
+        /* Bonequinhos */
+        .token {
+            position: absolute; width: 20px; height: 20px; border-radius: 50%;
+            border: 2px solid white; z-index: 1000; transition: all 0.4s ease;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+        }
+
+        .btn-roll {
+            width: 100%; background: var(--accent); border: none; padding: 15px;
+            border-radius: 10px; font-weight: bold; font-size: 1.2rem; color: #000;
+        }
+
+        .log { font-size: 0.8rem; color: #aaa; margin-top: 5px; height: 40px; overflow: hidden; text-align: center; }
+
+        /* Esconder áreas do grid que não são bordas */
+        .center-space { grid-area: 2 / 2 / 6 / 6; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; color: black; padding: 20px; border-radius: 15px;
+            z-index: 3000; width: 80%; display: none; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="setup-screen">
+    <h1 style="color: var(--accent)">Swiftie Poly</h1>
+    <p>Quantos jogadores?</p>
+    <button class="setup-btn" onclick="startGame(1)">1 Jogador vs IA</button>
+    <button class="setup-btn" onclick="startGame(2)">2 Jogadores</button>
+    <button class="setup-btn" onclick="startGame(3)">3 Jogadores</button>
+    <button class="setup-btn" onclick="startGame(4)">4 Jogadores</button>
+</div>
+
+<div id="game-board">
+    <div class="center-space">
+        <h2 id="dice-display" style="font-size: 3rem; margin: 0;">🎲</h2>
+        <div id="current-event" style="font-size: 0.7rem; color: var(--accent); text-align: center; padding: 10px;">Aguardando...</div>
+    </div>
+    </div>
+
+<div id="player-hud">
+    <div class="player-info">
+        <div>
+            <span id="p-token">🧣</span> <span id="p-name">Jogador 1</span><br>
+            <span style="color: #4caf50;">$ <span id="p-money">1500</span></span>
+        </div>
+        <div style="text-align: right;">
+            <small>Propriedades</small><br>
+            <span id="p-props">0</span>
+        </div>
+    </div>
+    <button id="roll-btn" class="btn-roll" onclick="handleTurn()">JOGAR DADOS</button>
+    <div class="log" id="game-log">Sua vez!</div>
+</div>
+
+<div id="buy-modal" class="modal">
+    <h3 id="modal-title">Propriedade</h3>
+    <p id="modal-desc"></p>
+    <button class="setup-btn" id="confirm-buy">Comprar</button>
+    <button class="setup-btn" style="background: #ccc;" onclick="closeModal()">Passar</button>
+</div>
+
+<script>
+    const tokens = ["🧣", "🐍", "🫶", "💎"];
+    const colors = ["#ff4081", "#4caf50", "#2196f3", "#ff9800"];
+    let players = [];
+    let currentPlayerIndex = 0;
+    let isIA = false;
+
+    const boardData = [
+        { name: "GO", type: "special", price: 0 },
+        { name: "Debut", price: 100, color: "#b9d8b5" },
+        { name: "Fearless", price: 150, color: "#e6be8a" },
+        { name: "Speak Now", price: 200, color: "#d1b2d1" },
+        { name: "Red", price: 250, color: "#8b0000" },
+        { name: "Prisão", type: "special" },
+        { name: "1989", price: 300, color: "#b1d4e0" },
+        { name: "Reputation", price: 350, color: "#2d2d2d" },
+        { name: "Lover", price: 400, color: "#ffb6c1" },
+        { name: "Folklore", price: 450, color: "#cfcfcf" },
+        { name: "Estac.", type: "special" },
+        { name: "Evermore", price: 450, color: "#c09a6b" },
+        { name: "Midnights", price: 500, color: "#191970" },
+        { name: "TTPD", price: 550, color: "#e5e4e2" },
+        { name: "Eras Tour", price: 700, color: "#d4af37" },
+        { name: "Vá p/ Jail", type: "special" },
+        { name: "Vault", type: "vault" },
+        { name: "All Too Well", price: 300, color: "#8b0000" },
+        { name: "Cruel Summer", price: 300, color: "#ffb6c1" },
+        { name: "Karma", type: "vault" }
+    ];
+
+    // Mapeamento do Grid para as bordas (sentido horário)
+    const gridMap = [
+        "6/6", "6/5", "6/4", "6/3", "6/2", "6/1",
+        "5/1", "4/1", "3/1", "2/1", "1/1",
+        "1/2", "1/3", "1/4", "1/5", "1/6",
+        "2/6", "3/6", "4/6", "5/6"
+    ];
+
+    function startGame(num) {
+        isIA = num === 1;
+        const total = num === 1 ? 2 : num;
+        for(let i=0; i<total; i++) {
+            players.push({
+                id: i,
+                name: i === 1 && isIA ? "Bot Swift" : `Jogador ${i+1}`,
+                money: 1500,
+                pos: 0,
+                props: [],
+                token: tokens[i],
+                color: colors[i]
+            });
+            // Criar token visual
+            const t = document.createElement('div');
+            t.id = `token-${i}`;
+            t.className = 'token';
+            t.style.background = colors[i];
+            t.innerText = tokens[i];
+            document.getElementById('game-board').appendChild(t);
+        }
+        document.getElementById('setup-screen').style.display = 'none';
+        renderBoard();
+        updatePlayerHUD();
+        movePlayerVisual(0, 0);
+    }
+
+    function renderBoard() {
+        const board = document.getElementById('game-board');
+        boardData.forEach((tile, i) => {
+            const el = document.createElement('div');
+            el.className = 'tile';
+            el.id = `tile-${i}`;
+            el.style.gridArea = gridMap[i];
+            if(tile.color) el.style.borderTop = `5px solid ${tile.color}`;
+            el.innerHTML = `<span>${tile.name}</span><br><span>${tile.price ? '$'+tile.price : ''}</span><div id="mark-${i}" class="owner-mark"></div>`;
+            board.appendChild(el);
+        });
+    }
+
+    function handleTurn() {
+        const p = players[currentPlayerIndex];
+        const dice = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('dice-display').innerText = dice;
+        
+        let oldPos = p.pos;
+        p.pos = (p.pos + dice) % boardData.length;
+        
+        if (p.pos < oldPos) p.money += 200; // Passou pelo GO
+
+        movePlayerVisual(currentPlayerIndex, p.pos);
+        
+        setTimeout(() => processTile(p, p.pos), 500);
+    }
+
+    function processTile(p, tileIdx) {
+        const tile = boardData[tileIdx];
+        
+        if (tile.type === "special" && tile.name === "Vá p/ Jail") {
+            p.pos = 5;
+            movePlayerVisual(p.id, 5);
+            nextTurn();
+            return;
+        }
+
+        if (tile.price && !isOwned(tileIdx)) {
+            if (isIA && p.id === 1) {
+                if (p.money >= tile.price) buyProp(p, tileIdx);
+                nextTurn();
+            } else {
+                showBuyModal(p, tile);
+            }
+        } else {
+            nextTurn();
+        }
+    }
+
+    function isOwned(idx) {
+        return players.some(p => p.props.includes(idx));
+    }
+
+    function showBuyModal(p, tile) {
+        const modal = document.getElementById('buy-modal');
+        modal.style.display = 'block';
+        document.getElementById('modal-title').innerText = tile.name;
+        document.getElementById('modal-desc').innerText = `Comprar por $${tile.price}?`;
+        document.getElementById('confirm-buy').onclick = () => {
+            buyProp(p, boardData.indexOf(tile));
+            closeModal();
+            nextTurn();
+        };
+    }
+
+    function buyProp(p, idx) {
+        if(p.money >= boardData[idx].price) {
+            p.money -= boardData[idx].price;
+            p.props.push(idx);
+            document.getElementById(`mark-${idx}`).style.background = p.color;
+            updatePlayerHUD();
+        }
+    }
+
+    function nextTurn() {
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        updatePlayerHUD();
+        
+        if (isIA && currentPlayerIndex === 1) {
+            document.getElementById('roll-btn').disabled = true;
+            setTimeout(handleTurn, 1000);
+        } else {
+            document.getElementById('roll-btn').disabled = false;
+        }
+    }
+
+    function updatePlayerHUD() {
+        const p = players[currentPlayerIndex];
+        document.getElementById('p-name').innerText = p.name;
+        document.getElementById('p-money').innerText = p.money;
+        document.getElementById('p-props').innerText = p.props.length;
+        document.getElementById('p-token').innerText = p.token;
+        document.getElementById('game-log').innerText = `Turno de ${p.name}`;
+    }
+
+    function movePlayerVisual(pId, tileIdx) {
+        const tileEl = document.getElementById(`tile-${tileIdx}`);
+        const tokenEl = document.getElementById(`token-${pId}`);
+        // Offset simples para não sobrepor totalmente os 4 jogadores
+        const offset = pId * 4;
+        tokenEl.style.left = (tileEl.offsetLeft + 5 + offset) + 'px';
+        tokenEl.style.top = (tileEl.offsetTop + 5 + offset) + 'px';
+    }
+
+    function closeModal() { document.getElementById('buy-modal').style.display = 'none'; nextTurn(); }
+</script>
+</body>
+</html>
