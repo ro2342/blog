@@ -3,114 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Swiftie Poly Master - Fullscreen</title>
+    <title>Swiftie Poly Master</title>
     <style>
-        :root { --bg: #121212; --accent: #d4af37; --panel: #1e1e1e; --safe: 30px; }
+        :root { --bg: #0f0f0f; --accent: #d4af37; --panel: #1a1a1a; --safe: 25px; }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; padding: var(--safe); gap: 15px; overflow: hidden; }
+
+        /* Board Design */
+        #board-container { flex: 1.2; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 3px solid var(--accent); position: relative; }
+        .tile { background: white; color: black; border: 0.1px solid #666; display: flex; flex-direction: column; align-items: center; justify-content: space-between; font-size: 0.5rem; font-weight: bold; text-align: center; padding: 2px; position: relative; }
+        .tile-color { position: absolute; width: 100%; height: 10px; top: 0; border-bottom: 1px solid #000; }
         
-        body { 
-            font-family: 'Inter', sans-serif; background: var(--bg); color: white;
-            height: 100vh; display: flex; padding: var(--safe); gap: 20px; overflow: hidden;
-        }
+        .center { grid-area: 2 / 2 / 11 / 11; background: radial-gradient(circle, #222 0%, #000 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border: 1px solid #333; }
 
-        /* Botão Fullscreen Estilo YouTube */
-        #fs-btn {
-            position: absolute; top: 10px; right: 10px; z-index: 1000;
-            background: rgba(0,0,0,0.6); border: 1px solid var(--accent);
-            color: white; padding: 8px; border-radius: 5px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
+        /* Dice 3D Animation */
+        .dice-wrapper { display: flex; gap: 20px; perspective: 600px; margin-bottom: 20px; }
+        .die { width: 50px; height: 50px; background: white; color: black; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: transform 0.4s; }
+        .rolling { animation: roll 0.4s infinite; }
+        @keyframes roll { 0% { transform: rotateX(0deg); } 100% { transform: rotateX(360deg); } }
 
-        #board-container { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 4px solid var(--accent); position: relative; }
-        #side-panel { width: 320px; background: var(--panel); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #333; }
-
-        .tile { 
-            background: white; color: black; border: 0.2px solid #555; 
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            font-size: 0.55rem; font-weight: bold; text-align: center; padding: 2px; position: relative;
-        }
-        .tile-color { position: absolute; width: 100%; height: 12px; top: 0; border-bottom: 1px solid #000; }
-        .build-container { position: absolute; top: 12px; display: flex; gap: 1px; }
-        .h-house { width: 6px; height: 6px; background: #2ecc71; border: 1px solid #000; }
-        .h-hotel { width: 10px; height: 10px; background: #e74c3c; border: 1px solid #000; }
-
-        .center { grid-area: 2 / 2 / 11 / 11; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        
-        .p-card { background: #2a2a2a; padding: 10px; border-radius: 10px; border-left: 5px solid transparent; }
+        /* Sidebar & UI */
+        #side-panel { width: 350px; background: var(--panel); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #333; }
+        .p-card { background: #252525; padding: 10px; border-radius: 8px; border-left: 5px solid transparent; position: relative; }
         .p-card.active { border-color: var(--accent); background: #333; }
-        .btn { background: var(--accent); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+        .btn { background: var(--accent); color: black; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.9rem; margin-top: 5px; }
+        .btn:disabled { background: #444; color: #888; }
 
-        .token { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.4s ease; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .token { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); display: flex; align-items: center; justify-content: center; font-size: 12px; }
 
-        #game-log { flex: 1; background: #111; padding: 10px; border-radius: 8px; font-size: 0.65rem; overflow-y: auto; color: #aaa; }
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 20px; border-radius: 15px; z-index: 2000; width: 320px; display: none; text-align: center; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 20px; border-radius: 12px; z-index: 2000; width: 340px; display: none; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        #game-log { flex: 1; background: #0a0a0a; padding: 8px; border-radius: 6px; font-size: 0.7rem; overflow-y: auto; color: #ccc; font-family: 'Courier New', monospace; border: 1px solid #222; }
+
+        /* Fullscreen button */
+        #fs-btn { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.5); color: var(--accent); border: none; padding: 5px; cursor: pointer; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div id="setup" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <h1 style="color:var(--accent); font-size: 3rem;">Swiftie Poly</h1>
-    <button class="btn" onclick="startGame(1)" style="max-width:250px; margin:5px">1 Jogador vs Bot</button>
-    <button class="btn" onclick="startGame(2)" style="max-width:250px; margin:5px">2 Jogadores</button>
+<div id="setup" style="position:fixed; inset:0; background:rgba(0,0,0,0.98); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px;">
+    <h1 style="color:var(--accent); font-size: 2.5rem; margin-bottom: 5px;">Swiftie Poly</h1>
+    <p style="margin-bottom: 20px;">The Mastermind Edition</p>
+    
+    <div style="background:#1a1a1a; padding: 20px; border-radius: 10px; width: 100%; max-width: 400px; border: 1px solid #333;">
+        <label>Seu Nome:</label>
+        <input type="text" id="user-name" value="Rod" style="width:100%; padding:10px; margin: 10px 0; border-radius:5px; border:none;">
+        
+        <label>Escolha seu Emoji:</label>
+        <div id="emoji-list" style="display:flex; justify-content:space-around; margin: 15px 0; font-size: 1.5rem;">
+            <span onclick="setEmoji('🧣', this)" style="cursor:pointer; border:2px solid gold; padding:5px; border-radius:5px">🧣</span>
+            <span onclick="setEmoji('🐍', this)" style="cursor:pointer; padding:5px;">🐍</span>
+            <span onclick="setEmoji('🫶', this)" style="cursor:pointer; padding:5px;">🫶</span>
+            <span onclick="setEmoji('💎', this)" style="cursor:pointer; padding:5px;">💎</span>
+            <span onclick="setEmoji('🎸', this)" style="cursor:pointer; padding:5px;">🎸</span>
+        </div>
+        
+        <button class="btn" onclick="startGame(1)">1 Jogador vs Bot</button>
+        <button class="btn" onclick="startGame(2)" style="background:#888;">2 Jogadores</button>
+    </div>
 </div>
 
 <div id="board-container">
-    <button id="fs-btn" onclick="toggleFullscreen()">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
-        </svg>
-    </button>
+    <button id="fs-btn" onclick="toggleFullscreen()">[ ] FULLSCREEN</button>
     <div class="center">
-        <div id="dice-view" style="font-size: 4rem;">🎲</div>
-        <div id="status-msg" style="color:var(--accent); font-weight:bold; margin-top:10px;"></div>
+        <div class="dice-wrapper">
+            <div id="die1" class="die">1</div>
+            <div id="die2" class="die">1</div>
+        </div>
+        <div id="status-msg" style="color:var(--accent); font-weight:bold; letter-spacing:1px; text-transform:uppercase; font-size:0.8rem;">Pronto para o show?</div>
     </div>
 </div>
 
 <div id="side-panel">
     <div id="player-list"></div>
     <div id="game-log"></div>
-    <button id="roll-btn" class="btn" onclick="playTurn()">GIRAR DADOS</button>
-    <button class="btn" style="background:#3498db; color:white; margin-top:5px;" onclick="openManage()">GERENCIAR</button>
+    <button id="roll-btn" class="btn" onclick="rollDice()">GIRAR DADOS</button>
+    <button class="btn" style="background:#3498db; color:white;" onclick="openManage()">MEUS IMÓVEIS</button>
 </div>
 
 <div id="buy-modal" class="modal">
     <h2 id="m-name"></h2><p id="m-price"></p>
-    <button class="btn" onclick="confirmPurchase()" style="margin-top:10px">Comprar</button>
-    <button class="btn" style="background:#ccc; margin-top:5px" onclick="closeModals()">Passar</button>
+    <button class="btn" onclick="buyProperty()">Comprar</button>
+    <button class="btn" style="background:#ccc;" onclick="skipProperty()">Passar</button>
 </div>
 
-<div id="manage-modal" class="modal">
-    <h2>Construir</h2>
-    <div id="manage-content" style="max-height:200px; overflow-y:auto; margin:10px 0;"></div>
+<div id="manage-modal" class="modal" style="width:400px;">
+    <h2>Gerenciar</h2>
+    <div id="manage-content" style="max-height:300px; overflow-y:auto; margin:10px 0; text-align:left;"></div>
     <button class="btn" onclick="closeModals()">Fechar</button>
 </div>
 
 <script>
+    let userEmoji = '🧣';
+    let selectedEmojiEl = null;
+
     const music = [
-        {n: "GO", t: "s"}, {n: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50}, {n: "VAULT", t: "v"}, {n: "Teardrops", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50}, {n: "TAX", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "VAULT", t: "v"}, {n: "You Belong", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "Fearless", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a", h: 50},
-        {n: "HIATO", t: "s"}, {n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "SPOTIFY", p: 150, t: "util"}, {n: "Back to Dec.", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "Mean", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "All Too Well", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "VAULT", t: "v"}, {n: "Red", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "22", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#8b0000", h: 100},
-        {n: "FREE", t: "s"}, {n: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "VAULT", t: "v"}, {n: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0", h: 150}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150}, {n: "Ready For It", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150}, {n: "APPLE", p: 150, t: "util"}, {n: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d", h: 150},
-        {n: "GO JAIL", t: "s"}, {n: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "VAULT", t: "v"}, {n: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "VAULT", t: "v"}, {n: "Cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "TAX", t: "tax", v: 100}, {n: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}
+        {n: "GO", t: "s"}, {n: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50}, {n: "Our Song", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50}, {n: "PAY TAX", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "Fearless", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "You Belong", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a", h: 50}, {n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "Mean", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100},
+        {n: "HIATO", t: "s"}, {n: "All Too Well", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "SPOTIFY", p: 150, t: "util"}, {n: "Red", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "22", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#8b0000", h: 100}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0", h: 150}, {n: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150},
+        {n: "FREE", t: "s"}, {n: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d", h: 150}, {n: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "willow", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "APPLE", p: 150, t: "util"}, {n: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200},
+        {n: "GO JAIL", t: "s"}, {n: "Fortnight", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#e5e4e2", h: 200}, {n: "Smallest Man", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#e5e4e2", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Showgirl", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#191970", h: 200}, {n: "Karma", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}, {n: "TAX", t: "tax", v: 100}, {n: "Bejeweled", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}
     ];
 
     const grid = ["11/11","11/10","11/9","11/8","11/7","11/6","11/5","11/4","11/3","11/2","11/1","10/1","9/1","8/1","7/1","6/1","5/1","4/1","3/1","2/1","1/1","1/2","1/3","1/4","1/5","1/6","1/7","1/8","1/9","1/10","1/11","2/11","3/11","4/11","5/11","6/11","7/11","8/11","9/11","10/11"];
-    let players = [], turn = 0, dCount = 0, isIA = false;
+    let players = [], turn = 0, doubles = 0, isIA = false;
 
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                alert(`Erro ao tentar ativar tela cheia: ${err.message}`);
-            });
-        } else {
-            document.exitFullscreen();
-        }
+    function setEmoji(e, el) {
+        userEmoji = e;
+        if(selectedEmojiEl) selectedEmojiEl.style.border = 'none';
+        el.style.border = '2px solid gold';
+        el.style.borderRadius = '5px';
+        selectedEmojiEl = el;
     }
 
     function startGame(n) {
-        isIA = n === 1;
-        for(let i=0; i<(n==1?2:n); i++) {
-            players.push({ id: i, name: (i==1 && isIA) ? "Bot Swift" : `Rod ${i+1}`, money: 1500, pos: 0, props: [], token: ["🧣","🐍","🫶","💎"][i], color: ["#ff4081","#4caf50","#2196f3","#ff9800"][i], jail: 0 });
-        }
+        const uName = document.getElementById('user-name').value || "Rod";
+        isIA = (n === 1);
+        players.push({ id: 0, name: uName, money: 1500, pos: 0, props: [], token: userEmoji, color: "#ff4081", jail: 0 });
+        if(isIA) players.push({ id: 1, name: "Bot Swift", money: 1500, pos: 0, props: [], token: "🐍", color: "#4caf50", jail: 0 });
+        else players.push({ id: 1, name: "Jogador 2", money: 1500, pos: 0, props: [], token: "🫶", color: "#2196f3", jail: 0 });
+        
         document.getElementById('setup').remove();
         initBoard();
     }
@@ -118,75 +128,116 @@
     function initBoard() {
         const b = document.getElementById('board-container');
         music.forEach((d, i) => {
-            const tile = document.createElement('div'); tile.className = 'tile'; tile.id = `tile-${i}`; tile.style.gridArea = grid[i];
-            if(d.c) tile.innerHTML = `<div class="tile-color" style="background:${d.c}"></div><div class="build-container" id="build-${i}"></div>`;
-            tile.innerHTML += `<span>${d.n}</span>${d.p ? '<br>$'+d.p : ''}<div id="owner-${i}" style="width:100%; height:3px"></div>`;
-            b.appendChild(tile);
+            const t = document.createElement('div'); t.className = 'tile'; t.id = `tile-${i}`; t.style.gridArea = grid[i];
+            if(d.c) t.innerHTML = `<div class="tile-color" style="background:${d.c}"></div><div id="build-${i}" style="position:absolute; top:12px; display:flex;"></div>`;
+            t.innerHTML += `<span>${d.n}</span>${d.p ? '<br>$'+d.p : ''}<div id="owner-${i}" style="width:100%; height:3px"></div>`;
+            b.appendChild(t);
         });
         players.forEach(p => {
-            const t = document.createElement('div'); t.id = `tk-${p.id}`; t.className = 'token'; t.style.background = p.color; t.innerText = p.token; b.appendChild(t);
+            const tk = document.createElement('div'); tk.id = `tk-${p.id}`; tk.className = 'token'; tk.style.background = p.color; tk.innerText = p.token;
+            b.appendChild(tk);
         });
         updateUI(); sync();
     }
 
-    function playTurn() {
-        const p = players[turn];
-        if(p.jail > 0) { p.jail--; log(`${p.name} no hiato.`); return next(); }
-        const d1 = Math.floor(Math.random()*6)+1, d2 = Math.floor(Math.random()*6)+1;
-        document.getElementById('dice-view').innerText = `${d1}·${d2}`;
-        if(d1 === d2) { dCount++; if(dCount===3){ p.pos=10; p.jail=3; log("Prisão!"); sync(); return next(); } log("Dobradinha!"); } else { dCount=0; }
-        let old = p.pos; p.pos = (p.pos + d1 + d2) % 40;
-        if(p.pos < old) { p.money += 200; log("GO! +$200"); }
-        sync(); setTimeout(() => handle(p, d1+d2), 500);
+    function rollDice() {
+        if(isIA && turn === 1) return;
+        executeDice();
     }
 
-    function handle(p, dice) {
-        const idx = p.pos; const tile = music[idx];
-        if(idx === 30) { p.pos=10; p.jail=3; sync(); return next(); }
+    function executeDice() {
+        const d1el = document.getElementById('die1'), d2el = document.getElementById('die2');
+        d1el.classList.add('rolling'); d2el.classList.add('rolling');
+        
+        setTimeout(() => {
+            const d1 = Math.floor(Math.random()*6)+1, d2 = Math.floor(Math.random()*6)+1;
+            d1el.classList.remove('rolling'); d2el.classList.remove('rolling');
+            d1el.innerText = d1; d2el.innerText = d2;
+            
+            const p = players[turn];
+            if(d1 === d2) { doubles++; log("Dobradinha!"); } else { doubles = 0; }
+            
+            if(doubles === 3) { p.pos = 10; p.jail = 3; log("Prisão por excesso de velocidade!"); next(); return; }
+            
+            p.pos = (p.pos + d1 + d2) % 40;
+            sync();
+            setTimeout(() => handle(p, d1+d2), 500);
+        }, 400);
+    }
+
+    function handle(p, total) {
+        const tile = music[p.pos], idx = p.pos;
+        if(idx === 30) { p.pos = 10; p.jail = 3; log("Vá para o Hiato!"); sync(); next(); return; }
         if(tile.t === "tax") { p.money -= tile.v; log(`Taxa: $${tile.v}`); return check(p); }
-        const owner = getOwner(idx);
+        
+        const owner = players.find(x => x.props.some(y => y.idx === idx));
         if(tile.p && !owner) {
-            if(isIA && turn === 1) { if(p.money > tile.p+200) buy(p, idx); next(); } else openB(tile, idx);
+            if(isIA && turn === 1) { if(p.money > tile.p + 200) buy(p, idx); next(); }
+            else openB(tile);
         } else if(owner && owner.id !== p.id) {
-            let rent = calcRent(tile, owner, dice);
-            p.money -= rent; owner.money += rent; log(`Pagou $${rent}`); check(p);
-        } else { if(dCount===0) next(); }
+            let rent = calcRent(tile, owner, total);
+            p.money -= rent; owner.money += rent;
+            log(`Pagou $${rent} p/ ${owner.name}`);
+            check(p);
+        } else {
+            if(doubles === 0) next();
+            else log("Jogue novamente!");
+        }
         updateUI();
     }
 
-    function calcRent(tile, owner, dice) {
-        const pr = owner.props.find(x => x.idx === music.indexOf(tile));
-        if(tile.t === "rail") return [0, 25, 50, 100, 200][owner.props.filter(x => music[x.idx].t === "rail").length];
-        if(tile.t === "util") return dice * (owner.props.filter(x => music[x.idx].t === "util").length === 1 ? 4 : 10);
-        return tile.r[pr.houses];
+    function calcRent(t, o, d) {
+        const pr = o.props.find(x => x.idx === music.indexOf(t));
+        if(t.t === "rail") return [0, 25, 50, 100, 200][o.props.filter(x => music[x.idx].t === "rail").length];
+        if(t.t === "util") return d * (o.props.filter(x => music[x.idx].t === "util").length === 1 ? 4 : 10);
+        return t.r[pr.houses];
     }
 
-    function check(p) { if(p.money < 0) { alert("Faliu!"); location.reload(); } else if(dCount===0) next(); }
-    function buy(p, idx) { p.money -= music[idx].p; p.props.push({idx, houses: 0}); document.getElementById(`owner-${idx}`).style.background = p.color; updateUI(); }
-    function next() { turn = (turn+1)%players.length; updateUI(); if(isIA && turn===1) setTimeout(playTurn, 1000); }
-    function getOwner(idx) { return players.find(p => p.props.some(x => x.idx === idx)); }
-    function openB(t, i) { document.getElementById('buy-modal').style.display='block'; document.getElementById('m-name').innerText=t.n; document.getElementById('m-price').innerText=`$${t.p}`; }
-    function confirmPurchase() { buy(players[turn], players[turn].pos); closeModals(); if(dCount===0) next(); }
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
+    function buy(p, i) { p.money -= music[i].p; p.props.push({idx: i, houses: 0}); document.getElementById(`owner-${i}`).style.background = p.color; updateUI(); }
+    function openB(t) { document.getElementById('buy-modal').style.display='block'; document.getElementById('m-name').innerText=t.n; document.getElementById('m-price').innerText=`$${t.p}`; }
+    function buyProperty() { buy(players[turn], players[turn].pos); closeModals(); if(doubles === 0) next(); }
+    function skipProperty() { closeModals(); if(doubles === 0) next(); }
+
+    function check(p) { if(p.money < 0) { alert("Game Over!"); location.reload(); } else if(doubles === 0) next(); }
+    function next() { turn = (turn+1)%players.length; updateUI(); if(isIA && turn === 1) setTimeout(executeDice, 1000); }
+    
     function openManage() {
         const list = document.getElementById('manage-content'); list.innerHTML = "";
         players[turn].props.forEach(pr => {
             if(!music[pr.idx].r) return;
-            list.innerHTML += `<div style="border-bottom:1px solid #ddd; padding:5px">${music[pr.idx].n} (${pr.houses}) <button onclick="build(${pr.idx})" style="padding:2px; font-size:10px">Construir ($${music[pr.idx].h})</button></div>`;
+            list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd"><b>${music[pr.idx].n}</b> (${pr.houses}) <button onclick="build(${pr.idx})" style="padding:4px; font-size:10px">Construir ($${music[pr.idx].h})</button> <button onclick="sell(${pr.idx})" style="padding:4px; font-size:10px; background:#e74c3c; color:white;">Vender</button></div>`;
         });
         document.getElementById('manage-modal').style.display='block';
     }
+
     function build(idx) {
-        const p = players[turn]; const pr = p.props.find(x => x.idx === idx);
-        if(p.money >= music[idx].h && pr.houses < 5) { p.money -= music[idx].h; pr.houses++; render(idx, pr.houses); updateUI(); openManage(); }
+        const p = players[turn], pr = p.props.find(x => x.idx === idx);
+        if(p.money >= music[idx].h && pr.houses < 5) {
+            p.money -= music[idx].h; pr.houses++;
+            document.getElementById(`build-${idx}`).innerHTML = pr.houses < 5 ? '🏠'.repeat(pr.houses) : '🏨';
+            updateUI(); openManage();
+        }
     }
-    function render(idx, n) { document.getElementById(`build-${idx}`).innerHTML = n < 5 ? '<div class="h-house"></div>'.repeat(n) : '<div class="h-hotel"></div>'; }
+
+    function sell(idx) {
+        const p = players[turn];
+        p.money += music[idx].p / 2;
+        p.props = p.props.filter(x => x.idx !== idx);
+        document.getElementById(`owner-${idx}`).style.background = 'none';
+        document.getElementById(`build-${idx}`).innerHTML = '';
+        updateUI(); openManage();
+    }
+
     function updateUI() {
         const l = document.getElementById('player-list'); l.innerHTML = "";
         players.forEach((p, i) => l.innerHTML += `<div class="p-card ${turn===i?'active':''}"><b>${p.token} ${p.name}</b><br>$${p.money}</div>`);
+        document.getElementById('roll-btn').disabled = (isIA && turn === 1);
     }
-    function sync() { players.forEach((p, i) => { const t = document.getElementById(`tile-${p.pos}`); const tk = document.getElementById(`tk-${i}`); tk.style.left = (t.offsetLeft+4+i*3)+'px'; tk.style.top = (t.offsetTop+16+i*3)+'px'; }); }
-    function log(m) { const g = document.getElementById('game-log'); g.innerHTML = `> ${m}<br>${g.innerHTML}`; }
+
+    function sync() { players.forEach((p, i) => { const t = document.getElementById(`tile-${p.pos}`); const tk = document.getElementById(`tk-${i}`); tk.style.left = (t.offsetLeft+4+i*4)+'px'; tk.style.top = (t.offsetTop+18+i*4)+'px'; }); }
+    function log(m) { const l = document.getElementById('game-log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
+    function toggleFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
 </script>
 </body>
 </html>
