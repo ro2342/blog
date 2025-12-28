@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Swiftie Poly Master - Rod Edition</title>
+    <title>Swiftie Poly Master - Fullscreen</title>
     <style>
-        :root { --bg: #121212; --accent: #d4af37; --panel: #1e1e1e; --safe: 35px; }
+        :root { --bg: #121212; --accent: #d4af37; --panel: #1e1e1e; --safe: 30px; }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -13,11 +13,17 @@
             height: 100vh; display: flex; padding: var(--safe); gap: 20px; overflow: hidden;
         }
 
-        /* Layout Principal */
-        #board-container { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 4px solid var(--accent); position: relative; }
-        #side-panel { width: 320px; background: var(--panel); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 15px; border: 1px solid #333; }
+        /* Botão Fullscreen Estilo YouTube */
+        #fs-btn {
+            position: absolute; top: 10px; right: 10px; z-index: 1000;
+            background: rgba(0,0,0,0.6); border: 1px solid var(--accent);
+            color: white; padding: 8px; border-radius: 5px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-        /* Casas do Tabuleiro */
+        #board-container { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 4px solid var(--accent); position: relative; }
+        #side-panel { width: 320px; background: var(--panel); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #333; }
+
         .tile { 
             background: white; color: black; border: 0.2px solid #555; 
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
@@ -30,77 +36,79 @@
 
         .center { grid-area: 2 / 2 / 11 / 11; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
         
-        /* HUD & Players */
-        .p-card { background: #2a2a2a; padding: 12px; border-radius: 10px; border-left: 5px solid transparent; transition: 0.3s; }
-        .p-card.active { border-color: var(--accent); background: #333; transform: translateX(5px); }
+        .p-card { background: #2a2a2a; padding: 10px; border-radius: 10px; border-left: 5px solid transparent; }
+        .p-card.active { border-color: var(--accent); background: #333; }
         .btn { background: var(--accent); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
-        .btn:disabled { background: #444; color: #888; }
 
-        .token { position: absolute; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .token { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.4s ease; display: flex; align-items: center; justify-content: center; font-size: 12px; }
 
-        /* Log e Modais */
-        #game-log { flex: 1; background: #111; padding: 10px; border-radius: 8px; font-size: 0.7rem; overflow-y: auto; color: #aaa; font-family: monospace; }
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 25px; border-radius: 15px; z-index: 2000; width: 350px; display: none; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.7); }
-        .modal h2 { margin-bottom: 10px; color: #111; }
+        #game-log { flex: 1; background: #111; padding: 10px; border-radius: 8px; font-size: 0.65rem; overflow-y: auto; color: #aaa; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 20px; border-radius: 15px; z-index: 2000; width: 320px; display: none; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="setup" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <h1 style="color:var(--accent); font-size: 3rem; margin-bottom: 10px;">Swiftie Poly</h1>
-    <p style="margin-bottom: 25px;">The Eras Board Game</p>
+    <h1 style="color:var(--accent); font-size: 3rem;">Swiftie Poly</h1>
     <button class="btn" onclick="startGame(1)" style="max-width:250px; margin:5px">1 Jogador vs Bot</button>
     <button class="btn" onclick="startGame(2)" style="max-width:250px; margin:5px">2 Jogadores</button>
-    <button class="btn" onclick="startGame(3)" style="max-width:250px; margin:5px">3 Jogadores</button>
-    <button class="btn" onclick="startGame(4)" style="max-width:250px; margin:5px">4 Jogadores</button>
 </div>
 
 <div id="board-container">
+    <button id="fs-btn" onclick="toggleFullscreen()">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+        </svg>
+    </button>
     <div class="center">
-        <div id="dice-view" style="font-size: 5rem; margin-bottom: 10px;">🎲</div>
-        <div id="status-msg" style="color:var(--accent); font-size: 1.2rem; font-weight: bold; text-align:center;">Boa sorte, Rod!</div>
+        <div id="dice-view" style="font-size: 4rem;">🎲</div>
+        <div id="status-msg" style="color:var(--accent); font-weight:bold; margin-top:10px;"></div>
     </div>
 </div>
 
 <div id="side-panel">
-    <h2 style="color:var(--accent); text-align: center;">The Eras Empire</h2>
-    <div id="player-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <div id="player-list"></div>
     <div id="game-log"></div>
     <button id="roll-btn" class="btn" onclick="playTurn()">GIRAR DADOS</button>
-    <button id="manage-btn" class="btn" style="background:#3498db; color:white;" onclick="openManage()">GERENCIAR IMÓVEIS</button>
+    <button class="btn" style="background:#3498db; color:white; margin-top:5px;" onclick="openManage()">GERENCIAR</button>
 </div>
 
 <div id="buy-modal" class="modal">
-    <h2 id="m-name">Álbum</h2>
-    <p id="m-price"></p>
-    <div style="margin-top:20px; display:flex; gap:10px;">
-        <button class="btn" onclick="confirmPurchase()">Comprar</button>
-        <button class="btn" style="background:#ccc;" onclick="closeModals()">Passar</button>
-    </div>
+    <h2 id="m-name"></h2><p id="m-price"></p>
+    <button class="btn" onclick="confirmPurchase()" style="margin-top:10px">Comprar</button>
+    <button class="btn" style="background:#ccc; margin-top:5px" onclick="closeModals()">Passar</button>
 </div>
 
-<div id="manage-modal" class="modal" style="width:400px;">
-    <h2>Construir Bracelets</h2>
-    <div id="manage-content" style="max-height:300px; overflow-y:auto; text-align:left; padding:10px;"></div>
-    <button class="btn" style="background:#333; color:white; margin-top:10px;" onclick="closeModals()">Fechar</button>
+<div id="manage-modal" class="modal">
+    <h2>Construir</h2>
+    <div id="manage-content" style="max-height:200px; overflow-y:auto; margin:10px 0;"></div>
+    <button class="btn" onclick="closeModals()">Fechar</button>
 </div>
 
 <script>
     const music = [
-        {n: "GO", t: "s"}, {n: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50}, {n: "VAULT", t: "v"}, {n: "Teardrops", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50}, {n: "PAY TAX", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "VAULT", t: "v"}, {n: "You Belong", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "Fearless", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a", h: 50},
+        {n: "GO", t: "s"}, {n: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50}, {n: "VAULT", t: "v"}, {n: "Teardrops", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50}, {n: "TAX", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "VAULT", t: "v"}, {n: "You Belong", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "Fearless", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a", h: 50},
         {n: "HIATO", t: "s"}, {n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "SPOTIFY", p: 150, t: "util"}, {n: "Back to Dec.", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "Mean", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "All Too Well", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "VAULT", t: "v"}, {n: "Red", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "22", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#8b0000", h: 100},
-        {name: "FREE", t: "s"}, {n: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "VAULT", t: "v"}, {n: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0", h: 150}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150}, {n: "Ready For It", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150}, {n: "APPLE MUSIC", p: 150, t: "util"}, {n: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d", h: 150},
-        {n: "GO JAIL", t: "s"}, {n: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "VAULT", t: "v"}, {n: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "VAULT", t: "v"}, {n: "cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "LUX TAX", t: "tax", v: 100}, {n: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}
+        {n: "FREE", t: "s"}, {n: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "VAULT", t: "v"}, {n: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0", h: 150}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150}, {n: "Ready For It", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150}, {n: "APPLE", p: 150, t: "util"}, {n: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d", h: 150},
+        {n: "GO JAIL", t: "s"}, {n: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "VAULT", t: "v"}, {n: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "VAULT", t: "v"}, {n: "Cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "TAX", t: "tax", v: 100}, {n: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}
     ];
 
     const grid = ["11/11","11/10","11/9","11/8","11/7","11/6","11/5","11/4","11/3","11/2","11/1","10/1","9/1","8/1","7/1","6/1","5/1","4/1","3/1","2/1","1/1","1/2","1/3","1/4","1/5","1/6","1/7","1/8","1/9","1/10","1/11","2/11","3/11","4/11","5/11","6/11","7/11","8/11","9/11","10/11"];
-    
-    let players = [], turn = 0, doubleCount = 0, isIA = false;
+    let players = [], turn = 0, dCount = 0, isIA = false;
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                alert(`Erro ao tentar ativar tela cheia: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
 
     function startGame(n) {
         isIA = n === 1;
-        const total = (n === 1) ? 2 : n;
-        for(let i=0; i<total; i++) {
+        for(let i=0; i<(n==1?2:n); i++) {
             players.push({ id: i, name: (i==1 && isIA) ? "Bot Swift" : `Rod ${i+1}`, money: 1500, pos: 0, props: [], token: ["🧣","🐍","🫶","💎"][i], color: ["#ff4081","#4caf50","#2196f3","#ff9800"][i], jail: 0 });
         }
         document.getElementById('setup').remove();
@@ -110,159 +118,75 @@
     function initBoard() {
         const b = document.getElementById('board-container');
         music.forEach((d, i) => {
-            const tile = document.createElement('div');
-            tile.className = 'tile'; tile.id = `tile-${i}`; tile.style.gridArea = grid[i];
+            const tile = document.createElement('div'); tile.className = 'tile'; tile.id = `tile-${i}`; tile.style.gridArea = grid[i];
             if(d.c) tile.innerHTML = `<div class="tile-color" style="background:${d.c}"></div><div class="build-container" id="build-${i}"></div>`;
             tile.innerHTML += `<span>${d.n}</span>${d.p ? '<br>$'+d.p : ''}<div id="owner-${i}" style="width:100%; height:3px"></div>`;
             b.appendChild(tile);
         });
         players.forEach(p => {
-            const t = document.createElement('div'); t.id = `tk-${p.id}`; t.className = 'token';
-            t.style.background = p.color; t.innerText = p.token; b.appendChild(t);
+            const t = document.createElement('div'); t.id = `tk-${p.id}`; t.className = 'token'; t.style.background = p.color; t.innerText = p.token; b.appendChild(t);
         });
-        updateUI(); syncTokens();
+        updateUI(); sync();
     }
 
     function playTurn() {
         const p = players[turn];
-        if(p.jail > 0) {
-            p.jail--; 
-            log(`${p.name} está no hiato.`); 
-            return nextTurn();
-        }
-
+        if(p.jail > 0) { p.jail--; log(`${p.name} no hiato.`); return next(); }
         const d1 = Math.floor(Math.random()*6)+1, d2 = Math.floor(Math.random()*6)+1;
-        const total = d1 + d2;
         document.getElementById('dice-view').innerText = `${d1}·${d2}`;
-
-        if(d1 === d2) {
-            doubleCount++;
-            if(doubleCount === 3) { log("3 Dobradinhas! Vá p/ Hiato."); p.pos = 10; p.jail = 3; syncTokens(); return nextTurn(); }
-            log("Dobradinha! Jogue de novo.");
-        } else {
-            doubleCount = 0;
-        }
-
-        let old = p.pos;
-        p.pos = (p.pos + total) % 40;
-        if(p.pos < old) { p.money += 200; log("Passou pelo GO! +$200"); }
-        
-        syncTokens();
-        setTimeout(() => handleTile(p, total), 500);
+        if(d1 === d2) { dCount++; if(dCount===3){ p.pos=10; p.jail=3; log("Prisão!"); sync(); return next(); } log("Dobradinha!"); } else { dCount=0; }
+        let old = p.pos; p.pos = (p.pos + d1 + d2) % 40;
+        if(p.pos < old) { p.money += 200; log("GO! +$200"); }
+        sync(); setTimeout(() => handle(p, d1+d2), 500);
     }
 
-    function handleTile(p, dice) {
-        const idx = p.pos;
-        const tile = music[idx];
-
-        if(idx === 30) { p.pos = 10; p.jail = 3; log("Vá para o Hiato!"); syncTokens(); return nextTurn(); }
-        if(tile.t === "tax") { p.money -= tile.v; log(`Pagou $${tile.v} de taxas.`); return checkBankruptcy(p); }
-        if(tile.t === "v") { 
-            const luck = Math.random() > 0.5;
-            const val = luck ? 150 : -100;
-            p.money += val;
-            alert(luck ? "Sua música viralizou! +$150" : "Cancelamento no Twitter! -$100");
-            return checkBankruptcy(p);
-        }
-
+    function handle(p, dice) {
+        const idx = p.pos; const tile = music[idx];
+        if(idx === 30) { p.pos=10; p.jail=3; sync(); return next(); }
+        if(tile.t === "tax") { p.money -= tile.v; log(`Taxa: $${tile.v}`); return check(p); }
         const owner = getOwner(idx);
         if(tile.p && !owner) {
-            if(isIA && turn === 1) { if(p.money > tile.p + 200) buyProp(p, idx); nextTurn(); }
-            else openBuyModal(tile, idx);
+            if(isIA && turn === 1) { if(p.money > tile.p+200) buy(p, idx); next(); } else openB(tile, idx);
         } else if(owner && owner.id !== p.id) {
-            let rent = calculateRent(tile, owner, dice);
-            p.money -= rent; owner.money += rent;
-            log(`Pagou $${rent} p/ ${owner.name}`);
-            checkBankruptcy(p);
-        } else {
-            if(doubleCount === 0) nextTurn();
-        }
+            let rent = calcRent(tile, owner, dice);
+            p.money -= rent; owner.money += rent; log(`Pagou $${rent}`); check(p);
+        } else { if(dCount===0) next(); }
         updateUI();
     }
 
-    function calculateRent(tile, owner, dice) {
-        const propData = owner.props.find(x => x.idx === music.indexOf(tile));
-        if(tile.t === "rail") {
-            const count = owner.props.filter(x => music[x.idx].t === "rail").length;
-            return [0, 25, 50, 100, 200][count];
-        }
-        if(tile.t === "util") {
-            const count = owner.props.filter(x => music[x.idx].t === "util").length;
-            return dice * (count === 1 ? 4 : 10);
-        }
-        return tile.r[propData.houses];
+    function calcRent(tile, owner, dice) {
+        const pr = owner.props.find(x => x.idx === music.indexOf(tile));
+        if(tile.t === "rail") return [0, 25, 50, 100, 200][owner.props.filter(x => music[x.idx].t === "rail").length];
+        if(tile.t === "util") return dice * (owner.props.filter(x => music[x.idx].t === "util").length === 1 ? 4 : 10);
+        return tile.r[pr.houses];
     }
 
-    function buyProp(p, idx) {
-        p.money -= music[idx].p;
-        p.props.push({idx: idx, houses: 0});
-        document.getElementById(`owner-${idx}`).style.background = p.color;
-        updateUI();
-    }
-
-    function checkBankruptcy(p) {
-        if(p.money < 0) {
-            alert(`${p.name} faliu! Fim de jogo.`);
-            location.reload();
-        } else {
-            if(doubleCount === 0) nextTurn();
-        }
-    }
-
-    function openManage() {
-        const p = players[turn];
-        const list = document.getElementById('manage-content');
-        list.innerHTML = "";
-        p.props.forEach(pr => {
-            const tile = music[pr.idx];
-            if(!tile.r) return;
-            list.innerHTML += `<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px">
-                <b>${tile.n}</b> (Bracelets: ${pr.houses})<br>
-                <button onclick="build(${pr.idx})" style="padding:5px; margin-top:5px; font-size:10px">Construir ($${tile.h})</button>
-            </div>`;
-        });
-        document.getElementById('manage-modal').style.display = 'block';
-    }
-
-    function build(idx) {
-        const p = players[turn];
-        const prop = p.props.find(x => x.idx === idx);
-        const cost = music[idx].h;
-        if(p.money >= cost && prop.houses < 5) {
-            p.money -= cost; prop.houses++;
-            renderBuilds(idx, prop.houses);
-            updateUI(); openManage();
-        }
-    }
-
-    function renderBuilds(idx, n) {
-        const c = document.getElementById(`build-${idx}`);
-        c.innerHTML = (n < 5) ? '<div class="h-house"></div>'.repeat(n) : '<div class="h-hotel"></div>';
-    }
-
-    function nextTurn() { turn = (turn + 1) % players.length; updateUI(); if(isIA && turn === 1) setTimeout(playTurn, 1000); }
+    function check(p) { if(p.money < 0) { alert("Faliu!"); location.reload(); } else if(dCount===0) next(); }
+    function buy(p, idx) { p.money -= music[idx].p; p.props.push({idx, houses: 0}); document.getElementById(`owner-${idx}`).style.background = p.color; updateUI(); }
+    function next() { turn = (turn+1)%players.length; updateUI(); if(isIA && turn===1) setTimeout(playTurn, 1000); }
     function getOwner(idx) { return players.find(p => p.props.some(x => x.idx === idx)); }
-    function openBuyModal(tile, idx) { document.getElementById('buy-modal').style.display = 'block'; document.getElementById('m-name').innerText = tile.n; document.getElementById('m-price').innerText = `Preço: $${tile.p}`; }
-    function confirmPurchase() { buyProp(players[turn], players[turn].pos); closeModals(); if(doubleCount === 0) nextTurn(); }
-    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+    function openB(t, i) { document.getElementById('buy-modal').style.display='block'; document.getElementById('m-name').innerText=t.n; document.getElementById('m-price').innerText=`$${t.p}`; }
+    function confirmPurchase() { buy(players[turn], players[turn].pos); closeModals(); if(dCount===0) next(); }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
+    function openManage() {
+        const list = document.getElementById('manage-content'); list.innerHTML = "";
+        players[turn].props.forEach(pr => {
+            if(!music[pr.idx].r) return;
+            list.innerHTML += `<div style="border-bottom:1px solid #ddd; padding:5px">${music[pr.idx].n} (${pr.houses}) <button onclick="build(${pr.idx})" style="padding:2px; font-size:10px">Construir ($${music[pr.idx].h})</button></div>`;
+        });
+        document.getElementById('manage-modal').style.display='block';
+    }
+    function build(idx) {
+        const p = players[turn]; const pr = p.props.find(x => x.idx === idx);
+        if(p.money >= music[idx].h && pr.houses < 5) { p.money -= music[idx].h; pr.houses++; render(idx, pr.houses); updateUI(); openManage(); }
+    }
+    function render(idx, n) { document.getElementById(`build-${idx}`).innerHTML = n < 5 ? '<div class="h-house"></div>'.repeat(n) : '<div class="h-hotel"></div>'; }
     function updateUI() {
-        const list = document.getElementById('player-list'); list.innerHTML = "";
-        players.forEach((p, i) => {
-            list.innerHTML += `<div class="p-card ${turn === i ? 'active' : ''}">
-                <b>${p.token} ${p.name}</b><br><span style="color:#2ecc71">$${p.money}</span> | Prop: ${p.props.length}
-            </div>`;
-        });
-        document.getElementById('roll-btn').disabled = (isIA && turn === 1);
+        const l = document.getElementById('player-list'); l.innerHTML = "";
+        players.forEach((p, i) => l.innerHTML += `<div class="p-card ${turn===i?'active':''}"><b>${p.token} ${p.name}</b><br>$${p.money}</div>`);
     }
-    function syncTokens() {
-        players.forEach((p, i) => {
-            const tile = document.getElementById(`tile-${p.pos}`);
-            const tk = document.getElementById(`tk-${i}`);
-            tk.style.left = (tile.offsetLeft + 5 + i*3) + "px";
-            tk.style.top = (tile.offsetTop + 18 + i*3) + "px";
-        });
-    }
-    function log(m) { const l = document.getElementById('game-log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
+    function sync() { players.forEach((p, i) => { const t = document.getElementById(`tile-${p.pos}`); const tk = document.getElementById(`tk-${i}`); tk.style.left = (t.offsetLeft+4+i*3)+'px'; tk.style.top = (t.offsetTop+16+i*3)+'px'; }); }
+    function log(m) { const g = document.getElementById('game-log'); g.innerHTML = `> ${m}<br>${g.innerHTML}`; }
 </script>
 </body>
 </html>
