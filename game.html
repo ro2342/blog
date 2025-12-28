@@ -3,358 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Swiftie Poly Master Edition</title>
+    <title>Swiftie Poly Master - Rod Edition</title>
     <style>
-        :root {
-            --bg: #1a1a1a;
-            --accent: #d4af37;
-            --safe-margin: 30px; /* Margem para evitar barras do Chrome/Sistema */
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', -apple-system, sans-serif; 
-            background: var(--bg); color: white;
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-            padding: var(--safe-margin); /* Aplica a margem em volta de tudo */
-        }
-
-        #main-layout {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 20px;
-            height: 100%;
-        }
-
-        /* TABULEIRO 11x11 */
-        #board {
-            display: grid;
-            grid-template-columns: repeat(11, 1fr);
-            grid-template-rows: repeat(11, 1fr);
-            background: #222;
-            border: 4px solid var(--accent);
-            position: relative;
-        }
-
-        .tile {
-            background: white; color: black; border: 0.5px solid #444;
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            font-size: 0.55rem; font-weight: bold; text-align: center; position: relative;
-            padding: 4px 2px;
-        }
-
-        .tile-color { position: absolute; width: 100%; height: 12px; top: 0; border-bottom: 1px solid #000; }
+        :root { --bg: #121212; --accent: #d4af37; --panel: #1e1e1e; --safe: 35px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        /* Construções: Casas e Hotéis */
-        .buildings { position: absolute; top: 13px; display: flex; gap: 2px; }
-        .house { width: 8px; height: 8px; background: #2ecc71; border-radius: 2px; }
-        .hotel { width: 12px; height: 12px; background: #e74c3c; border-radius: 2px; }
-
-        .center-space {
-            grid-column: 2 / 11; grid-row: 2 / 11;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #111; border: 2px inset #333; position: relative;
+        body { 
+            font-family: 'Inter', sans-serif; background: var(--bg); color: white;
+            height: 100vh; display: flex; padding: var(--safe); gap: 20px; overflow: hidden;
         }
 
-        /* PAINEL LATERAL (ECONOMIA) */
-        #side-panel {
-            background: #252525; border-radius: 15px; padding: 20px;
-            display: flex; flex-direction: column; gap: 15px; border: 1px solid #444;
-        }
+        /* Layout Principal */
+        #board-container { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 4px solid var(--accent); position: relative; }
+        #side-panel { width: 320px; background: var(--panel); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 15px; border: 1px solid #333; }
 
-        .player-status {
-            background: #333; padding: 12px; border-radius: 10px; border-left: 5px solid transparent;
+        /* Casas do Tabuleiro */
+        .tile { 
+            background: white; color: black; border: 0.2px solid #555; 
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            font-size: 0.55rem; font-weight: bold; text-align: center; padding: 2px; position: relative;
         }
-        .player-status.active { border-color: var(--accent); background: #444; }
+        .tile-color { position: absolute; width: 100%; height: 12px; top: 0; border-bottom: 1px solid #000; }
+        .build-container { position: absolute; top: 12px; display: flex; gap: 1px; }
+        .h-house { width: 6px; height: 6px; background: #2ecc71; border: 1px solid #000; }
+        .h-hotel { width: 10px; height: 10px; background: #e74c3c; border: 1px solid #000; }
 
-        .btn {
-            background: var(--accent); color: black; border: none; padding: 12px;
-            border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;
-        }
-        .btn:disabled { background: #555; cursor: not-allowed; }
+        .center { grid-area: 2 / 2 / 11 / 11; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        
+        /* HUD & Players */
+        .p-card { background: #2a2a2a; padding: 12px; border-radius: 10px; border-left: 5px solid transparent; transition: 0.3s; }
+        .p-card.active { border-color: var(--accent); background: #333; transform: translateX(5px); }
+        .btn { background: var(--accent); color: black; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+        .btn:disabled { background: #444; color: #888; }
 
-        .token {
-            position: absolute; width: 24px; height: 24px; border-radius: 50%;
-            border: 2px solid white; z-index: 100; transition: all 0.5s ease;
-            display: flex; align-items: center; justify-content: center; font-size: 14px;
-        }
+        .token { position: absolute; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
-        /* MODAIS */
-        .modal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; color: black; padding: 25px; border-radius: 15px;
-            z-index: 2000; width: 350px; display: none; text-align: center;
-            box-shadow: 0 0 40px rgba(0,0,0,0.6);
-        }
+        /* Log e Modais */
+        #game-log { flex: 1; background: #111; padding: 10px; border-radius: 8px; font-size: 0.7rem; overflow-y: auto; color: #aaa; font-family: monospace; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 25px; border-radius: 15px; z-index: 2000; width: 350px; display: none; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.7); }
+        .modal h2 { margin-bottom: 10px; color: #111; }
     </style>
 </head>
 <body>
 
-<div id="setup-screen" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <h1 style="color:var(--accent); font-size: 3rem;">Swiftie Poly Master</h1>
-    <p style="margin-bottom:20px">Selecione o número de jogadores</p>
-    <div>
-        <button class="btn" onclick="init(1)" style="width:200px; margin:5px">1 Jogador (vs Bot)</button>
-        <button class="btn" onclick="init(2)" style="width:200px; margin:5px">2 Jogadores</button>
-        <button class="btn" onclick="init(3)" style="width:200px; margin:5px">3 Jogadores</button>
-        <button class="btn" onclick="init(4)" style="width:200px; margin:5px">4 Jogadores</button>
+<div id="setup" style="position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <h1 style="color:var(--accent); font-size: 3rem; margin-bottom: 10px;">Swiftie Poly</h1>
+    <p style="margin-bottom: 25px;">The Eras Board Game</p>
+    <button class="btn" onclick="startGame(1)" style="max-width:250px; margin:5px">1 Jogador vs Bot</button>
+    <button class="btn" onclick="startGame(2)" style="max-width:250px; margin:5px">2 Jogadores</button>
+    <button class="btn" onclick="startGame(3)" style="max-width:250px; margin:5px">3 Jogadores</button>
+    <button class="btn" onclick="startGame(4)" style="max-width:250px; margin:5px">4 Jogadores</button>
+</div>
+
+<div id="board-container">
+    <div class="center">
+        <div id="dice-view" style="font-size: 5rem; margin-bottom: 10px;">🎲</div>
+        <div id="status-msg" style="color:var(--accent); font-size: 1.2rem; font-weight: bold; text-align:center;">Boa sorte, Rod!</div>
     </div>
 </div>
 
-<div id="main-layout">
-    <div id="board">
-        <div class="center-space">
-            <div id="dice-res" style="font-size: 4rem;">🎲</div>
-            <div id="event-msg" style="color:var(--accent); text-align:center; padding:10px">Sua vez!</div>
-        </div>
-    </div>
-
-    <div id="side-panel">
-        <h2 style="color:var(--accent)">Status do Jogo</h2>
-        <div id="player-list"></div>
-        <hr style="border:0.5px solid #444">
-        <button id="roll-btn" class="btn" onclick="playTurn()">GIRAR DADOS</button>
-        <button id="manage-btn" class="btn" style="background:#4a90e2; color:white; margin-top:5px" onclick="openManage()">GERENCIAR IMÓVEIS</button>
-        <div id="turn-log" style="font-size: 0.75rem; color:#aaa; overflow-y:auto; height:100px"></div>
-    </div>
+<div id="side-panel">
+    <h2 style="color:var(--accent); text-align: center;">The Eras Empire</h2>
+    <div id="player-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <div id="game-log"></div>
+    <button id="roll-btn" class="btn" onclick="playTurn()">GIRAR DADOS</button>
+    <button id="manage-btn" class="btn" style="background:#3498db; color:white;" onclick="openManage()">GERENCIAR IMÓVEIS</button>
 </div>
 
 <div id="buy-modal" class="modal">
-    <h2 id="m-title"></h2>
-    <p id="m-info"></p>
-    <div style="margin-top:15px; display:flex; gap:10px">
-        <button class="btn" onclick="confirmBuy()">Comprar</button>
-        <button class="btn" style="background:#ccc" onclick="closeModal()">Passar</button>
+    <h2 id="m-name">Álbum</h2>
+    <p id="m-price"></p>
+    <div style="margin-top:20px; display:flex; gap:10px;">
+        <button class="btn" onclick="confirmPurchase()">Comprar</button>
+        <button class="btn" style="background:#ccc;" onclick="closeModals()">Passar</button>
     </div>
 </div>
 
-<div id="manage-modal" class="modal" style="width:450px">
-    <h2>Seus Imóveis</h2>
-    <div id="manage-list" style="max-height:300px; overflow-y:auto; margin:15px 0; text-align:left"></div>
-    <button class="btn" onclick="closeManage()">Fechar</button>
+<div id="manage-modal" class="modal" style="width:400px;">
+    <h2>Construir Bracelets</h2>
+    <div id="manage-content" style="max-height:300px; overflow-y:auto; text-align:left; padding:10px;"></div>
+    <button class="btn" style="background:#333; color:white; margin-top:10px;" onclick="closeModals()">Fechar</button>
 </div>
 
 <script>
-    const tokens = ["🧣", "🐍", "🫶", "💎"];
-    const colors = ["#ff4081", "#4caf50", "#2196f3", "#ff9800"];
-    let players = [];
-    let turn = 0;
-    let isIA = false;
-
-    // Definição das 40 casas
-    const properties = [
-        {name: "GO", type: "sp"}, {name: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5"}, {name: "VAULT", type: "v"}, {name: "Teardrops", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5"}, {name: "PAY TAX", type: "tax", val: 200}, {name: "ERA TOUR", p: 200, type: "rail"}, {name: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a"}, {name: "VAULT", type: "v"}, {name: "You Belong", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a"}, {name: "Fearless", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a"},
-        {name: "JAIL", type: "sp"}, {name: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1"}, {name: "SPOTIFY", type: "util", p: 150}, {name: "Back to Dec.", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1"}, {name: "Mean", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1"}, {name: "ERA TOUR", p: 200, type: "rail"}, {name: "All Too Well", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000"}, {name: "VAULT", type: "v"}, {name: "Red", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000"}, {name: "22", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#8b0000"},
-        {name: "BACKSTAGE", type: "sp"}, {name: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0"}, {name: "VAULT", type: "v"}, {name: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0"}, {name: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0"}, {name: "ERA TOUR", p: 200, type: "rail"}, {name: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d"}, {name: "Ready For It", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d"}, {name: "APPLE MUSIC", type: "util", p: 150}, {name: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d"},
-        {name: "GO JAIL", type: "sp"}, {name: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1"}, {name: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1"}, {name: "VAULT", type: "v"}, {name: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1"}, {name: "ERA TOUR", p: 200, type: "rail"}, {name: "VAULT", type: "v"}, {name: "Cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf"}, {name: "LUX TAX", type: "tax", val: 100}, {name: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970"}
+    const music = [
+        {n: "GO", t: "s"}, {n: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50}, {n: "VAULT", t: "v"}, {n: "Teardrops", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50}, {n: "PAY TAX", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "VAULT", t: "v"}, {n: "You Belong", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "Fearless", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a", h: 50},
+        {n: "HIATO", t: "s"}, {n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "SPOTIFY", p: 150, t: "util"}, {n: "Back to Dec.", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "Mean", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "All Too Well", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "VAULT", t: "v"}, {n: "Red", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "22", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#8b0000", h: 100},
+        {name: "FREE", t: "s"}, {n: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "VAULT", t: "v"}, {n: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0", h: 150}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150}, {n: "Ready For It", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150}, {n: "APPLE MUSIC", p: 150, t: "util"}, {n: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d", h: 150},
+        {n: "GO JAIL", t: "s"}, {n: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "VAULT", t: "v"}, {n: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "VAULT", t: "v"}, {n: "cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "LUX TAX", t: "tax", v: 100}, {n: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}
     ];
 
-    const gridOrder = [
-        "11/11","11/10","11/9","11/8","11/7","11/6","11/5","11/4","11/3","11/2","11/1",
-        "10/1","9/1","8/1","7/1","6/1","5/1","4/1","3/1","2/1","1/1",
-        "1/2","1/3","1/4","1/5","1/6","1/7","1/8","1/9","1/10","1/11",
-        "2/11","3/11","4/11","5/11","6/11","7/11","8/11","9/11","10/11"
-    ];
+    const grid = ["11/11","11/10","11/9","11/8","11/7","11/6","11/5","11/4","11/3","11/2","11/1","10/1","9/1","8/1","7/1","6/1","5/1","4/1","3/1","2/1","1/1","1/2","1/3","1/4","1/5","1/6","1/7","1/8","1/9","1/10","1/11","2/11","3/11","4/11","5/11","6/11","7/11","8/11","9/11","10/11"];
+    
+    let players = [], turn = 0, doubleCount = 0, isIA = false;
 
-    const vaultCards = [
-        {txt: "Sua regravação é um sucesso! Ganhe $150", v: 150},
-        {txt: "Taxa de Ticketmaster. Pague $50", v: -50},
-        {txt: "Venda de Merch esgotada! Ganhe $100", v: 100},
-        {txt: "Processo judicial por plágio (falso). Pague $100", v: -100}
-    ];
-
-    function init(n) {
+    function startGame(n) {
         isIA = n === 1;
-        const count = n === 1 ? 2 : n;
-        for(let i=0; i<count; i++) {
-            players.push({
-                id: i, name: (i==1 && isIA) ? "Bot Swift" : `Rod ${i+1}`,
-                money: 1500, pos: 0, props: [], token: tokens[i], color: colors[i], jail: 0
-            });
-            const t = document.createElement('div');
-            t.id = `tkn-${i}`; t.className = 'token'; t.style.background = colors[i]; t.innerText = tokens[i];
-            document.getElementById('board').appendChild(t);
+        const total = (n === 1) ? 2 : n;
+        for(let i=0; i<total; i++) {
+            players.push({ id: i, name: (i==1 && isIA) ? "Bot Swift" : `Rod ${i+1}`, money: 1500, pos: 0, props: [], token: ["🧣","🐍","🫶","💎"][i], color: ["#ff4081","#4caf50","#2196f3","#ff9800"][i], jail: 0 });
         }
-        document.getElementById('setup-screen').remove();
-        buildBoard();
-        updateUI();
-        syncTokens();
+        document.getElementById('setup').remove();
+        initBoard();
     }
 
-    function buildBoard() {
-        const board = document.getElementById('board');
-        properties.forEach((p, i) => {
+    function initBoard() {
+        const b = document.getElementById('board-container');
+        music.forEach((d, i) => {
             const tile = document.createElement('div');
-            tile.className = 'tile'; tile.id = `tile-${i}`;
-            tile.style.gridArea = gridOrder[i];
-            if(p.c) tile.innerHTML = `<div class="tile-color" style="background:${p.c}"></div><div class="buildings" id="build-${i}"></div>`;
-            tile.innerHTML += `<span>${p.name}</span>${p.p ? '<br>$'+p.p : ''}<div id="owner-${i}" style="width:100%; height:4px"></div>`;
-            board.appendChild(tile);
+            tile.className = 'tile'; tile.id = `tile-${i}`; tile.style.gridArea = grid[i];
+            if(d.c) tile.innerHTML = `<div class="tile-color" style="background:${d.c}"></div><div class="build-container" id="build-${i}"></div>`;
+            tile.innerHTML += `<span>${d.n}</span>${d.p ? '<br>$'+d.p : ''}<div id="owner-${i}" style="width:100%; height:3px"></div>`;
+            b.appendChild(tile);
         });
+        players.forEach(p => {
+            const t = document.createElement('div'); t.id = `tk-${p.id}`; t.className = 'token';
+            t.style.background = p.color; t.innerText = p.token; b.appendChild(t);
+        });
+        updateUI(); syncTokens();
     }
 
     function playTurn() {
-        if(isIA && turn === 1) return;
-        moveAction();
-    }
-
-    function moveAction() {
         const p = players[turn];
-        if(p.jail > 0) { p.jail--; log(`${p.name} está no hiato (prisão).`); return next(); }
-
-        const d1 = Math.floor(Math.random() * 6) + 1;
-        const d2 = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('dice-res').innerText = `${d1}·${d2}`;
-        
-        let old = p.pos;
-        p.pos = (p.pos + d1 + d2) % 40;
-        if(p.pos < old) { p.money += 200; log(`${p.name} passou pelo GO (+200)`); }
-        
-        syncTokens();
-        setTimeout(() => handleLand(p), 600);
-    }
-
-    function handleLand(p) {
-        const tile = properties[p.pos];
-        const idx = p.pos;
-
-        if(idx === 30) { p.pos = 10; p.jail = 2; log("Vá para o Hiato!"); syncTokens(); return next(); }
-        if(tile.type === "tax") { p.money -= tile.val; log(`Pangou imposto: $${tile.val}`); return next(); }
-        if(tile.type === "v") {
-            const card = vaultCards[Math.floor(Math.random()*vaultCards.length)];
-            alert(card.txt); p.money += card.v; return next();
+        if(p.jail > 0) {
+            p.jail--; 
+            log(`${p.name} está no hiato.`); 
+            return nextTurn();
         }
 
-        if(tile.p && !isOwned(idx)) {
-            if(isIA && turn === 1) {
-                if(p.money > tile.p + 200) buyProp(p, idx);
-                next();
-            } else {
-                openBuyModal(tile, idx);
-            }
-        } else if(isOwned(idx)) {
-            const owner = players.find(x => x.props.some(pr => pr.idx === idx));
-            if(owner.id !== p.id) {
-                const propObj = owner.props.find(pr => pr.idx === idx);
-                const rent = tile.r[propObj.houses];
-                p.money -= rent; owner.money += rent;
-                log(`Pagou $${rent} de aluguel para ${owner.name}`);
-            }
-            next();
+        const d1 = Math.floor(Math.random()*6)+1, d2 = Math.floor(Math.random()*6)+1;
+        const total = d1 + d2;
+        document.getElementById('dice-view').innerText = `${d1}·${d2}`;
+
+        if(d1 === d2) {
+            doubleCount++;
+            if(doubleCount === 3) { log("3 Dobradinhas! Vá p/ Hiato."); p.pos = 10; p.jail = 3; syncTokens(); return nextTurn(); }
+            log("Dobradinha! Jogue de novo.");
         } else {
-            next();
+            doubleCount = 0;
+        }
+
+        let old = p.pos;
+        p.pos = (p.pos + total) % 40;
+        if(p.pos < old) { p.money += 200; log("Passou pelo GO! +$200"); }
+        
+        syncTokens();
+        setTimeout(() => handleTile(p, total), 500);
+    }
+
+    function handleTile(p, dice) {
+        const idx = p.pos;
+        const tile = music[idx];
+
+        if(idx === 30) { p.pos = 10; p.jail = 3; log("Vá para o Hiato!"); syncTokens(); return nextTurn(); }
+        if(tile.t === "tax") { p.money -= tile.v; log(`Pagou $${tile.v} de taxas.`); return checkBankruptcy(p); }
+        if(tile.t === "v") { 
+            const luck = Math.random() > 0.5;
+            const val = luck ? 150 : -100;
+            p.money += val;
+            alert(luck ? "Sua música viralizou! +$150" : "Cancelamento no Twitter! -$100");
+            return checkBankruptcy(p);
+        }
+
+        const owner = getOwner(idx);
+        if(tile.p && !owner) {
+            if(isIA && turn === 1) { if(p.money > tile.p + 200) buyProp(p, idx); nextTurn(); }
+            else openBuyModal(tile, idx);
+        } else if(owner && owner.id !== p.id) {
+            let rent = calculateRent(tile, owner, dice);
+            p.money -= rent; owner.money += rent;
+            log(`Pagou $${rent} p/ ${owner.name}`);
+            checkBankruptcy(p);
+        } else {
+            if(doubleCount === 0) nextTurn();
         }
         updateUI();
     }
 
-    function isOwned(idx) { return players.some(p => p.props.some(pr => pr.idx === idx)); }
-
-    function openBuyModal(tile, idx) {
-        document.getElementById('m-title').innerText = tile.name;
-        document.getElementById('m-info').innerText = `Preço: $${tile.p}\nAluguel base: $${tile.r[0]}`;
-        document.getElementById('buy-modal').style.display = 'block';
-    }
-
-    function confirmBuy() {
-        const p = players[turn];
-        const idx = p.pos;
-        if(p.money >= properties[idx].p) {
-            buyProp(p, idx);
-            closeModal();
-            next();
-        } else { alert("Sem dinheiro!"); }
+    function calculateRent(tile, owner, dice) {
+        const propData = owner.props.find(x => x.idx === music.indexOf(tile));
+        if(tile.t === "rail") {
+            const count = owner.props.filter(x => music[x.idx].t === "rail").length;
+            return [0, 25, 50, 100, 200][count];
+        }
+        if(tile.t === "util") {
+            const count = owner.props.filter(x => music[x.idx].t === "util").length;
+            return dice * (count === 1 ? 4 : 10);
+        }
+        return tile.r[propData.houses];
     }
 
     function buyProp(p, idx) {
-        p.money -= properties[idx].p;
+        p.money -= music[idx].p;
         p.props.push({idx: idx, houses: 0});
         document.getElementById(`owner-${idx}`).style.background = p.color;
         updateUI();
     }
 
+    function checkBankruptcy(p) {
+        if(p.money < 0) {
+            alert(`${p.name} faliu! Fim de jogo.`);
+            location.reload();
+        } else {
+            if(doubleCount === 0) nextTurn();
+        }
+    }
+
     function openManage() {
         const p = players[turn];
-        const list = document.getElementById('manage-list');
+        const list = document.getElementById('manage-content');
         list.innerHTML = "";
         p.props.forEach(pr => {
-            const prop = properties[pr.idx];
-            if(!prop.r) return;
-            const div = document.createElement('div');
-            div.style.marginBottom = "10px";
-            div.innerHTML = `<b>${prop.name}</b> (Casas: ${pr.houses})<br>
-                <button onclick="buildHouse(${pr.idx})" class="btn" style="width:auto; padding:5px; font-size:10px">Construir ($50)</button>
-                <button onclick="sellProp(${pr.idx})" class="btn" style="width:auto; padding:5px; font-size:10px; background:#e74c3c; color:white">Vender ($${prop.p/2})</button>`;
-            list.appendChild(div);
+            const tile = music[pr.idx];
+            if(!tile.r) return;
+            list.innerHTML += `<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px">
+                <b>${tile.n}</b> (Bracelets: ${pr.houses})<br>
+                <button onclick="build(${pr.idx})" style="padding:5px; margin-top:5px; font-size:10px">Construir ($${tile.h})</button>
+            </div>`;
         });
         document.getElementById('manage-modal').style.display = 'block';
     }
 
-    function buildHouse(idx) {
+    function build(idx) {
         const p = players[turn];
-        const propObj = p.props.find(x => x.idx === idx);
-        if(p.money >= 50 && propObj.houses < 5) {
-            p.money -= 50;
-            propObj.houses++;
-            renderBuildings(idx, propObj.houses);
-            updateUI();
-            openManage();
+        const prop = p.props.find(x => x.idx === idx);
+        const cost = music[idx].h;
+        if(p.money >= cost && prop.houses < 5) {
+            p.money -= cost; prop.houses++;
+            renderBuilds(idx, prop.houses);
+            updateUI(); openManage();
         }
     }
 
-    function renderBuildings(idx, num) {
-        const container = document.getElementById(`build-${idx}`);
-        container.innerHTML = "";
-        if(num < 5) {
-            for(let i=0; i<num; i++) container.innerHTML += `<div class="house"></div>`;
-        } else {
-            container.innerHTML = `<div class="hotel"></div>`;
-        }
+    function renderBuilds(idx, n) {
+        const c = document.getElementById(`build-${idx}`);
+        c.innerHTML = (n < 5) ? '<div class="h-house"></div>'.repeat(n) : '<div class="h-hotel"></div>';
     }
 
-    function sellProp(idx) {
-        const p = players[turn];
-        const prop = properties[idx];
-        p.money += prop.p / 2;
-        p.props = p.props.filter(x => x.idx !== idx);
-        document.getElementById(`owner-${idx}`).style.background = "none";
-        document.getElementById(`build-${idx}`).innerHTML = "";
-        updateUI();
-        openManage();
-    }
-
-    function next() {
-        turn = (turn + 1) % players.length;
-        updateUI();
-        if(isIA && turn === 1) setTimeout(moveAction, 1000);
-    }
-
+    function nextTurn() { turn = (turn + 1) % players.length; updateUI(); if(isIA && turn === 1) setTimeout(playTurn, 1000); }
+    function getOwner(idx) { return players.find(p => p.props.some(x => x.idx === idx)); }
+    function openBuyModal(tile, idx) { document.getElementById('buy-modal').style.display = 'block'; document.getElementById('m-name').innerText = tile.n; document.getElementById('m-price').innerText = `Preço: $${tile.p}`; }
+    function confirmPurchase() { buyProp(players[turn], players[turn].pos); closeModals(); if(doubleCount === 0) nextTurn(); }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
     function updateUI() {
-        const list = document.getElementById('player-list');
-        list.innerHTML = "";
+        const list = document.getElementById('player-list'); list.innerHTML = "";
         players.forEach((p, i) => {
-            const div = document.createElement('div');
-            div.className = `player-status ${turn === i ? 'active' : ''}`;
-            div.innerHTML = `<b>${p.token} ${p.name}</b><br><span style="color:#2ecc71">$${p.money}</span> | Imóveis: ${p.props.length}`;
-            list.appendChild(div);
+            list.innerHTML += `<div class="p-card ${turn === i ? 'active' : ''}">
+                <b>${p.token} ${p.name}</b><br><span style="color:#2ecc71">$${p.money}</span> | Prop: ${p.props.length}
+            </div>`;
         });
+        document.getElementById('roll-btn').disabled = (isIA && turn === 1);
     }
-
     function syncTokens() {
         players.forEach((p, i) => {
             const tile = document.getElementById(`tile-${p.pos}`);
-            const tkn = document.getElementById(`tkn-${i}`);
-            tkn.style.left = (tile.offsetLeft + 5 + (i*3)) + "px";
-            tkn.style.top = (tile.offsetTop + 18 + (i*3)) + "px";
+            const tk = document.getElementById(`tk-${i}`);
+            tk.style.left = (tile.offsetLeft + 5 + i*3) + "px";
+            tk.style.top = (tile.offsetTop + 18 + i*3) + "px";
         });
     }
-
-    function log(m) {
-        const l = document.getElementById('turn-log');
-        l.innerHTML = `> ${m}<br>${l.innerHTML}`;
-    }
-
-    function closeModal() { document.getElementById('buy-modal').style.display = 'none'; }
-    function closeManage() { document.getElementById('manage-modal').style.display = 'none'; }
+    function log(m) { const l = document.getElementById('game-log'); l.innerHTML = `> ${m}<br>${l.innerHTML}`; }
 </script>
-
 </body>
 </html>
