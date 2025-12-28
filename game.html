@@ -2,255 +2,265 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Swiftie Poly Vertical</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swiftie Poly - Tablet Edition</title>
     <style>
         :root {
-            --bg: #121212;
-            --panel: #1e1e1e;
+            --bg: #1a1a1a;
+            --tile-w: 9vw; /* Ajustado para caber 11 casas horizontalmente */
+            --tile-h: 8vh; /* Ajustado para caber 11 casas verticalmente */
             --accent: #d4af37;
-            --text: #ffffff;
-            --tile-h: 70px;
-            --tile-w: 18vw;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg); color: var(--text);
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: var(--bg); color: white;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* Setup Screen */
-        #setup-screen {
-            position: fixed; inset: 0; background: var(--bg); z-index: 5000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .setup-btn {
-            background: var(--accent); border: none; padding: 15px; margin: 10px;
-            border-radius: 10px; font-weight: bold; width: 80%; max-width: 300px;
-        }
-
-        /* Tabuleiro Retrato Total */
-        #game-container {
-            position: relative;
-            flex-grow: 1;
-            width: 100vw;
+        /* Grid de 11x11 para as 40 casas */
+        #board {
             display: grid;
-            grid-template-columns: var(--tile-w) 1fr var(--tile-w);
-            grid-template-rows: var(--tile-h) 1fr var(--tile-h);
+            grid-template-columns: repeat(11, 1fr);
+            grid-template-rows: repeat(11, 1fr);
+            width: 98vw;
+            height: 85vh;
+            margin: auto;
+            border: 2px solid var(--accent);
+            background: #222;
         }
-
-        .side-column { display: flex; flex-direction: column; }
-        .top-row, .bottom-row { display: flex; width: 100%; }
 
         .tile {
-            background: white; color: black; border: 0.5px solid #000;
-            font-size: 9px; font-weight: bold; text-align: center;
+            background: white; color: black; border: 0.5px solid #444;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            position: relative; flex: 1;
+            font-size: 0.6rem; font-weight: bold; text-align: center; position: relative;
+            padding: 2px;
         }
 
-        /* Estilo das Casas */
-        .tile-header { width: 100%; height: 15px; position: absolute; top: 0; }
-        .owner-mark { position: absolute; bottom: 0; width: 100%; height: 5px; }
+        .tile-color { position: absolute; width: 100%; height: 15px; top: 0; }
+        .tile.corner { background: #eee; font-size: 0.8rem; }
 
-        /* Centro do Jogo */
-        #game-center {
-            grid-area: 2 / 2 / 3 / 3;
+        /* Centro do Tabuleiro */
+        .center-space {
+            grid-column: 2 / 11;
+            grid-row: 2 / 11;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; text-align: center;
+            background: #1a1a1a; border: 1px inset #333;
         }
 
-        /* HUD Jogador */
-        #player-hud {
-            height: 120px; background: var(--panel);
-            padding: 15px; border-top: 2px solid var(--accent);
-            display: flex; flex-direction: column; gap: 10px;
+        /* HUD */
+        #hud {
+            height: 15vh; background: #111; display: flex; align-items: center;
+            justify-content: space-around; padding: 10px; border-top: 3px solid var(--accent);
         }
-        .hud-top { display: flex; justify-content: space-between; font-weight: bold; }
+
+        .player-card {
+            background: #333; padding: 10px 20px; border-radius: 10px;
+            text-align: center; border: 2px solid transparent;
+        }
+        .player-card.active { border-color: var(--accent); box-shadow: 0 0 15px var(--accent); }
 
         .token {
-            position: absolute; width: 22px; height: 22px; border-radius: 50%;
-            border: 2px solid white; z-index: 1000; transition: all 0.5s ease-in-out;
+            position: absolute; width: 25px; height: 25px; border-radius: 50%;
+            border: 2px solid white; z-index: 100; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; align-items: center; justify-content: center; font-size: 14px;
         }
 
-        #dice-btn {
-            background: var(--accent); border: none; padding: 12px;
-            border-radius: 8px; font-weight: bold; font-size: 1.1rem;
+        #roll-btn {
+            background: var(--accent); color: black; border: none; padding: 20px 40px;
+            font-size: 1.5rem; font-weight: bold; border-radius: 10px; cursor: pointer;
         }
 
-        .modal {
+        /* Modal de Ação */
+        #modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; color: black; padding: 25px; border-radius: 20px;
-            z-index: 10000; width: 85%; display: none; text-align: center;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            background: white; color: black; padding: 30px; border-radius: 20px;
+            z-index: 1000; text-align: center; width: 400px; display: none;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
+        .modal button { padding: 10px 20px; margin: 10px; cursor: pointer; border-radius: 5px; border: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="setup-screen">
-    <h1 style="margin-bottom: 20px;">Swiftie Poly</h1>
-    <button class="setup-btn" onclick="initGame(1)">1 Jogador vs IA</button>
-    <button class="setup-btn" onclick="initGame(2)">2 Jogadores</button>
-    <button class="setup-btn" onclick="initGame(3)">3 Jogadores</button>
-    <button class="setup-btn" onclick="initGame(4)">4 Jogadores</button>
-</div>
-
-<div id="game-container">
-    <div id="dynamic-board" style="display: contents;"></div>
-    
-    <div id="game-center">
-        <div id="dice-val" style="font-size: 3rem;">🎲</div>
-        <p id="event-text" style="color: var(--accent); margin-top: 10px; font-size: 0.9rem;"></p>
+<div id="setup-screen" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <h1 style="color:var(--accent); font-size: 3rem; margin-bottom: 20px;">Swiftie Poly</h1>
+    <div id="player-selection">
+        <button onclick="init(1)" style="padding:20px; margin:10px; font-size:1.2rem;">1 Jogador vs IA</button>
+        <button onclick="init(2)" style="padding:20px; margin:10px; font-size:1.2rem;">2 Jogadores</button>
+        <button onclick="init(3)" style="padding:20px; margin:10px; font-size:1.2rem;">3 Jogadores</button>
+        <button onclick="init(4)" style="padding:20px; margin:10px; font-size:1.2rem;">4 Jogadores</button>
     </div>
 </div>
 
-<div id="player-hud">
-    <div class="hud-top">
-        <div><span id="h-token">🧣</span> <span id="h-name">---</span></div>
-        <div style="color: #4caf50;">$ <span id="h-money">0</span></div>
+<div id="board">
+    <div class="center-space">
+        <div id="dice-display" style="font-size: 5rem;">🎲</div>
+        <h2 id="current-info" style="color:var(--accent)">Sua Vez!</h2>
     </div>
-    <button id="dice-btn" onclick="playTurn()">GIRAR DADOS</button>
+    </div>
+
+<div id="hud">
+    <div id="p-cards" style="display:flex; gap:15px;"></div>
+    <button id="roll-btn" onclick="rollDice()">GIRAR DADOS</button>
 </div>
 
-<div id="buy-modal" class="modal">
-    <h2 id="m-title">Álbum</h2>
-    <p id="m-price" style="margin: 10px 0; font-weight: bold;"></p>
-    <button class="setup-btn" id="m-buy">Comprar</button>
-    <button class="setup-btn" style="background:#ccc" onclick="closeModal()">Passar</button>
+<div id="modal">
+    <h2 id="m-title">Título</h2>
+    <p id="m-text">Descrição</p>
+    <div id="m-btns"></div>
 </div>
 
 <script>
-    const tokens = ["🧣", "🐍", "🫶", "💎"];
-    const colors = ["#E91E63", "#4CAF50", "#2196F3", "#FF9800"];
+    const musicData = [
+        {name: "GO", type: "corner"}, {name: "Tim McGraw", p: 60, c: "#b9d8b5"}, {name: "Vault", type: "v"}, {name: "Teardrops", p: 60, c: "#b9d8b5"}, {name: "Taxa", type: "tax"}, {name: "Eras Tour", p: 200, type: "rail"}, {name: "Love Story", p: 100, c: "#e6be8a"}, {name: "Vault", type: "v"}, {name: "You Belong", p: 100, c: "#e6be8a"}, {name: "Fearless", p: 120, c: "#e6be8a"},
+        {name: "JAIL", type: "corner"}, {name: "Enchanted", p: 140, c: "#d1b2d1"}, {name: "Spotify", type: "util"}, {name: "Back to Dec.", p: 140, c: "#d1b2d1"}, {name: "Mean", p: 160, c: "#d1b2d1"}, {name: "Rep Tour", p: 200, type: "rail"}, {name: "All Too Well", p: 180, c: "#8b0000"}, {name: "Vault", type: "v"}, {name: "Red", p: 180, c: "#8b0000"}, {name: "22", p: 200, c: "#8b0000"},
+        {name: "FREE", type: "corner"}, {name: "Blank Space", p: 220, c: "#b1d4e0"}, {name: "Vault", type: "v"}, {name: "Style", p: 220, c: "#b1d4e0"}, {name: "Shake It Off", p: 240, c: "#b1d4e0"}, {name: "1989 Tour", p: 200, type: "rail"}, {name: "Delicate", p: 260, c: "#2d2d2d"}, {name: "Ready For It", p: 260, c: "#2d2d2d"}, {name: "Apple Music", type: "util"}, {name: "Getaway Car", p: 280, c: "#2d2d2d"},
+        {name: "GO JAIL", type: "corner"}, {name: "Cruel Summer", p: 300, c: "#ffb6c1"}, {name: "Lover", p: 300, c: "#ffb6c1"}, {name: "Vault", type: "v"}, {name: "The Archer", p: 320, c: "#ffb6c1"}, {name: "Eras Tour", p: 200, type: "rail"}, {name: "Vault", type: "v"}, {name: "cardigan", p: 350, c: "#cfcfcf"}, {name: "Taxa Deluxe", type: "tax"}, {name: "Anti-Hero", p: 400, c: "#191970"}
+    ];
+
+    const gridOrder = [
+        "11/11","11/10","11/9","11/8","11/7","11/6","11/5","11/4","11/3","11/2","11/1",
+        "10/1","9/1","8/1","7/1","6/1","5/1","4/1","3/1","2/1","1/1",
+        "1/2","1/3","1/4","1/5","1/6","1/7","1/8","1/9","1/10","1/11",
+        "2/11","3/11","4/11","5/11","6/11","7/11","8/11","9/11","10/11"
+    ];
+
     let players = [];
     let turn = 0;
     let isIA = false;
+    const tokens = ["🧣", "🐍", "🫶", "💎"];
+    const colors = ["#ff4081", "#4caf50", "#2196f3", "#ff9800"];
 
-    const board = [
-        { name: "GO", type: "sp" }, { name: "Debut", p: 100, c: "#b9d8b5" }, { name: "Fearless", p: 150, c: "#e6be8a" },
-        { name: "Speak Now", p: 200, c: "#d1b2d1" }, { name: "Red", p: 240, c: "#8b0000" }, { name: "Prisão", type: "sp" },
-        { name: "1989", p: 300, c: "#b1d4e0" }, { name: "Rep", p: 350, c: "#2d2d2d" }, { name: "Lover", p: 400, c: "#ffb6c1" },
-        { name: "Folk", p: 420, c: "#cfcfcf" }, { name: "Backst.", type: "sp" }, { name: "Ever", p: 420, c: "#c09a6b" },
-        { name: "Mid", p: 450, c: "#191970" }, { name: "TTPD", p: 500, c: "#e5e4e2" }, { name: "Eras Tour", p: 600, c: "#d4af37" },
-        { name: "Ir p/ Jail", type: "sp" }, { name: "Vault", type: "v" }, { name: "ATW 10", p: 300, c: "#8b0000" },
-        { name: "Cruel S.", p: 300, c: "#ffb6c1" }, { name: "Karma", type: "v" }
-    ];
-
-    function initGame(n) {
-        isIA = n === 1;
-        const count = n === 1 ? 2 : n;
+    function init(num) {
+        isIA = num === 1;
+        const count = num === 1 ? 2 : num;
         for(let i=0; i<count; i++) {
-            players.push({ id: i, name: (i==1 && isIA) ? "Bot Swift" : `P${i+1}`, money: 1500, pos: 0, props: [], token: tokens[i], color: colors[i] });
+            players.push({
+                id: i, name: (i==1 && isIA) ? "Bot Swift" : `Player ${i+1}`,
+                money: 1500, pos: 0, token: tokens[i], color: colors[i], props: []
+            });
             const t = document.createElement('div');
             t.id = `tkn-${i}`; t.className = 'token'; t.style.background = colors[i]; t.innerText = tokens[i];
-            document.body.appendChild(t);
+            document.getElementById('board').appendChild(t);
         }
         document.getElementById('setup-screen').remove();
-        createBoard();
+        generateBoard();
         updateHUD();
         syncTokens();
     }
 
-    function createBoard() {
-        const container = document.getElementById('dynamic-board');
-        // Este loop organiza as divs no grid 3x3 do mobile de forma visual
-        board.forEach((data, i) => {
+    function generateBoard() {
+        const board = document.getElementById('board');
+        musicData.forEach((m, i) => {
             const tile = document.createElement('div');
-            tile.className = 'tile'; tile.id = `tile-${i}`;
-            if(data.c) tile.innerHTML = `<div class="tile-header" style="background:${data.c}"></div>`;
-            tile.innerHTML += `<span>${data.name}</span>${data.p ? '<div>$'+data.p+'</div>' : ''}<div id="owner-${i}" class="owner-mark"></div>`;
-            
-            // Lógica de posicionamento simplificada para o grid mobile
-            if(i <= 4) tile.style.gridArea = `3 / ${6-i > 3 ? 3 : 6-i}`; // Simplificado para o exemplo
-            // No mobile real, usamos coordenadas absolutas ou grid fixo:
-            container.appendChild(tile);
+            tile.className = `tile ${m.type || ''}`;
+            tile.id = `tile-${i}`;
+            tile.style.gridArea = gridOrder[i];
+            if(m.c) tile.innerHTML = `<div class="tile-color" style="background:${m.c}"></div>`;
+            tile.innerHTML += `<span>${m.name}</span>${m.p ? '<br>$'+m.p : ''}<div id="owner-${i}" style="width:100%; height:5px; margin-top:2px;"></div>`;
+            board.appendChild(tile);
         });
-        // Reposicionando tiles manualmente para garantir o retângulo perfeito
-        const positions = [
-            "3/3", "3/2", "3/1", "2/1", "1/1", "1/2", "1/3", "2/3" // Exemplo de loop menor para caber na tela
-        ];
-        // Para 20 tiles, ajustamos as posições:
-        const fullPositions = ["3/3","3/2","3/1","2/1","1/1","1/2","1/3","2/3"]; // Versão compacta para mobile
     }
 
-    function playTurn() {
+    function rollDice() {
+        if(isIA && turn === 1) return;
+        executeTurn();
+    }
+
+    function executeTurn() {
         const p = players[turn];
-        const dice = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('dice-val').innerText = dice;
-        let old = p.pos;
-        p.pos = (p.pos + dice) % board.length;
-        if(p.pos < old) p.money += 200;
+        const d1 = Math.floor(Math.random() * 6) + 1;
+        const d2 = Math.floor(Math.random() * 6) + 1;
+        const total = d1 + d2;
+        document.getElementById('dice-display').innerText = `${d1}·${d2}`;
+        
+        let oldPos = p.pos;
+        p.pos = (p.pos + total) % 40;
+        if(p.pos < oldPos) { p.money += 200; alert("Passou pelo GO! +$200"); }
+        
         syncTokens();
         setTimeout(() => handleTile(p), 600);
     }
 
     function handleTile(p) {
-        const tile = board[p.pos];
-        if(tile.p && !isOwned(p.pos)) {
+        const tileIdx = p.pos;
+        const tile = musicData[tileIdx];
+
+        if(tile.p && !isOwned(tileIdx)) {
             if(isIA && turn === 1) {
-                if(p.money >= tile.p) buy(p, p.pos);
+                if(p.money >= tile.p) buy(p, tileIdx);
                 next();
             } else {
-                showModal(p, tile);
+                openModal(tile.name, `Preço: $${tile.p}`, () => { buy(p, tileIdx); closeModal(); next(); }, () => { closeModal(); next(); });
             }
+        } else if(isOwned(tileIdx) && !p.props.includes(tileIdx)) {
+            const owner = players.find(pl => pl.props.includes(tileIdx));
+            const rent = Math.floor(tile.p * 0.1);
+            p.money -= rent;
+            owner.money += rent;
+            alert(`Pagou $${rent} de aluguel para ${owner.name}`);
+            next();
         } else {
             next();
         }
+        updateHUD();
     }
 
     function isOwned(idx) { return players.some(pl => pl.props.includes(idx)); }
 
-    function showModal(p, tile) {
-        const m = document.getElementById('buy-modal');
-        m.style.display = 'block';
-        document.getElementById('m-title').innerText = tile.name;
-        document.getElementById('m-price').innerText = `$${tile.p}`;
-        document.getElementById('m-buy').onclick = () => { buy(p, p.pos); closeModal(); };
-    }
-
     function buy(p, idx) {
-        if(p.money >= board[idx].p) {
-            p.money -= board[idx].p;
-            p.props.push(idx);
-            document.getElementById(`tile-${idx}`).style.background = "#e0e0e0";
-            updateHUD();
-        }
+        p.money -= musicData[idx].p;
+        p.props.push(idx);
+        document.getElementById(`owner-${idx}`).style.background = p.color;
     }
 
     function next() {
         turn = (turn + 1) % players.length;
         updateHUD();
-        if(isIA && turn === 1) {
-            document.getElementById('dice-btn').disabled = true;
-            setTimeout(playTurn, 1000);
-        } else {
-            document.getElementById('dice-btn').disabled = false;
-        }
+        if(isIA && turn === 1) setTimeout(executeTurn, 1000);
     }
 
     function updateHUD() {
-        const p = players[turn];
-        document.getElementById('h-name').innerText = p.name;
-        document.getElementById('h-money').innerText = p.money;
-        document.getElementById('h-token').innerText = p.token;
+        const container = document.getElementById('p-cards');
+        container.innerHTML = "";
+        players.forEach((p, i) => {
+            const card = document.createElement('div');
+            card.className = `player-card ${turn === i ? 'active' : ''}`;
+            card.innerHTML = `<span style="font-size:1.5rem">${p.token}</span><br><b>${p.name}</b><br><span style="color:#4caf50">$${p.money}</span>`;
+            container.appendChild(card);
+        });
     }
 
     function syncTokens() {
         players.forEach((p, i) => {
             const tile = document.getElementById(`tile-${p.pos}`);
             const tkn = document.getElementById(`tkn-${i}`);
-            if(tile) {
-                tkn.style.left = (tile.offsetLeft + (i*5)) + "px";
-                tkn.style.top = (tile.offsetTop + (i*5)) + "px";
-            }
+            const offset = (i * 5);
+            tkn.style.left = (tile.offsetLeft + 10 + offset) + "px";
+            tkn.style.top = (tile.offsetTop + 10 + offset) + "px";
         });
     }
 
-    function closeModal() { document.getElementById('buy-modal').style.display = 'none'; next(); }
+    function openModal(title, text, onBuy, onPass) {
+        const m = document.getElementById('modal');
+        m.style.display = 'block';
+        document.getElementById('m-title').innerText = title;
+        document.getElementById('m-text').innerText = text;
+        document.getElementById('m-btns').innerHTML = "";
+        
+        const b1 = document.createElement('button');
+        b1.innerText = "COMPRAR"; b1.style.background = "var(--accent)";
+        b1.onclick = onBuy;
+        
+        const b2 = document.createElement('button');
+        b2.innerText = "PASSAR"; b2.onclick = onPass;
+        
+        document.getElementById('m-btns').append(b1, b2);
+    }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
 </script>
+
 </body>
 </html>
