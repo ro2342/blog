@@ -3,191 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Swiftie Poly Master - Immersive Edition</title>
+    <title>Swiftie Poly Ultra</title>
     <style>
-        :root { --md-sys-color-primary: #d4af37; --md-sys-color-surface: #1a1a1c; --bg: #0a0a0a; --safe: 15px; }
+        :root { --md-primary: #d4af37; --md-surface: #1a1a1c; --bg: #050505; --safe: 10px; }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #e1e1e1; height: 100vh; display: flex; flex-direction: column; padding: var(--safe); overflow: hidden; }
+        body { font-family: 'Inter', system-ui; background: var(--bg); color: #fff; height: 100vh; display: flex; flex-direction: column; padding: var(--safe); overflow: hidden; }
 
+        /* Grid 11x11 Perfeito */
         #game-wrapper { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 2px solid #444; position: relative; border-radius: 8px; }
         
-        .tile { background: #fff; color: #000; border: 0.5px solid #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.52rem; font-weight: 700; text-align: center; padding: 2px; position: relative; line-height: 1.2; }
-        .tile-color { position: absolute; width: 100%; height: 10px; top: 0; }
-        .price { margin-top: 2px; color: #666; font-size: 0.48rem; }
+        .tile { background: #fff; color: #000; border: 0.5px solid #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.5rem; font-weight: 800; text-align: center; padding: 2px; position: relative; line-height: 1.1; }
+        .tile-color { position: absolute; width: 100%; height: 8px; top: 0; }
+        .owner-bar { position: absolute; bottom: 0; width: 100%; height: 4px; transition: background 0.3s; }
 
-        .center-dashboard { grid-area: 2 / 2 / 11 / 11; background: var(--md-sys-color-surface); display: flex; flex-direction: column; padding: 20px; position: relative; border-radius: 24px; margin: 10px; border: 1px solid #333; }
+        .center-dash { grid-area: 2 / 2 / 11 / 11; background: var(--md-surface); display: flex; flex-direction: column; padding: 15px; position: relative; border-radius: 20px; border: 1px solid #333; margin: 5px; }
         
-        .m3-btn { background: var(--md-sys-color-primary); color: #000; border: none; padding: 12px 24px; border-radius: 100px; font-weight: 600; cursor: pointer; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: transform 0.1s; }
-        .m3-btn:active { transform: scale(0.95); }
-        .m3-btn-secondary { background: #353538; color: var(--md-sys-color-primary); border: 1px solid var(--md-sys-color-primary); }
+        /* Buttons M3 */
+        .m3-btn { background: var(--md-primary); color: #000; border: none; padding: 12px 20px; border-radius: 100px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
+        .m3-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .m3-btn-danger { background: #f44336; color: white; }
 
-        .p-status { background: #2d2d30; padding: 12px; border-radius: 16px; text-align: center; flex: 1; margin: 0 5px; border: 2px solid transparent; }
-        .p-status.active { border-color: var(--md-sys-color-primary); background: #3d3d40; }
+        /* Status dos Jogadores */
+        #status-row { display: flex; justify-content: space-around; gap: 10px; margin-bottom: 10px; }
+        .p-card { flex: 1; padding: 10px; background: #2d2d30; border-radius: 12px; text-align: center; border: 2px solid transparent; font-size: 0.8rem; }
 
-        .dice-box { display: flex; gap: 15px; margin-bottom: 20px; }
-        .die { width: 55px; height: 55px; background: #fff; color: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 900; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        .dice-box { display: flex; gap: 10px; margin: auto; }
+        .die { width: 50px; height: 50px; background: #fff; color: #000; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 900; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .rolling { animation: spin 0.2s infinite; }
-        @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        .token { position: absolute; width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        .token { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.4s ease; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
 
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #000; padding: 32px; border-radius: 28px; z-index: 9000; width: 380px; display: none; text-align: center; box-shadow: 0 24px 48px rgba(0,0,0,0.5); }
-        #log-box { height: 60px; background: #000; border-radius: 8px; padding: 10px; font-size: 0.7rem; color: #aaa; overflow-y: auto; font-family: monospace; width: 100%; margin-top: auto; }
-        #fs-btn { position: absolute; top: 15px; right: 15px; padding: 8px; cursor: pointer; background: none; border: 1px solid #555; border-radius: 8px; color: #888; font-size: 0.6rem; }
+        /* Modals Reais (Não-JS Alert) */
+        .ui-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #000; padding: 25px; border-radius: 24px; z-index: 9999; width: 340px; display: none; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+        
+        @keyframes build-glow { 0% { box-shadow: inset 0 0 0px var(--md-primary); } 50% { box-shadow: inset 0 0 20px var(--md-primary); } 100% { box-shadow: inset 0 0 0px var(--md-primary); } }
+        .building-up { animation: build-glow 0.8s ease-out; }
     </style>
 </head>
 <body>
 
-<div id="setup" style="position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px;">
-    <h1 style="color:var(--md-sys-color-primary); font-size: 2.5rem; margin-bottom: 30px;">Swiftie Poly Master</h1>
-    <div style="background:var(--md-sys-color-surface); padding:32px; border-radius:28px; width:100%; max-width:500px; display:flex; flex-direction:column; gap:15px; border:1px solid #333;">
-        <div id="player-configs"></div>
-        <button class="m3-btn" onclick="addPlayerField()">+ Novo Jogador Real</button>
-        <button class="m3-btn" style="background:#fff" onclick="initGame()">Começar Show 🎤</button>
+<div id="setup" style="position:fixed; inset:0; background:var(--bg); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <h1 style="color:var(--md-primary); font-size: 2.5rem; margin-bottom: 20px;">Swiftie Poly Master</h1>
+    <div id="setup-box" style="background:var(--md-surface); padding:25px; border-radius:24px; width:90%; max-width:450px; border:1px solid #333;">
+        <div id="player-inputs"></div>
+        <div style="display:flex; gap:10px; margin-top:15px">
+            <button class="m3-btn" style="flex:1" onclick="addP()">+ Jogador</button>
+            <button class="m3-btn" style="flex:2; background:#fff" onclick="startGame()">Começar Show</button>
+        </div>
     </div>
 </div>
 
 <div id="game-wrapper">
-    <div class="center-dashboard">
-        <button id="fs-btn" onclick="toggleFS()">TELA CHEIA</button>
-        <div id="status-row" style="display:flex; justify-content:space-between; margin-bottom:20px"></div>
-        
-        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-            <div class="dice-box">
-                <div id="d1" class="die">1</div>
-                <div id="d2" class="die">1</div>
-            </div>
-            <button id="roll-btn" class="m3-btn" onclick="toss()">Girar Dados</button>
-            <button class="m3-btn m3-btn-secondary" style="margin-top:15px" onclick="openM()">Gerenciar Era</button>
+    <div class="center-dash">
+        <button id="fs-btn" style="position:absolute; top:10px; right:10px; color:#666; background:none; border:1px solid #444; padding:5px; border-radius:5px" onclick="toggleFS()">TELA CHEIA</button>
+        <div id="status-row"></div>
+        <div class="dice-box">
+            <div id="d1" class="die">1</div>
+            <div id="d2" class="die">1</div>
         </div>
-
-        <div id="log-box"></div>
+        <button id="roll-btn" class="m3-btn" style="width:200px; margin: 15px auto;" onclick="toss()">Girar Dados</button>
+        <button class="m3-btn" style="background:#333; color:var(--md-primary); width:200px; margin: 0 auto;" onclick="openManage()">Gerenciar</button>
+        <div id="log-box" style="margin-top:10px; font-size:0.6rem; color:#888; height:40px; overflow:hidden; text-align:center"></div>
     </div>
 </div>
 
-<div id="pop-buy" class="modal">
-    <h2 id="pop-n"></h2>
-    <p id="pop-p" style="font-size:1.1rem; margin-bottom:24px"></p>
-    <div style="display:flex; flex-direction:column; gap:10px">
-        <button class="m3-btn" onclick="doBuy()">Comprar</button>
-        <button class="m3-btn m3-btn-secondary" onclick="cls()">Passar</button>
+<div id="modal-turn" class="ui-modal" style="background:var(--md-primary); color:black;">
+    <h1 id="turn-msg"></h1>
+    <button class="m3-btn" style="background:black; color:white; margin-top:15px" onclick="closeModal('modal-turn')">OK</button>
+</div>
+
+<div id="modal-buy" class="ui-modal">
+    <h2 id="buy-n"></h2><p id="buy-p"></p>
+    <div style="margin-top:20px; display:flex; gap:10px">
+        <button class="m3-btn" style="flex:1" onclick="doBuy()">Comprar</button>
+        <button class="m3-btn" style="flex:1; background:#ccc" onclick="nextTurn()">Passar</button>
     </div>
 </div>
 
-<div id="pop-pay" class="modal">
-    <h2 style="margin-bottom:8px">Pagamento</h2>
-    <p id="pay-msg" style="margin-bottom:24px"></p>
-    <button class="m3-btn" id="pay-confirm-btn">Confirmar Pagamento</button>
+<div id="modal-pay" class="ui-modal">
+    <h2>Pagamento</h2>
+    <p id="pay-msg" style="margin:15px 0"></p>
+    <button class="m3-btn" id="pay-btn" style="width:100%">Pagar Agora</button>
 </div>
 
-<div id="pop-manage" class="modal" style="width:450px;">
-    <h2>Minha Discografia</h2>
-    <div id="manage-list" style="max-height:300px; overflow-y:auto; margin:20px 0; text-align:left;"></div>
-    <button class="m3-btn" style="width:100%" onclick="cls()">Fechar</button>
+<div id="modal-manage" class="ui-modal" style="width:400px; max-height:80vh; overflow-y:auto;">
+    <h2>Suas Propriedades</h2>
+    <div id="manage-list" style="text-align:left; margin:15px 0"></div>
+    <button class="m3-btn" style="width:100%" onclick="closeModal('modal-manage')">Fechar</button>
+</div>
+
+<div id="modal-fail" class="ui-modal" style="background:#f44336; color:white;">
+    <h1>FALÊNCIA!</h1>
+    <p id="fail-msg" style="margin:15px 0"></p>
+    <button class="m3-btn" style="background:white" onclick="location.reload()">Reiniciar Jogo</button>
 </div>
 
 <script>
-    // Áudios
-    const sndDice = new Audio('https://www.soundjay.com/misc/sounds/dice-roll-1.mp3');
     const sndCash = new Audio('https://www.soundjay.com/misc/sounds/cash-register-05.mp3');
-    const sndJail = new Audio('https://www.soundjay.com/misc/sounds/door-bolt-1.mp3');
+    const tokens = ['🧣', '🐍', '🫶', '💎', '🎸', '🐈'];
+    let players = [], turn = 0, doubles = 0, housesBuilt = 0;
 
-    let players = [], turn = 0, doubles = 0;
-    const tokens = ['🧣', '🐍', '🫶', '💎', '🎸'];
-    
-    // Configuração das Músicas e Eras corrigida
     const music = [
-        {n: "GO", t: "s"}, 
-        {n: "Tim McGraw", p: 60, r: [2,10,30,90,160,250], c: "#b9d8b5", h: 50}, 
-        {n: "Our Song", p: 60, r: [4,20,60,180,320,450], c: "#b9d8b5", h: 50}, 
-        {n: "TAXA", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, 
-        {n: "Love Story", p: 100, r: [6,30,90,270,400,550], c: "#fff176", h: 50}, 
-        {n: "Fearless", p: 100, r: [6,30,90,270,400,550], c: "#fff176", h: 50}, 
-        {n: "You Belong", p: 120, r: [8,40,100,300,450,600], c: "#fff176", h: 50}, 
-        {n: "Enchanted", p: 140, r: [10,50,150,450,625,750], c: "#d1b2d1", h: 100}, 
-        {n: "Mean", p: 160, r: [12,60,180,500,700,900], c: "#d1b2d1", h: 100},
-        {n: "HIATO", t: "s"}, 
-        {n: "All Too Well", p: 180, r: [14,70,200,550,750,950], c: "#8b0000", h: 100}, 
-        {n: "SPOTIFY", p: 150, t: "util"}, 
-        {n: "Red", p: 180, r: [14,70,200,550,750,950], c: "#8b0000", h: 100}, 
-        {n: "22", p: 200, r: [16,80,220,600,800,1000], c: "#8b0000", h: 100}, 
-        {n: "Eras Tour", p: 200, t: "rail"}, 
-        {n: "Style", p: 220, r: [18,90,250,700,875,1050], c: "#b1d4e0", h: 150}, 
-        {n: "Blank Space", p: 220, r: [18,90,250,700,875,1050], c: "#b1d4e0", h: 150}, 
-        {n: "Shake It Off", p: 240, r: [20,100,300,750,925,1100], c: "#b1d4e0", h: 150}, 
-        {n: "Anti-Hero", p: 260, r: [22,110,330,800,975,1150], c: "#191970", h: 150},
-        {n: "BACKST.", t: "s"}, 
-        {n: "Bejeweled", p: 280, r: [24,120,360,850,1025,1200], c: "#191970", h: 150}, 
-        {n: "Karma", p: 300, r: [26,130,390,900,1100,1275], c: "#191970", h: 200}, 
-        {n: "Cruel Summer", p: 300, r: [26,130,390,900,1100,1275], c: "#ffb6c1", h: 200}, 
-        {n: "Lover", p: 320, r: [28,150,450,1000,1200,1400], c: "#ffb6c1", h: 200}, 
-        {n: "Eras Tour", p: 200, t: "rail"}, 
-        {n: "cardigan", p: 350, r: [35,175,500,1100,1300,1500], c: "#cfcfcf", h: 200}, 
-        {n: "willow", p: 350, r: [35,175,500,1100,1300,1500], c: "#cfcfcf", h: 200}, 
-        {n: "APPLE", p: 150, t: "util"}, 
-        {n: "Fortnight", p: 400, r: [50,200,600,1400,1700,2000], c: "#e5e4e2", h: 200},
-        {n: "GO JAIL", t: "s"}, 
-        {n: "Smallest Man", p: 350, r: [35,175,500,1100,1300,1500], c: "#e5e4e2", h: 200}, 
-        {n: "Eras Tour", p: 200, t: "rail"}, 
-        {n: "Showgirl", p: 380, r: [40,185,550,1200,1400,1700], c: "#ff9800", h: 200}, 
-        {n: "Ophelia", p: 380, r: [40,185,550,1200,1400,1700], c: "#ff9800", h: 200}, 
-        {n: "Cancelled!", p: 400, r: [50,200,600,1400,1700,2000], c: "#ff9800", h: 200}, 
-        {n: "TAXA LUXO", t: "tax", v: 100}, 
-        {n: "The End", p: 450, r: [60,250,700,1500,1800,2200], c: "#ff9800", h: 250}
+        {n: "GO", t: "s"}, {n: "Tim McGraw", p: 60, r: [2,10,30,90,160,250], c: "#b9d8b5", h: 50}, {n: "Our Song", p: 60, r: [4,20,60,180,320,450], c: "#b9d8b5", h: 50}, {n: "TAXA", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Love Story", p: 100, r: [6,30,90,270,400,550], c: "#fff176", h: 50}, {n: "Fearless", p: 100, r: [6,30,90,270,400,550], c: "#fff176", h: 50}, {n: "You Belong", p: 120, r: [8,40,100,300,450,600], c: "#fff176", h: 50}, {n: "Enchanted", p: 140, r: [10,50,150,450,625,750], c: "#d1b2d1", h: 100}, {n: "Mean", p: 160, r: [12,60,180,500,700,900], c: "#d1b2d1", h: 100},
+        {n: "HIATO", t: "s"}, {n: "All Too Well", p: 180, r: [14,70,200,550,750,950], c: "#8b0000", h: 100}, {n: "Buyback Masters", p: 150, t: "util"}, {n: "Red", p: 180, r: [14,70,200,550,750,950], c: "#8b0000", h: 100}, {n: "22", p: 200, r: [16,80,220,600,800,1000], c: "#8b0000", h: 100}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Style", p: 220, r: [18,90,250,700,875,1050], c: "#b1d4e0", h: 150}, {n: "Blank Space", p: 220, r: [18,90,250,700,875,1050], c: "#b1d4e0", h: 150}, {n: "Shake It Off", p: 240, r: [20,100,300,750,925,1100], c: "#b1d4e0", h: 150}, {n: "Anti-Hero", p: 260, r: [22,110,330,800,975,1150], c: "#191970", h: 150},
+        {n: "BACKST.", t: "s"}, {n: "Bejeweled", p: 280, r: [24,120,360,850,1025,1200], c: "#191970", h: 150}, {n: "Karma", p: 300, r: [26,130,390,900,1100,1275], c: "#191970", h: 200}, {n: "Cruel Summer", p: 300, r: [26,130,390,900,1100,1275], c: "#ffb6c1", h: 200}, {n: "Lover", p: 320, r: [28,150,450,1000,1200,1400], c: "#ffb6c1", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "cardigan", p: 350, r: [35,175,500,1100,1300,1500], c: "#cfcfcf", h: 200}, {n: "willow", p: 350, r: [35,175,500,1100,1300,1500], c: "#cfcfcf", h: 200}, {n: "Taylor's Version", p: 150, t: "util"}, {n: "Fortnight", p: 400, r: [50,200,600,1400,1700,2000], c: "#e5e4e2", h: 200},
+        {n: "GO JAIL", t: "s"}, {n: "Smallest Man", p: 350, r: [35,175,500,1100,1300,1500], c: "#e5e4e2", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Showgirl", p: 380, r: [40,185,550,1200,1400,1700], c: "#ff9800", h: 200}, {n: "Ophelia", p: 380, r: [40,185,550,1200,1400,1700], c: "#ff9800", h: 200}, {n: "Cancelled!", p: 400, r: [50,200,600,1400,1700,2000], c: "#ff9800", h: 200}, {n: "TAXA LUXO", t: "tax", v: 100}, {n: "The Finale", p: 450, r: [60,250,700,1500,1800,2200], c: "#ff9800", h: 250}
     ];
 
     const grid = ["11/11","11/10","11/9","11/8","11/7","11/6","11/5","11/4","11/3","11/2","11/1","10/1","9/1","8/1","7/1","6/1","5/1","4/1","3/1","2/1","1/1","1/2","1/3","1/4","1/5","1/6","1/7","1/8","1/9","1/10","1/11","2/11","3/11","4/11","5/11","6/11","7/11","8/11","9/11","10/11"];
 
-    function addPlayerField() {
-        const div = document.getElementById('player-configs');
+    function addP() {
+        const div = document.getElementById('player-inputs');
         if(div.children.length >= 4) return;
         const id = div.children.length;
-        div.innerHTML += `<div style="display:flex; gap:10px; margin-bottom:10px"><input type="text" placeholder="Nome do Rod ${id+1}" class="m3-btn m3-btn-secondary" style="flex:1; text-align:left; color:#fff" id="p-name-${id}"> <select id="p-emoji-${id}" class="m3-btn m3-btn-secondary">${tokens.map(t=>`<option>${t}</option>`).join('')}</select></div>`;
+        div.innerHTML += `<div id="p-row-${id}" style="display:flex; gap:10px; margin-bottom:10px">
+            <input type="text" id="p-n-${id}" value="Rod ${id+1}" style="flex:1; padding:10px; border-radius:10px; border:none;">
+            <select id="p-e-${id}" style="padding:10px; border-radius:10px;">${tokens.map(t=>`<option>${t}</option>`).join('')}</select>
+            <button onclick="document.getElementById('p-row-${id}').remove()" style="background:none; border:none; color:white;">✕</button>
+        </div>`;
     }
 
-    function initGame() {
-        const fields = document.getElementById('player-configs').children;
-        for(let i=0; i<fields.length; i++) {
-            players.push({ id:i, name: document.getElementById(`p-name-${i}`).value || `Rod ${i+1}`, money:1500, pos:0, props:[], token:document.getElementById(`p-emoji-${i}`).value, jail:0 });
+    function startGame() {
+        const rows = document.getElementById('player-inputs').children;
+        for(let i=0; i<rows.length; i++) {
+            const num = rows[i].id.split('-').pop();
+            players.push({ id:i, name: document.getElementById(`p-n-${num}`).value, money:1500, pos:0, props:[], token:document.getElementById(`p-e-${num}`).value, jail:0 });
         }
         if(players.length === 1) players.push({ id:1, name: "Bot Swift", money:1500, pos:0, props:[], token:'🐍', jail:0 });
-        
-        // Ativar áudio após interação
-        sndCash.play().then(() => sndCash.pause()); 
         document.getElementById('setup').remove();
-        renderBoard();
+        render(); startTurn();
     }
 
-    function renderBoard() {
+    function render() {
         const b = document.getElementById('game-wrapper');
         music.forEach((d, i) => {
             const t = document.createElement('div'); t.className = 'tile'; t.id = `tile-${i}`; t.style.gridArea = grid[i];
             if(d.c) t.innerHTML = `<div class="tile-color" style="background:${d.c}"></div><div id="build-${i}" style="position:absolute; top:12px"></div>`;
-            t.innerHTML += `<div>${d.n}</div><div class="price">${d.p ? '$'+d.p : ''}</div><div id="owner-${i}" style="width:100%; height:4px; margin-top:2px;"></div>`;
+            t.innerHTML += `<div>${d.n}</div><div class="price">${d.p ? '$'+d.p : ''}</div><div id="owner-${i}" class="owner-bar"></div>`;
             b.appendChild(t);
         });
         players.forEach(p => {
-            const tk = document.createElement('div'); tk.id = `tk-${p.id}`; tk.className = 'token'; tk.innerText = p.token; b.appendChild(tk);
+            const tk = document.createElement('div'); tk.id = `tk-${p.id}`; tk.className = 'token'; tk.innerText = p.token; 
+            tk.style.background = p.id === 0 ? '#ff4081' : (p.id === 1 ? '#4caf50' : '#2196f3');
+            b.appendChild(tk);
         });
         updateHUD(); sync();
+    }
+
+    function startTurn() {
+        const p = players[turn];
+        document.getElementById('turn-msg').innerText = `Rodada de ${p.name}`;
+        showModal('modal-turn');
     }
 
     function toss() {
         const p = players[turn];
         const d1e = document.getElementById('d1'), d2e = document.getElementById('d2');
         d1e.classList.add('rolling'); d2e.classList.add('rolling');
-        sndDice.play();
-        
         setTimeout(() => {
             const d1 = Math.floor(Math.random()*6)+1, d2 = Math.floor(Math.random()*6)+1;
             d1e.classList.remove('rolling'); d2e.classList.remove('rolling');
             d1e.innerText = d1; d2e.innerText = d2;
-            
             if(p.jail > 0) {
-                if(d1 === d2) { p.jail = 0; log("Dobradinha! Saiu do Hiato."); move(p, d1+d2); }
-                else { log(`Ainda no Hiato... (${p.jail} turnos)`); p.jail--; next(); }
+                if(d1 === d2) { p.jail = 0; log("Saiu do Hiato!"); move(p, d1+d2); }
+                else { p.jail--; log(`Ainda no Hiato (${p.jail})`); nextTurn(); }
             } else {
-                if(d1 === d2) { doubles++; log("Dobradinha!"); if(doubles===3){ p.pos=10; p.jail=3; log("Vá para o Hiato!"); sndJail.play(); next(); return; } } else doubles = 0;
+                if(d1 === d2) doubles++; else doubles = 0;
                 move(p, d1+d2);
             }
         }, 500);
@@ -196,34 +178,32 @@
     function move(p, dist) {
         let old = p.pos; p.pos = (p.pos + dist) % 40;
         if(p.pos < old) { p.money += 200; log("Passou pelo GO! +$200"); sndCash.play(); }
-        sync(); setTimeout(() => handleTile(p, dist), 500);
+        sync(); setTimeout(() => handle(p, dist), 500);
     }
 
-    function handleTile(p, dist) {
+    function handle(p, dist) {
         const t = music[p.pos];
-        if(p.pos === 30) { p.pos=10; p.jail=3; log("Vá para o Hiato!"); sndJail.play(); sync(); next(); return; }
-        if(t.t === "tax") return askPayment(p, t.v, "Taxa Governamental", () => next());
+        if(p.pos === 30) { p.pos=10; p.jail=3; sync(); nextTurn(); return; }
+        if(t.t === "tax") return askPay(p, t.v, "Taxa", nextTurn);
         
         const owner = players.find(x => x.props.some(y => y.idx === p.pos));
         if(t.p && !owner) {
-            if(p.name === "Bot Swift") { if(p.money >= t.p + 200) buy(p, p.pos); next(); }
-            else { document.getElementById('pop-buy').style.display='block'; document.getElementById('pop-n').innerText=t.n; document.getElementById('pop-p').innerText=`$${t.p}`; }
+            if(p.name === "Bot Swift") { if(p.money > t.p + 200) buy(p, p.pos); nextTurn(); }
+            else { document.getElementById('buy-n').innerText = t.n; document.getElementById('buy-p').innerText = `$${t.p}`; showModal('modal-buy'); }
         } else if(owner && owner.id !== p.id) {
             const rent = calcRent(t, owner, dist);
-            askPayment(p, rent, `Aluguel para ${owner.name}`, () => { owner.money += rent; next(); });
-        } else { if(doubles === 0) next(); }
+            askPay(p, rent, `Aluguel para ${owner.name}`, nextTurn);
+        } else nextTurn();
         updateHUD();
     }
 
-    function askPayment(p, val, reason, callback) {
-        if(p.name === "Bot Swift") { p.money -= val; if(p.money < 0) faliu(p); callback(); return; }
-        const pop = document.getElementById('pop-pay'); pop.style.display = 'block';
-        document.getElementById('pay-msg').innerText = `${p.name}, você deve pagar $${val} (${reason})`;
-        document.getElementById('pay-confirm-btn').onclick = () => {
-            p.money -= val; pop.style.display = 'none';
-            sndCash.play();
-            if(p.money < 0) faliu(p);
-            else callback();
+    function askPay(p, val, reason, cb) {
+        if(p.name === "Bot Swift") { p.money -= val; if(p.money < 0) fail(p); else cb(); return; }
+        showModal('modal-pay');
+        document.getElementById('pay-msg').innerText = `${p.name}, pague $${val} (${reason})`;
+        document.getElementById('pay-btn').onclick = () => {
+            p.money -= val; closeModal('modal-pay');
+            if(p.money < 0) fail(p); else { sndCash.play(); cb(); }
             updateHUD();
         };
     }
@@ -235,37 +215,65 @@
         return t.r[pr.houses];
     }
 
-    function buy(p, i) { p.money -= music[i].p; p.props.push({idx: i, houses: 0}); document.getElementById(`owner-${i}`).style.background = p.color; sndCash.play(); updateHUD(); }
-    function doBuy() { buy(players[turn], players[turn].pos); cls(); if(doubles === 0) next(); }
-    function faliu(p) { alert(`GAME OVER: ${p.name} faliu!`); location.reload(); }
-    function next() { if(doubles === 0) turn = (turn+1)%players.length; updateHUD(); if(players[turn].name === "Bot Swift") setTimeout(toss, 1000); }
-    function updateHUD() {
-        const r = document.getElementById('status-row'); r.innerHTML = "";
-        players.forEach((p, i) => r.innerHTML += `<div class="p-status ${turn===i?'active':''}"><b>${p.token} ${p.name}</b><br>$${p.money}</div>`);
-    }
-    function sync() { players.forEach((p, i) => { const t = document.getElementById(`tile-${p.pos}`); const tk = document.getElementById(`tk-${p.id}`); tk.style.left = (t.offsetLeft+4+i*4)+'px'; tk.style.top = (t.offsetTop+18+i*4)+'px'; }); }
-    function openM() {
-        const l = document.getElementById('manage-list'); l.innerHTML = "";
+    function buy(p, i) { p.money -= music[i].p; p.props.push({idx: i, houses: 0}); document.getElementById(`owner-${i}`).style.background = (p.id === 0 ? '#ff4081' : '#4caf50'); sndCash.play(); updateHUD(); }
+    function doBuy() { buy(players[turn], players[turn].pos); closeModal('modal-buy'); nextTurn(); }
+    function nextTurn() { if(doubles === 0) turn = (turn+1)%players.length; updateHUD(); if(players[turn].name === "Bot Swift") setTimeout(toss, 1000); else startTurn(); }
+    function fail(p) { document.getElementById('fail-msg').innerText = `${p.name} faliu! Império musical encerrado.`; showModal('modal-fail'); }
+    
+    function openManage() {
+        const list = document.getElementById('manage-list'); list.innerHTML = "";
         players[turn].props.forEach(pr => {
-            l.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee"><b>${music[pr.idx].n}</b><br><button class="m3-btn" style="padding:5px; font-size:10px" onclick="build(${pr.idx})">🏠 Bracelets (${pr.houses})</button> <button class="m3-btn m3-btn-secondary" style="padding:5px; font-size:10px" onclick="sell(${pr.idx})">Vender</button></div>`;
+            const tile = music[pr.idx];
+            if(!tile.r) return;
+            const can = players[turn].money >= tile.h && pr.houses < 5;
+            list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee">
+                <b>${tile.n}</b> (${pr.houses})<br>
+                <button class="m3-btn" ${can ? '' : 'disabled'} style="padding:5px; font-size:10px" onclick="bld(${pr.idx})">🏠 Bracelet ($${tile.h})</button>
+                <button class="m3-btn" style="padding:5px; font-size:10px; background:#f44336; color:white" onclick="sl(${pr.idx})">Vender ($${tile.p/2})</button>
+            </div>`;
         });
-        document.getElementById('pop-manage').style.display='block';
+        showModal('modal-manage');
     }
-    function build(idx) {
+
+    function bld(idx) {
         const p = players[turn], pr = p.props.find(x => x.idx === idx);
-        if(p.money >= music[idx].h && pr.houses < 5) { p.money -= music[idx].h; pr.houses++; sndCash.play(); document.getElementById(`build-${idx}`).innerText = pr.houses < 5 ? "🏠".repeat(pr.houses) : "🏨"; updateHUD(); openM(); }
+        p.money -= music[idx].h; pr.houses++;
+        document.getElementById(`build-${idx}`).innerText = pr.houses < 5 ? "🏠".repeat(pr.houses) : "🏨";
+        document.getElementById(`tile-${idx}`).classList.add('building-up');
+        setTimeout(() => document.getElementById(`tile-${idx}`).classList.remove('building-up'), 800);
+        sndCash.play(); updateHUD(); openManage();
     }
-    function sell(idx) {
-        if(!confirm("Vender essa Era?")) return;
+
+    function sl(idx) {
+        if(!confirm("Vender propriedade?")) return;
         const p = players[turn]; p.money += music[idx].p / 2;
         p.props = p.props.filter(x => x.idx !== idx);
         document.getElementById(`owner-${idx}`).style.background = 'none';
-        document.getElementById(`build-${idx}`).innerText = ''; updateHUD(); openM();
+        document.getElementById(`build-${idx}`).innerText = ''; updateHUD(); openManage();
     }
-    function log(m) { const b = document.getElementById('log-box'); b.innerHTML = `> ${m}<br>${b.innerHTML}`; }
-    function cls() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
-    function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
-    addPlayerField();
+
+    function updateHUD() {
+        const row = document.getElementById('status-row'); row.innerHTML = "";
+        players.forEach((p, i) => {
+            const card = document.createElement('div'); card.className = `p-card ${turn === i ? 'active' : ''}`;
+            card.style.background = turn === i ? (i === 0 ? '#ff4081' : '#4caf50') : '#2d2d30';
+            card.innerHTML = `<b>${p.token} ${p.name}</b><br>$${p.money}`;
+            row.appendChild(card);
+        });
+    }
+
+    function sync() { 
+        players.forEach((p, i) => { 
+            const t = document.getElementById(`tile-${p.pos}`); const tk = document.getElementById(`tk-${p.id}`); 
+            tk.style.left = (t.offsetLeft + 4 + i*4) + 'px'; tk.style.top = (t.offsetTop + 18 + i*4) + 'px';
+        }); 
+    }
+
+    function log(m) { document.getElementById('log-box').innerHTML = `> ${m}<br>` + document.getElementById('log-box').innerHTML; }
+    function showModal(id) { document.getElementById(id).style.display = 'block'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().then(sync); else document.exitFullscreen().then(sync); }
+    addP();
 </script>
 </body>
 </html>
