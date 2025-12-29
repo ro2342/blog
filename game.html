@@ -3,58 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Swiftie Poly Master - Fixed</title>
+    <title>Swiftie Poly Master - Final</title>
     <style>
-        :root { --bg: #050505; --accent: #d4af37; --tile-txt: #000; --safe: 15px; }
+        :root { --bg: #0a0a0a; --accent: #d4af37; --tile-txt: #000; --safe: 20px; }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; padding: var(--safe); overflow: hidden; }
 
-        #game-wrapper { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #1a1a1a; border: 4px solid var(--accent); position: relative; }
-        
-        .tile { background: white; color: var(--tile-txt); border: 0.5px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: bold; text-align: center; padding: 4px; position: relative; line-height: 1.1; overflow: hidden; }
-        .tile-color { position: absolute; width: 100%; height: 12px; top: 0; border-bottom: 1px solid rgba(0,0,0,0.2); }
-        .price { margin-top: 2px; color: #555; font-size: 0.5rem; }
+        #game-wrapper { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 4px solid var(--accent); position: relative; }
+        .tile { background: white; color: var(--tile-txt); border: 0.5px solid #444; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: bold; text-align: center; padding: 4px; position: relative; line-height: 1.1; }
+        .tile-color { position: absolute; width: 100%; height: 10px; top: 0; }
+        .price { margin-top: 2px; color: #444; font-size: 0.5rem; }
 
-        .center-dashboard { grid-area: 2 / 2 / 11 / 11; background: #000; display: flex; flex-direction: column; padding: 15px; position: relative; border: 1px solid #333; }
-        #fs-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--accent); color: var(--accent); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; z-index: 10; }
+        .center-dashboard { grid-area: 2 / 2 / 11 / 11; background: #111; display: flex; flex-direction: column; padding: 20px; position: relative; border: 1px solid #333; }
+        #fs-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
 
-        .hud-top { display: flex; justify-content: space-around; margin-bottom: 10px; }
-        .p-status { background: #151515; padding: 8px 15px; border-radius: 8px; border-bottom: 3px solid transparent; text-align: center; min-width: 100px; font-size: 0.9rem; }
-        .p-status.active { border-color: var(--accent); background: #222; }
+        .hud-top { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .p-status { background: #222; padding: 10px 20px; border-radius: 8px; border-bottom: 3px solid transparent; text-align: center; min-width: 120px; }
+        .p-status.active { border-color: var(--accent); background: #333; }
 
         .game-controls { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
         .dice-box { display: flex; gap: 15px; perspective: 400px; }
-        .die { width: 55px; height: 55px; background: white; color: black; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+        .die { width: 60px; height: 60px; background: white; color: black; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .rolling { animation: spin 0.3s infinite; }
         @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
-        .btn { background: var(--accent); color: black; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-transform: uppercase; width: 100%; }
-        #log-box { height: 70px; background: #000; border: 1px solid #222; border-radius: 5px; padding: 8px; font-size: 0.7rem; color: #888; overflow-y: auto; font-family: monospace; }
+        .btn { background: var(--accent); color: black; border: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; text-transform: uppercase; }
+        .btn:disabled { background: #444; cursor: not-allowed; opacity: 0.6; }
 
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 25px; border-radius: 15px; z-index: 9000; width: 340px; display: none; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
-        .token { position: absolute; width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        
-        /* Pulse feedback ao comprar */
-        @keyframes pulse-success { 0% { background-color: white; } 50% { background-color: #d4af37; } 100% { background-color: white; } }
+        #log-box { height: 80px; background: #000; border: 1px solid #222; border-radius: 5px; padding: 10px; font-size: 0.7rem; color: #888; overflow-y: auto; font-family: monospace; }
+
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 25px; border-radius: 15px; z-index: 9000; width: 350px; display: none; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
+        .token { position: absolute; width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); display: flex; align-items: center; justify-content: center; font-size: 14px; }
         .bought-anim { animation: pulse-success 0.6s ease; }
+        @keyframes pulse-success { 0% { transform: scale(1); } 50% { transform: scale(1.1); background-color: #d4af37; } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
 <div id="setup" style="position:fixed; inset:0; background:rgba(0,0,0,0.98); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
     <h1 style="color:var(--accent); font-size: 3rem; margin-bottom: 20px;">Swiftie Poly</h1>
-    <div style="background:#111; padding:30px; border-radius:15px; border:1px solid #333; width:90%; max-width:400px;">
-        <label>Nome:</label>
+    <div style="background:#1a1a1a; padding:30px; border-radius:15px; border:1px solid #333; width:90%; max-width:450px;">
+        <label>Seu Nome:</label>
         <input type="text" id="u-name" value="Rod" style="width:100%; padding:12px; margin:10px 0; border-radius:5px; border:none; font-size:1.1rem;">
-        <label>Emoji:</label>
+        <label>Escolha seu Emoji:</label>
         <div id="emojis" style="display:flex; justify-content:space-around; margin:20px 0; font-size:1.8rem;">
             <span onclick="selE('🧣', this)" style="cursor:pointer; border:2px solid gold; padding:5px; border-radius:8px">🧣</span>
             <span onclick="selE('🐍', this)" style="cursor:pointer; padding:5px;">🐍</span>
             <span onclick="selE('🫶', this)" style="cursor:pointer; padding:5px;">🫶</span>
             <span onclick="selE('💎', this)" style="cursor:pointer; padding:5px;">💎</span>
         </div>
-        <button class="btn" onclick="go(1)">1 Jogador + IA</button>
-        <button class="btn" onclick="go(2)" style="background:#888; margin-top:10px;">2 Jogadores</button>
+        <button class="btn" onclick="go(1)" style="width:100%; margin-bottom:10px;">1 Jogador + IA</button>
+        <button class="btn" onclick="go(2)" style="width:100%; margin-bottom:10px; background:#888;">2 Jogadores Reais</button>
+        <button class="btn" onclick="go(3)" style="width:100%; background:#666;">3 Jogadores Reais</button>
     </div>
 </div>
 
@@ -68,7 +68,7 @@
                 <div id="d2" class="die">1</div>
             </div>
             <button id="roll-btn" class="btn" onclick="toss()">Girar Dados</button>
-            <button onclick="openM()" style="background:none; border:none; color:var(--accent); text-decoration:underline; cursor:pointer; font-size:0.8rem;">Gerenciar Bracelets</button>
+            <button onclick="openM()" style="background:none; border:none; color:var(--accent); text-decoration:underline; cursor:pointer; margin-top:10px;">Gerenciar Bracelets</button>
         </div>
         <div id="log-box"></div>
     </div>
@@ -76,59 +76,23 @@
 
 <div id="pop-buy" class="modal">
     <h2 id="pop-n"></h2><p id="pop-p" style="font-weight:bold; margin:10px 0;"></p>
-    <button class="btn" onclick="doBuy()">Comprar</button>
-    <button class="btn" onclick="clsPass()" style="background:#ccc; margin-top:10px;">Passar</button>
+    <button id="btn-confirm-buy" class="btn" onclick="doBuy()" style="width:100%;">Comprar</button>
+    <button class="btn" onclick="clsPass()" style="width:100%; background:#ccc; margin-top:10px;">Passar</button>
 </div>
 
-<div id="pop-manage" class="modal" style="width:400px;">
-    <h2>Minhas Eras</h2>
-    <div id="manage-list" style="max-height:250px; overflow-y:auto; margin:15px 0; text-align:left;"></div>
-    <button class="btn" onclick="cls()">Fechar</button>
+<div id="pop-manage" class="modal" style="width:450px;">
+    <h2>Suas Propriedades</h2>
+    <div id="manage-list" style="max-height:300px; overflow-y:auto; margin:15px 0; text-align:left;"></div>
+    <button class="btn" onclick="cls()" style="width:100%;">Fechar</button>
 </div>
 
 <script>
     let myEmoji = '🧣', selEl = null;
     const music = [
-        {n: "GO", t: "s"}, 
-        {n: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50}, 
-        {n: "Our Song", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50}, 
-        {n: "TAXA", t: "tax", v: 200}, 
-        {n: "Eras Tour", p: 200, t: "rail"}, 
-        {n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, 
-        {n: "Fearless", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, 
-        {n: "You Belong", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a", h: 50}, 
-        {n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, 
-        {n: "Mean", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100},
-        {n: "HIATO", t: "s"}, 
-        {n: "All Too Well", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, 
-        {n: "SPOTIFY", p: 150, t: "util"}, 
-        {n: "Red", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, 
-        {n: "22", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#8b0000", h: 100}, 
-        {n: "Eras Tour", p: 200, t: "rail"}, 
-        {n: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, 
-        {n: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, 
-        {n: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0", h: 150}, 
-        {n: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150},
-        {n: "BACKST.", t: "s"}, 
-        {n: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d", h: 150}, 
-        {n: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, 
-        {n: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, 
-        {n: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1", h: 200}, 
-        {n: "Eras Tour", p: 200, t: "rail"}, 
-        {n: "cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, 
-        {n: "willow", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, 
-        {n: "APPLE MUSIC", p: 150, t: "util"}, 
-        {n: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200},
-        {n: "GO JAIL", t: "s"}, 
-        {n: "Fortnight", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#e5e4e2", h: 200}, 
-        {n: "Smallest Man", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#e5e4e2", h: 200}, 
-        {n: "Eras Tour", p: 200, t: "rail"}, 
-        {n: "Showgirl", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#191970", h: 200}, 
-        {n: "Ophelia", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#191970", h: 200}, 
-        {n: "Cancelled!", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}, 
-        {n: "Bejeweled", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}, 
-        {n: "TAXA LUXO", t: "tax", v: 100}, 
-        {n: "Karma", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}
+        {n: "GO", t: "s"}, {n: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50}, {n: "Our Song", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50}, {n: "TAXA", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "Fearless", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "You Belong", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a", h: 50}, {n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "Mean", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100},
+        {n: "HIATO", t: "s"}, {n: "All Too Well", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "SPOTIFY", p: 150, t: "util"}, {n: "Red", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "22", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#8b0000", h: 100}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0", h: 150}, {n: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150},
+        {n: "BACKST.", t: "s"}, {n: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d", h: 150}, {n: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "willow", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "APPLE MUSIC", p: 150, t: "util"}, {n: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200},
+        {n: "GO JAIL", t: "s"}, {n: "Fortnight", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#e5e4e2", h: 200}, {n: "Smallest Man", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#e5e4e2", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Showgirl", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#191970", h: 200}, {n: "Ophelia", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#191970", h: 200}, {n: "Cancelled!", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}, {n: "Bejeweled", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}, {n: "TAXA LUXO", t: "tax", v: 100}, {n: "Karma", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}
     ];
 
     const grid = ["11/11","11/10","11/9","11/8","11/7","11/6","11/5","11/4","11/3","11/2","11/1","10/1","9/1","8/1","7/1","6/1","5/1","4/1","3/1","2/1","1/1","1/2","1/3","1/4","1/5","1/6","1/7","1/8","1/9","1/10","1/11","2/11","3/11","4/11","5/11","6/11","7/11","8/11","9/11","10/11"];
@@ -140,9 +104,11 @@
         const name = document.getElementById('u-name').value || "Rod";
         isIA = (n === 1);
         players.push({ id:0, name: name, money:1500, pos:0, props:[], token:myEmoji, color:'#ff4081', jail:0 });
-        players.push({ id:1, name: isIA ? "Bot Swift" : "Jogador 2", money:1500, pos:0, props:[], token: isIA ? '🐍' : '🫶', color:'#4caf50', jail:0 });
-        if(n === 3) players.push({ id:2, name: "Jogador 3", money:1500, pos:0, props:[], token:'💎', color:'#2196f3', jail:0 });
-        
+        if(isIA) players.push({ id:1, name: "Bot Swift", money:1500, pos:0, props:[], token:'🐍', color:'#4caf50', jail:0 });
+        else {
+            players.push({ id:1, name: "Jogador 2", money:1500, pos:0, props:[], token:'🫶', color:'#2196f3', jail:0 });
+            if(n === 3) players.push({ id:2, name: "Jogador 3", money:1500, pos:0, props:[], token:'💎', color:'#ff9800', jail:0 });
+        }
         document.getElementById('setup').remove();
         startBoard();
     }
@@ -163,19 +129,11 @@
     }
 
     function toggleFS() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            document.getElementById('fs-btn').innerText = "SAIR TELA CHEIA";
-        } else {
-            document.exitFullscreen();
-            document.getElementById('fs-btn').innerText = "TELA CHEIA";
-        }
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
     }
 
-    function toss() {
-        if(isIA && turn === 1) return;
-        rollLogic();
-    }
+    function toss() { if(isIA && turn === 1) return; rollLogic(); }
 
     function rollLogic() {
         const d1e = document.getElementById('d1'), d2e = document.getElementById('d2');
@@ -190,30 +148,27 @@
             
             let oldPos = p.pos;
             p.pos = (p.pos + d1 + d2) % 40;
+            if(p.pos < oldPos) { p.money += 200; log("Passou pelo GO! +$200"); }
             
-            // LÓGICA DO GO: Ganha 200 ao passar ou cair
-            if(p.pos < oldPos) {
-                p.money += 200;
-                log(`${p.name} passou pelo GO! +$200`);
-            }
-
             sync();
             setTimeout(() => process(p, d1+d2), 500);
         }, 400);
     }
 
     function process(p, sum) {
-        const t = music[p.pos];
-        if(p.pos === 30) { p.pos = 10; p.jail = 3; log("Hiato!"); sync(); next(); return; }
+        const t = music[p.pos], idx = p.pos;
+        if(idx === 30) { p.pos = 10; p.jail = 3; log("Hiato!"); sync(); next(); return; }
         if(t.t === "tax") { p.money -= t.v; log(`Taxa: $${t.v}`); return chk(p); }
         
-        const owner = players.find(x => x.props.some(y => y.idx === p.pos));
+        const owner = players.find(x => x.props.some(y => y.idx === idx));
         if(t.p && !owner) {
-            if(isIA && turn === 1) { if(p.money > t.p + 200) buy(p, p.pos); next(); }
+            if(isIA && turn === 1) { if(p.money >= t.p) buy(p, idx); next(); }
             else { 
+                const btn = document.getElementById('btn-confirm-buy');
+                btn.disabled = (p.money < t.p);
                 document.getElementById('pop-buy').style.display='block'; 
                 document.getElementById('pop-n').innerText=t.n; 
-                document.getElementById('pop-p').innerText=`Preço: $${t.p}`; 
+                document.getElementById('pop-p').innerText=`Preço: $${t.p} (${p.name})`; 
             }
         } else if(owner && owner.id !== p.id) {
             let rent = calc(t, owner, sum);
@@ -230,6 +185,7 @@
     }
 
     function buy(p, i) { 
+        if(p.money < music[i].p) return;
         p.money -= music[i].p; 
         p.props.push({idx: i, houses: 0}); 
         document.getElementById(`owner-${i}`).style.background = p.color; 
@@ -237,17 +193,25 @@
         setTimeout(()=> document.getElementById(`tile-${i}`).classList.remove('bought-anim'), 600);
         updateHUD(); 
     }
-    
+
     function doBuy() { buy(players[turn], players[turn].pos); cls(); if(doubles === 0) next(); }
     function clsPass() { cls(); if(doubles === 0) next(); }
-    function chk(p) { if(p.money < 0) { alert("Faliu!"); location.reload(); } else if(doubles === 0) next(); }
+
+    function chk(p) { 
+        if(p.money < 0) { 
+            alert(`GAME OVER! O jogador ${p.name} foi à falência.`); 
+            location.reload(); 
+        } else if(doubles === 0) next(); 
+    }
+
     function next() { turn = (turn+1)%players.length; updateHUD(); if(isIA && turn === 1) setTimeout(rollLogic, 1000); }
     
     function openM() {
         const list = document.getElementById('manage-list'); list.innerHTML = "";
         players[turn].props.forEach(pr => {
             if(!music[pr.idx].r) return;
-            list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #333"><b>${music[pr.idx].n}</b><br><button onclick="bld(${pr.idx})" style="padding:5px; font-size:10px">🏠 Construir ($${music[pr.idx].h})</button> <button onclick="sl(${pr.idx})" style="padding:5px; font-size:10px; background:#e74c3c; color:white;">Vender</button></div>`;
+            const canBuild = (players[turn].money >= music[pr.idx].h && pr.houses < 5);
+            list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #333"><b>${music[pr.idx].n}</b> (Casas: ${pr.houses})<br><button onclick="bld(${pr.idx})" ${canBuild ? '' : 'disabled'} style="padding:5px; font-size:10px">🏠 Construir ($${music[pr.idx].h})</button> <button onclick="sl(${pr.idx})" style="padding:5px; font-size:10px; background:#e74c3c; color:white;">Vender</button></div>`;
         });
         document.getElementById('pop-manage').style.display='block';
     }
@@ -260,7 +224,7 @@
             document.getElementById(`tile-${idx}`).classList.add('bought-anim');
             setTimeout(()=> document.getElementById(`tile-${idx}`).classList.remove('bought-anim'), 600);
             updateHUD(); openM();
-        }
+        } else { alert("Saldo insuficiente!"); }
     }
 
     function sl(idx) {
