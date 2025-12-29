@@ -3,253 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Swiftie Poly Master - Final</title>
+    <title>Swiftie Poly Master - Immersive Edition</title>
     <style>
-        :root { --bg: #0a0a0a; --accent: #d4af37; --tile-txt: #000; --safe: 20px; }
+        :root { --md-sys-color-primary: #d4af37; --md-sys-color-surface: #1a1a1c; --bg: #0a0a0a; --safe: 15px; }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; padding: var(--safe); overflow: hidden; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #e1e1e1; height: 100vh; display: flex; flex-direction: column; padding: var(--safe); overflow: hidden; }
 
-        #game-wrapper { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 4px solid var(--accent); position: relative; }
-        .tile { background: white; color: var(--tile-txt); border: 0.5px solid #444; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: bold; text-align: center; padding: 4px; position: relative; line-height: 1.1; }
+        #game-wrapper { flex: 1; display: grid; grid-template-columns: repeat(11, 1fr); grid-template-rows: repeat(11, 1fr); background: #222; border: 2px solid #444; position: relative; border-radius: 8px; }
+        
+        .tile { background: #fff; color: #000; border: 0.5px solid #bbb; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.52rem; font-weight: 700; text-align: center; padding: 2px; position: relative; line-height: 1.2; }
         .tile-color { position: absolute; width: 100%; height: 10px; top: 0; }
-        .price { margin-top: 2px; color: #444; font-size: 0.5rem; }
+        .price { margin-top: 2px; color: #666; font-size: 0.48rem; }
 
-        .center-dashboard { grid-area: 2 / 2 / 11 / 11; background: #111; display: flex; flex-direction: column; padding: 20px; position: relative; border: 1px solid #333; }
-        #fs-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
+        .center-dashboard { grid-area: 2 / 2 / 11 / 11; background: var(--md-sys-color-surface); display: flex; flex-direction: column; padding: 20px; position: relative; border-radius: 24px; margin: 10px; border: 1px solid #333; }
+        
+        .m3-btn { background: var(--md-sys-color-primary); color: #000; border: none; padding: 12px 24px; border-radius: 100px; font-weight: 600; cursor: pointer; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: transform 0.1s; }
+        .m3-btn:active { transform: scale(0.95); }
+        .m3-btn-secondary { background: #353538; color: var(--md-sys-color-primary); border: 1px solid var(--md-sys-color-primary); }
 
-        .hud-top { display: flex; justify-content: space-around; margin-bottom: 20px; }
-        .p-status { background: #222; padding: 10px 20px; border-radius: 8px; border-bottom: 3px solid transparent; text-align: center; min-width: 120px; }
-        .p-status.active { border-color: var(--accent); background: #333; }
+        .p-status { background: #2d2d30; padding: 12px; border-radius: 16px; text-align: center; flex: 1; margin: 0 5px; border: 2px solid transparent; }
+        .p-status.active { border-color: var(--md-sys-color-primary); background: #3d3d40; }
 
-        .game-controls { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-        .dice-box { display: flex; gap: 15px; perspective: 400px; }
-        .die { width: 60px; height: 60px; background: white; color: black; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .rolling { animation: spin 0.3s infinite; }
+        .dice-box { display: flex; gap: 15px; margin-bottom: 20px; }
+        .die { width: 55px; height: 55px; background: #fff; color: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 900; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        .rolling { animation: spin 0.2s infinite; }
         @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
-        .btn { background: var(--accent); color: black; border: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; text-transform: uppercase; }
-        .btn:disabled { background: #444; cursor: not-allowed; opacity: 0.6; }
+        .token { position: absolute; width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
 
-        #log-box { height: 80px; background: #000; border: 1px solid #222; border-radius: 5px; padding: 10px; font-size: 0.7rem; color: #888; overflow-y: auto; font-family: monospace; }
-
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; color: black; padding: 25px; border-radius: 15px; z-index: 9000; width: 350px; display: none; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-        .token { position: absolute; width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; z-index: 100; transition: all 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        .bought-anim { animation: pulse-success 0.6s ease; }
-        @keyframes pulse-success { 0% { transform: scale(1); } 50% { transform: scale(1.1); background-color: #d4af37; } 100% { transform: scale(1); } }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; color: #000; padding: 32px; border-radius: 28px; z-index: 9000; width: 380px; display: none; text-align: center; box-shadow: 0 24px 48px rgba(0,0,0,0.5); }
+        #log-box { height: 60px; background: #000; border-radius: 8px; padding: 10px; font-size: 0.7rem; color: #aaa; overflow-y: auto; font-family: monospace; width: 100%; margin-top: auto; }
+        #fs-btn { position: absolute; top: 15px; right: 15px; padding: 8px; cursor: pointer; background: none; border: 1px solid #555; border-radius: 8px; color: #888; font-size: 0.6rem; }
     </style>
 </head>
 <body>
 
-<div id="setup" style="position:fixed; inset:0; background:rgba(0,0,0,0.98); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <h1 style="color:var(--accent); font-size: 3rem; margin-bottom: 20px;">Swiftie Poly</h1>
-    <div style="background:#1a1a1a; padding:30px; border-radius:15px; border:1px solid #333; width:90%; max-width:450px;">
-        <label>Seu Nome:</label>
-        <input type="text" id="u-name" value="Rod" style="width:100%; padding:12px; margin:10px 0; border-radius:5px; border:none; font-size:1.1rem;">
-        <label>Escolha seu Emoji:</label>
-        <div id="emojis" style="display:flex; justify-content:space-around; margin:20px 0; font-size:1.8rem;">
-            <span onclick="selE('🧣', this)" style="cursor:pointer; border:2px solid gold; padding:5px; border-radius:8px">🧣</span>
-            <span onclick="selE('🐍', this)" style="cursor:pointer; padding:5px;">🐍</span>
-            <span onclick="selE('🫶', this)" style="cursor:pointer; padding:5px;">🫶</span>
-            <span onclick="selE('💎', this)" style="cursor:pointer; padding:5px;">💎</span>
-        </div>
-        <button class="btn" onclick="go(1)" style="width:100%; margin-bottom:10px;">1 Jogador + IA</button>
-        <button class="btn" onclick="go(2)" style="width:100%; margin-bottom:10px; background:#888;">2 Jogadores Reais</button>
-        <button class="btn" onclick="go(3)" style="width:100%; background:#666;">3 Jogadores Reais</button>
+<div id="setup" style="position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px;">
+    <h1 style="color:var(--md-sys-color-primary); font-size: 2.5rem; margin-bottom: 30px;">Swiftie Poly Master</h1>
+    <div style="background:var(--md-sys-color-surface); padding:32px; border-radius:28px; width:100%; max-width:500px; display:flex; flex-direction:column; gap:15px; border:1px solid #333;">
+        <div id="player-configs"></div>
+        <button class="m3-btn" onclick="addPlayerField()">+ Novo Jogador Real</button>
+        <button class="m3-btn" style="background:#fff" onclick="initGame()">Começar Show 🎤</button>
     </div>
 </div>
 
 <div id="game-wrapper">
     <div class="center-dashboard">
         <button id="fs-btn" onclick="toggleFS()">TELA CHEIA</button>
-        <div id="status-row" class="hud-top"></div>
-        <div class="game-controls">
+        <div id="status-row" style="display:flex; justify-content:space-between; margin-bottom:20px"></div>
+        
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
             <div class="dice-box">
                 <div id="d1" class="die">1</div>
                 <div id="d2" class="die">1</div>
             </div>
-            <button id="roll-btn" class="btn" onclick="toss()">Girar Dados</button>
-            <button onclick="openM()" style="background:none; border:none; color:var(--accent); text-decoration:underline; cursor:pointer; margin-top:10px;">Gerenciar Bracelets</button>
+            <button id="roll-btn" class="m3-btn" onclick="toss()">Girar Dados</button>
+            <button class="m3-btn m3-btn-secondary" style="margin-top:15px" onclick="openM()">Gerenciar Era</button>
         </div>
+
         <div id="log-box"></div>
     </div>
 </div>
 
 <div id="pop-buy" class="modal">
-    <h2 id="pop-n"></h2><p id="pop-p" style="font-weight:bold; margin:10px 0;"></p>
-    <button id="btn-confirm-buy" class="btn" onclick="doBuy()" style="width:100%;">Comprar</button>
-    <button class="btn" onclick="clsPass()" style="width:100%; background:#ccc; margin-top:10px;">Passar</button>
+    <h2 id="pop-n"></h2>
+    <p id="pop-p" style="font-size:1.1rem; margin-bottom:24px"></p>
+    <div style="display:flex; flex-direction:column; gap:10px">
+        <button class="m3-btn" onclick="doBuy()">Comprar</button>
+        <button class="m3-btn m3-btn-secondary" onclick="cls()">Passar</button>
+    </div>
+</div>
+
+<div id="pop-pay" class="modal">
+    <h2 style="margin-bottom:8px">Pagamento</h2>
+    <p id="pay-msg" style="margin-bottom:24px"></p>
+    <button class="m3-btn" id="pay-confirm-btn">Confirmar Pagamento</button>
 </div>
 
 <div id="pop-manage" class="modal" style="width:450px;">
-    <h2>Suas Propriedades</h2>
-    <div id="manage-list" style="max-height:300px; overflow-y:auto; margin:15px 0; text-align:left;"></div>
-    <button class="btn" onclick="cls()" style="width:100%;">Fechar</button>
+    <h2>Minha Discografia</h2>
+    <div id="manage-list" style="max-height:300px; overflow-y:auto; margin:20px 0; text-align:left;"></div>
+    <button class="m3-btn" style="width:100%" onclick="cls()">Fechar</button>
 </div>
 
 <script>
-    let myEmoji = '🧣', selEl = null;
+    // Áudios
+    const sndDice = new Audio('https://www.soundjay.com/misc/sounds/dice-roll-1.mp3');
+    const sndCash = new Audio('https://www.soundjay.com/misc/sounds/cash-register-05.mp3');
+    const sndJail = new Audio('https://www.soundjay.com/misc/sounds/door-bolt-1.mp3');
+
+    let players = [], turn = 0, doubles = 0;
+    const tokens = ['🧣', '🐍', '🫶', '💎', '🎸'];
+    
+    // Configuração das Músicas e Eras corrigida
     const music = [
-        {n: "GO", t: "s"}, {n: "Tim McGraw", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50}, {n: "Our Song", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50}, {n: "TAXA", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "Fearless", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#e6be8a", h: 50}, {n: "You Belong", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#e6be8a", h: 50}, {n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100}, {n: "Mean", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100},
-        {n: "HIATO", t: "s"}, {n: "All Too Well", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "SPOTIFY", p: 150, t: "util"}, {n: "Red", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#8b0000", h: 100}, {n: "22", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#8b0000", h: 100}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Style", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Blank Space", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#b1d4e0", h: 150}, {n: "Shake It Off", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#b1d4e0", h: 150}, {n: "Delicate", p: 260, r: [22, 110, 330, 800, 975, 1150], c: "#2d2d2d", h: 150},
-        {n: "BACKST.", t: "s"}, {n: "Getaway Car", p: 280, r: [24, 120, 360, 850, 1025, 1200], c: "#2d2d2d", h: 150}, {n: "Cruel Summer", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "Lover", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#ffb6c1", h: 200}, {n: "The Archer", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#ffb6c1", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "cardigan", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "willow", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#cfcfcf", h: 200}, {n: "APPLE MUSIC", p: 150, t: "util"}, {n: "Anti-Hero", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200},
-        {n: "GO JAIL", t: "s"}, {n: "Fortnight", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#e5e4e2", h: 200}, {n: "Smallest Man", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#e5e4e2", h: 200}, {n: "Eras Tour", p: 200, t: "rail"}, {n: "Showgirl", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#191970", h: 200}, {n: "Ophelia", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#191970", h: 200}, {n: "Cancelled!", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}, {n: "Bejeweled", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}, {n: "TAXA LUXO", t: "tax", v: 100}, {n: "Karma", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#191970", h: 200}
+        {n: "GO", t: "s"}, 
+        {n: "Tim McGraw", p: 60, r: [2,10,30,90,160,250], c: "#b9d8b5", h: 50}, 
+        {n: "Our Song", p: 60, r: [4,20,60,180,320,450], c: "#b9d8b5", h: 50}, 
+        {n: "TAXA", t: "tax", v: 200}, {n: "Eras Tour", p: 200, t: "rail"}, 
+        {n: "Love Story", p: 100, r: [6,30,90,270,400,550], c: "#fff176", h: 50}, 
+        {n: "Fearless", p: 100, r: [6,30,90,270,400,550], c: "#fff176", h: 50}, 
+        {n: "You Belong", p: 120, r: [8,40,100,300,450,600], c: "#fff176", h: 50}, 
+        {n: "Enchanted", p: 140, r: [10,50,150,450,625,750], c: "#d1b2d1", h: 100}, 
+        {n: "Mean", p: 160, r: [12,60,180,500,700,900], c: "#d1b2d1", h: 100},
+        {n: "HIATO", t: "s"}, 
+        {n: "All Too Well", p: 180, r: [14,70,200,550,750,950], c: "#8b0000", h: 100}, 
+        {n: "SPOTIFY", p: 150, t: "util"}, 
+        {n: "Red", p: 180, r: [14,70,200,550,750,950], c: "#8b0000", h: 100}, 
+        {n: "22", p: 200, r: [16,80,220,600,800,1000], c: "#8b0000", h: 100}, 
+        {n: "Eras Tour", p: 200, t: "rail"}, 
+        {n: "Style", p: 220, r: [18,90,250,700,875,1050], c: "#b1d4e0", h: 150}, 
+        {n: "Blank Space", p: 220, r: [18,90,250,700,875,1050], c: "#b1d4e0", h: 150}, 
+        {n: "Shake It Off", p: 240, r: [20,100,300,750,925,1100], c: "#b1d4e0", h: 150}, 
+        {n: "Anti-Hero", p: 260, r: [22,110,330,800,975,1150], c: "#191970", h: 150},
+        {n: "BACKST.", t: "s"}, 
+        {n: "Bejeweled", p: 280, r: [24,120,360,850,1025,1200], c: "#191970", h: 150}, 
+        {n: "Karma", p: 300, r: [26,130,390,900,1100,1275], c: "#191970", h: 200}, 
+        {n: "Cruel Summer", p: 300, r: [26,130,390,900,1100,1275], c: "#ffb6c1", h: 200}, 
+        {n: "Lover", p: 320, r: [28,150,450,1000,1200,1400], c: "#ffb6c1", h: 200}, 
+        {n: "Eras Tour", p: 200, t: "rail"}, 
+        {n: "cardigan", p: 350, r: [35,175,500,1100,1300,1500], c: "#cfcfcf", h: 200}, 
+        {n: "willow", p: 350, r: [35,175,500,1100,1300,1500], c: "#cfcfcf", h: 200}, 
+        {n: "APPLE", p: 150, t: "util"}, 
+        {n: "Fortnight", p: 400, r: [50,200,600,1400,1700,2000], c: "#e5e4e2", h: 200},
+        {n: "GO JAIL", t: "s"}, 
+        {n: "Smallest Man", p: 350, r: [35,175,500,1100,1300,1500], c: "#e5e4e2", h: 200}, 
+        {n: "Eras Tour", p: 200, t: "rail"}, 
+        {n: "Showgirl", p: 380, r: [40,185,550,1200,1400,1700], c: "#ff9800", h: 200}, 
+        {n: "Ophelia", p: 380, r: [40,185,550,1200,1400,1700], c: "#ff9800", h: 200}, 
+        {n: "Cancelled!", p: 400, r: [50,200,600,1400,1700,2000], c: "#ff9800", h: 200}, 
+        {n: "TAXA LUXO", t: "tax", v: 100}, 
+        {n: "The End", p: 450, r: [60,250,700,1500,1800,2200], c: "#ff9800", h: 250}
     ];
 
     const grid = ["11/11","11/10","11/9","11/8","11/7","11/6","11/5","11/4","11/3","11/2","11/1","10/1","9/1","8/1","7/1","6/1","5/1","4/1","3/1","2/1","1/1","1/2","1/3","1/4","1/5","1/6","1/7","1/8","1/9","1/10","1/11","2/11","3/11","4/11","5/11","6/11","7/11","8/11","9/11","10/11"];
-    let players = [], turn = 0, doubles = 0, isIA = false;
 
-    function selE(e, el) { myEmoji = e; if(selEl) selEl.style.border='none'; el.style.border='2px solid gold'; el.style.borderRadius='8px'; selEl=el; }
-
-    function go(n) {
-        const name = document.getElementById('u-name').value || "Rod";
-        isIA = (n === 1);
-        players.push({ id:0, name: name, money:1500, pos:0, props:[], token:myEmoji, color:'#ff4081', jail:0 });
-        if(isIA) players.push({ id:1, name: "Bot Swift", money:1500, pos:0, props:[], token:'🐍', color:'#4caf50', jail:0 });
-        else {
-            players.push({ id:1, name: "Jogador 2", money:1500, pos:0, props:[], token:'🫶', color:'#2196f3', jail:0 });
-            if(n === 3) players.push({ id:2, name: "Jogador 3", money:1500, pos:0, props:[], token:'💎', color:'#ff9800', jail:0 });
-        }
-        document.getElementById('setup').remove();
-        startBoard();
+    function addPlayerField() {
+        const div = document.getElementById('player-configs');
+        if(div.children.length >= 4) return;
+        const id = div.children.length;
+        div.innerHTML += `<div style="display:flex; gap:10px; margin-bottom:10px"><input type="text" placeholder="Nome do Rod ${id+1}" class="m3-btn m3-btn-secondary" style="flex:1; text-align:left; color:#fff" id="p-name-${id}"> <select id="p-emoji-${id}" class="m3-btn m3-btn-secondary">${tokens.map(t=>`<option>${t}</option>`).join('')}</select></div>`;
     }
 
-    function startBoard() {
-        const wrapper = document.getElementById('game-wrapper');
+    function initGame() {
+        const fields = document.getElementById('player-configs').children;
+        for(let i=0; i<fields.length; i++) {
+            players.push({ id:i, name: document.getElementById(`p-name-${i}`).value || `Rod ${i+1}`, money:1500, pos:0, props:[], token:document.getElementById(`p-emoji-${i}`).value, jail:0 });
+        }
+        if(players.length === 1) players.push({ id:1, name: "Bot Swift", money:1500, pos:0, props:[], token:'🐍', jail:0 });
+        
+        // Ativar áudio após interação
+        sndCash.play().then(() => sndCash.pause()); 
+        document.getElementById('setup').remove();
+        renderBoard();
+    }
+
+    function renderBoard() {
+        const b = document.getElementById('game-wrapper');
         music.forEach((d, i) => {
             const t = document.createElement('div'); t.className = 'tile'; t.id = `tile-${i}`; t.style.gridArea = grid[i];
-            if(d.c) t.innerHTML = `<div class="tile-color" style="background:${d.c}"></div><div id="build-${i}" style="position:absolute; top:12px; font-size:10px;"></div>`;
+            if(d.c) t.innerHTML = `<div class="tile-color" style="background:${d.c}"></div><div id="build-${i}" style="position:absolute; top:12px"></div>`;
             t.innerHTML += `<div>${d.n}</div><div class="price">${d.p ? '$'+d.p : ''}</div><div id="owner-${i}" style="width:100%; height:4px; margin-top:2px;"></div>`;
-            wrapper.appendChild(t);
+            b.appendChild(t);
         });
         players.forEach(p => {
-            const tk = document.createElement('div'); tk.id = `tk-${p.id}`; tk.className = 'token'; tk.style.background = p.color; tk.innerText = p.token;
-            wrapper.appendChild(tk);
+            const tk = document.createElement('div'); tk.id = `tk-${p.id}`; tk.className = 'token'; tk.innerText = p.token; b.appendChild(tk);
         });
         updateHUD(); sync();
     }
 
-    function toggleFS() {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
-    }
-
-    function toss() { if(isIA && turn === 1) return; rollLogic(); }
-
-    function rollLogic() {
+    function toss() {
+        const p = players[turn];
         const d1e = document.getElementById('d1'), d2e = document.getElementById('d2');
         d1e.classList.add('rolling'); d2e.classList.add('rolling');
+        sndDice.play();
         
         setTimeout(() => {
             const d1 = Math.floor(Math.random()*6)+1, d2 = Math.floor(Math.random()*6)+1;
             d1e.classList.remove('rolling'); d2e.classList.remove('rolling');
             d1e.innerText = d1; d2e.innerText = d2;
-            const p = players[turn];
-            if(d1 === d2) { doubles++; log("Dobradinha!"); if(doubles === 3) { p.pos = 10; p.jail = 3; next(); return; } } else doubles = 0;
             
-            let oldPos = p.pos;
-            p.pos = (p.pos + d1 + d2) % 40;
-            if(p.pos < oldPos) { p.money += 200; log("Passou pelo GO! +$200"); }
-            
-            sync();
-            setTimeout(() => process(p, d1+d2), 500);
-        }, 400);
+            if(p.jail > 0) {
+                if(d1 === d2) { p.jail = 0; log("Dobradinha! Saiu do Hiato."); move(p, d1+d2); }
+                else { log(`Ainda no Hiato... (${p.jail} turnos)`); p.jail--; next(); }
+            } else {
+                if(d1 === d2) { doubles++; log("Dobradinha!"); if(doubles===3){ p.pos=10; p.jail=3; log("Vá para o Hiato!"); sndJail.play(); next(); return; } } else doubles = 0;
+                move(p, d1+d2);
+            }
+        }, 500);
     }
 
-    function process(p, sum) {
-        const t = music[p.pos], idx = p.pos;
-        if(idx === 30) { p.pos = 10; p.jail = 3; log("Hiato!"); sync(); next(); return; }
-        if(t.t === "tax") { p.money -= t.v; log(`Taxa: $${t.v}`); return chk(p); }
+    function move(p, dist) {
+        let old = p.pos; p.pos = (p.pos + dist) % 40;
+        if(p.pos < old) { p.money += 200; log("Passou pelo GO! +$200"); sndCash.play(); }
+        sync(); setTimeout(() => handleTile(p, dist), 500);
+    }
+
+    function handleTile(p, dist) {
+        const t = music[p.pos];
+        if(p.pos === 30) { p.pos=10; p.jail=3; log("Vá para o Hiato!"); sndJail.play(); sync(); next(); return; }
+        if(t.t === "tax") return askPayment(p, t.v, "Taxa Governamental", () => next());
         
-        const owner = players.find(x => x.props.some(y => y.idx === idx));
+        const owner = players.find(x => x.props.some(y => y.idx === p.pos));
         if(t.p && !owner) {
-            if(isIA && turn === 1) { if(p.money >= t.p) buy(p, idx); next(); }
-            else { 
-                const btn = document.getElementById('btn-confirm-buy');
-                btn.disabled = (p.money < t.p);
-                document.getElementById('pop-buy').style.display='block'; 
-                document.getElementById('pop-n').innerText=t.n; 
-                document.getElementById('pop-p').innerText=`Preço: $${t.p} (${p.name})`; 
-            }
+            if(p.name === "Bot Swift") { if(p.money >= t.p + 200) buy(p, p.pos); next(); }
+            else { document.getElementById('pop-buy').style.display='block'; document.getElementById('pop-n').innerText=t.n; document.getElementById('pop-p').innerText=`$${t.p}`; }
         } else if(owner && owner.id !== p.id) {
-            let rent = calc(t, owner, sum);
-            p.money -= rent; owner.money += rent; log(`-$${rent} para ${owner.name}`); chk(p);
+            const rent = calcRent(t, owner, dist);
+            askPayment(p, rent, `Aluguel para ${owner.name}`, () => { owner.money += rent; next(); });
         } else { if(doubles === 0) next(); }
         updateHUD();
     }
 
-    function calc(t, o, d) {
+    function askPayment(p, val, reason, callback) {
+        if(p.name === "Bot Swift") { p.money -= val; if(p.money < 0) faliu(p); callback(); return; }
+        const pop = document.getElementById('pop-pay'); pop.style.display = 'block';
+        document.getElementById('pay-msg').innerText = `${p.name}, você deve pagar $${val} (${reason})`;
+        document.getElementById('pay-confirm-btn').onclick = () => {
+            p.money -= val; pop.style.display = 'none';
+            sndCash.play();
+            if(p.money < 0) faliu(p);
+            else callback();
+            updateHUD();
+        };
+    }
+
+    function calcRent(t, o, d) {
         const pr = o.props.find(x => x.idx === music.indexOf(t));
-        if(t.t === "rail") return [0, 25, 50, 100, 200][o.props.filter(x => music[x.idx].t === "rail").length];
+        if(t.t === "rail") return [0,25,50,100,200][o.props.filter(x => music[x.idx].t === "rail").length];
         if(t.t === "util") return d * (o.props.filter(x => music[x.idx].t === "util").length === 1 ? 4 : 10);
         return t.r[pr.houses];
     }
 
-    function buy(p, i) { 
-        if(p.money < music[i].p) return;
-        p.money -= music[i].p; 
-        p.props.push({idx: i, houses: 0}); 
-        document.getElementById(`owner-${i}`).style.background = p.color; 
-        document.getElementById(`tile-${i}`).classList.add('bought-anim');
-        setTimeout(()=> document.getElementById(`tile-${i}`).classList.remove('bought-anim'), 600);
-        updateHUD(); 
-    }
-
+    function buy(p, i) { p.money -= music[i].p; p.props.push({idx: i, houses: 0}); document.getElementById(`owner-${i}`).style.background = p.color; sndCash.play(); updateHUD(); }
     function doBuy() { buy(players[turn], players[turn].pos); cls(); if(doubles === 0) next(); }
-    function clsPass() { cls(); if(doubles === 0) next(); }
-
-    function chk(p) { 
-        if(p.money < 0) { 
-            alert(`GAME OVER! O jogador ${p.name} foi à falência.`); 
-            location.reload(); 
-        } else if(doubles === 0) next(); 
+    function faliu(p) { alert(`GAME OVER: ${p.name} faliu!`); location.reload(); }
+    function next() { if(doubles === 0) turn = (turn+1)%players.length; updateHUD(); if(players[turn].name === "Bot Swift") setTimeout(toss, 1000); }
+    function updateHUD() {
+        const r = document.getElementById('status-row'); r.innerHTML = "";
+        players.forEach((p, i) => r.innerHTML += `<div class="p-status ${turn===i?'active':''}"><b>${p.token} ${p.name}</b><br>$${p.money}</div>`);
     }
-
-    function next() { turn = (turn+1)%players.length; updateHUD(); if(isIA && turn === 1) setTimeout(rollLogic, 1000); }
-    
+    function sync() { players.forEach((p, i) => { const t = document.getElementById(`tile-${p.pos}`); const tk = document.getElementById(`tk-${p.id}`); tk.style.left = (t.offsetLeft+4+i*4)+'px'; tk.style.top = (t.offsetTop+18+i*4)+'px'; }); }
     function openM() {
-        const list = document.getElementById('manage-list'); list.innerHTML = "";
+        const l = document.getElementById('manage-list'); l.innerHTML = "";
         players[turn].props.forEach(pr => {
-            if(!music[pr.idx].r) return;
-            const canBuild = (players[turn].money >= music[pr.idx].h && pr.houses < 5);
-            list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #333"><b>${music[pr.idx].n}</b> (Casas: ${pr.houses})<br><button onclick="bld(${pr.idx})" ${canBuild ? '' : 'disabled'} style="padding:5px; font-size:10px">🏠 Construir ($${music[pr.idx].h})</button> <button onclick="sl(${pr.idx})" style="padding:5px; font-size:10px; background:#e74c3c; color:white;">Vender</button></div>`;
+            l.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee"><b>${music[pr.idx].n}</b><br><button class="m3-btn" style="padding:5px; font-size:10px" onclick="build(${pr.idx})">🏠 Bracelets (${pr.houses})</button> <button class="m3-btn m3-btn-secondary" style="padding:5px; font-size:10px" onclick="sell(${pr.idx})">Vender</button></div>`;
         });
         document.getElementById('pop-manage').style.display='block';
     }
-
-    function bld(idx) {
+    function build(idx) {
         const p = players[turn], pr = p.props.find(x => x.idx === idx);
-        if(p.money >= music[idx].h && pr.houses < 5) {
-            p.money -= music[idx].h; pr.houses++;
-            document.getElementById(`build-${idx}`).innerText = pr.houses < 5 ? "🏠".repeat(pr.houses) : "🏨";
-            document.getElementById(`tile-${idx}`).classList.add('bought-anim');
-            setTimeout(()=> document.getElementById(`tile-${idx}`).classList.remove('bought-anim'), 600);
-            updateHUD(); openM();
-        } else { alert("Saldo insuficiente!"); }
+        if(p.money >= music[idx].h && pr.houses < 5) { p.money -= music[idx].h; pr.houses++; sndCash.play(); document.getElementById(`build-${idx}`).innerText = pr.houses < 5 ? "🏠".repeat(pr.houses) : "🏨"; updateHUD(); openM(); }
     }
-
-    function sl(idx) {
+    function sell(idx) {
+        if(!confirm("Vender essa Era?")) return;
         const p = players[turn]; p.money += music[idx].p / 2;
         p.props = p.props.filter(x => x.idx !== idx);
         document.getElementById(`owner-${idx}`).style.background = 'none';
-        document.getElementById(`build-${idx}`).innerText = '';
-        updateHUD(); openM();
+        document.getElementById(`build-${idx}`).innerText = ''; updateHUD(); openM();
     }
-
-    function updateHUD() {
-        const row = document.getElementById('status-row'); row.innerHTML = "";
-        players.forEach((p, i) => row.innerHTML += `<div class="p-status ${turn===i?'active':''}"><b>${p.token} ${p.name}</b><br>$${p.money}</div>`);
-    }
-
-    function sync() { 
-        players.forEach((p, i) => { 
-            const t = document.getElementById(`tile-${p.pos}`); 
-            const tk = document.getElementById(`tk-${p.id}`); 
-            tk.style.left = (t.offsetLeft+4+i*4)+'px'; 
-            tk.style.top = (t.offsetTop+18+i*4)+'px'; 
-        }); 
-    }
-    function log(m) { const box = document.getElementById('log-box'); box.innerHTML = `> ${m}<br>${box.innerHTML}`; }
+    function log(m) { const b = document.getElementById('log-box'); b.innerHTML = `> ${m}<br>${b.innerHTML}`; }
     function cls() { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); }
+    function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+    addPlayerField();
 </script>
 </body>
 </html>
