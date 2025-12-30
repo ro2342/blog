@@ -4,19 +4,19 @@ let players = [], turn = 0, housesBuilt = 0, doubles = 0;
 
 const music = [
     // LADO 1 (0-12): DEBUT & FEARLESS
-    { n: "GO", t: "s" },
+    { n: "INÍCIO<br><span style='font-size:0.5rem'>RECEBA $200 DE ROYALTIES</span>", t: "s" },
     { n: "Picture To Burn", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50 },
     { n: "Our Song", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50 },
     { n: "SORTE OU REVÉS", t: "card" },
-    { n: "TAXA", t: "tax", v: 200 },
+    { n: "TAXA<br><span style='font-size:0.5rem'>$100</span>", t: "tax", v: 100 },
     { n: "Eras Tour", p: 200, t: "rail" },
     { n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#fff176", h: 50 },
     { n: "SORTE OU REVÉS", t: "card" },
-    { n: "You Belong", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#fff176", h: 50 },
+    { n: "You Belong With Me", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#fff176", h: 50 },
     { n: "Fearless", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#fff176", h: 50 },
     { n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100 },
     { n: "Long Live", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100 },
-    { n: "HIATO", t: "s" },
+    { n: "MASTERS PRESAS<br><span style='font-size:0.5rem'>FIQUE SEM JOGAR POR ATÉ 3 TURNOS</span>", t: "s" },
 
     // LADO 2 (12-24): RED & 1989
     { n: "Red", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#8b0000", h: 100 },
@@ -30,7 +30,7 @@ const music = [
     { n: "Look What You Made Me Do", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#010101", h: 150 },
     { n: "SORTE OU REVÉS", t: "card" },
     { n: "Delicate", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#010101", h: 150 },
-    { n: "BACKSTAGE", t: "s" },
+    { n: "HIATO", t: "s" }, // Renamed from BACKSTAGE
 
     // LADO 3 (24-36): REP, LOVER, FOLKLORE, EVERMORE
     { n: "End Game", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#010101", h: 150 },
@@ -44,7 +44,7 @@ const music = [
     { n: "willow", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#795548", h: 200 },
     { n: "SORTE OU REVÉS", t: "card" },
     { n: "champagne problems", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#795548", h: 200 },
-    { n: "ENTRE EM HIATO", t: "s" }, // 36
+    { n: "MASTERS<br>VENDIDAS", t: "s" }, // Renamed from ENTRE EM HIATO
 
     // LADO 4 (36-48): MIDNIGHTS, TTPD, SHOWGIRL
     { n: "Anti-Hero", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#3c3abeff", h: 200 },
@@ -52,9 +52,9 @@ const music = [
     { n: "Karma", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#3c3abeff", h: 200 },
     { n: "SORTE OU REVÉS", t: "card" },
     { n: "Eras Tour", p: 200, t: "rail" },
-    { n: "Fortnight", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#c4c3c3ff", h: 200 },
-    { n: "Down Bad", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#c4c3c3ff", h: 200 },
-    { n: "Smallest Man", p: 420, r: [55, 225, 650, 1450, 1750, 2050], c: "#c4c3c3ff", h: 200 },
+    { n: "Fortnight", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#85836dff", h: 200 },
+    { n: "Down Bad", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#85836dff", h: 200 },
+    { n: "I Can Do With a Broken Heart", p: 420, r: [55, 225, 650, 1450, 1750, 2050], c: "#c4c3c3ff", h: 200 },
     { n: "The Fate of Ophelia", p: 450, r: [60, 250, 700, 1500, 1800, 2200], c: "#ff9800", h: 250 },
     { n: "Opalite", p: 450, r: [60, 250, 700, 1500, 1800, 2200], c: "#ff9800", h: 250 },
     { n: "CANCELLED!", p: 500, r: [70, 300, 800, 1600, 2000, 2500], c: "#ff9800", h: 250 }
@@ -112,12 +112,23 @@ let auc = { idx: -1, players: [], turn: 0, bid: 0, leader: null };
 let tradeIdx = -1;
 let sellIdx = -1;
 
+const tsNames = [
+    "Meredith Grey", "Olivia Benson", "Benjamin Button", "Betty", "James", "Inez", "Augustine",
+    "Dorothea", "Peter", "Wendy", "Juliet", "Cassandra", "Jack Leopards", "Nils Sjöberg", "Rebekah", "Este"
+];
+
+function randomizeName(id) {
+    const name = tsNames[Math.floor(Math.random() * tsNames.length)];
+    document.getElementById(`p-n-${id}`).value = name;
+}
+
 function addP() {
     const div = document.getElementById('player-inputs');
     if (div.children.length >= 4) return;
     const id = div.children.length;
     div.innerHTML += `<div id="p-row-${id}" style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
-    <input type="text" id="p-n-${id}" value="Rod ${id + 1}" style="flex:3; border-radius:4px 4px 0 0;" placeholder="Nome">
+    <input type="text" id="p-n-${id}" value="Jogador ${id + 1}" style="flex:3; border-radius:4px 4px 0 0;" placeholder="Nome">
+    <button onclick="randomizeName(${id})" style="background:#673ab7; color:white; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.2rem">🎲</button>
     <select id="p-e-${id}" style="flex:1; border-radius:4px 4px 0 0;">${tokens.map(t => `<option>${t}</option>`).join('')}</select>
     <button onclick="document.getElementById('p-row-${id}').remove()" style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer">✕</button>
 </div>`;
@@ -153,10 +164,14 @@ function render() {
         const t = document.createElement('div'); t.className = 'tile'; t.id = `tile-${i}`; t.style.gridArea = grid[i];
 
         // Special Styles
-        if (d.n === "GO") t.classList.add('tile-go');
+        if (d.n === "GO" || d.n.includes("INÍCIO")) t.classList.add('tile-go');
         else if (d.t === "card") t.classList.add('tile-card');
-        else if (d.n.includes("HIATO") || d.n.includes("Hiato")) t.classList.add('tile-jail');
+        else if (d.n.includes("MASTERS PRESAS")) t.classList.add('tile-jail');
+        else if (d.n.includes("HIATO")) t.classList.add('tile-hiato');
+        else if (d.n.includes("VENDIDAS") || d.n.includes("ENTRE EM")) t.classList.add('tile-gotojail');
         else if (d.t === "s" || d.t === "tax") t.classList.add('tile-special');
+        else if (d.t === "rail") t.classList.add('tile-rail');
+        else if (d.t === "util") t.classList.add('tile-util');
 
         if (d.c) t.innerHTML = `<div class="tile-color" style="background:${d.c}"></div><div id="build-${i}" style="position:absolute; top:12px"></div>`;
         t.innerHTML += `<div>${d.n}</div><div class="price">${d.p ? '$' + d.p : ''}</div><div id="owner-${i}" class="owner-bar"></div>`;
@@ -302,18 +317,20 @@ function handle(p, dist) {
             else if (Math.random() > 0.5) startAuction(p.pos);
             else nextTurn();
         } else {
-            document.getElementById('buy-n').innerText = t.n;
-            document.getElementById('buy-p').innerText = `$${t.p}`;
+            // Render the Full Deed Card for the Buy Modal
+            const cardHtml = renderBuyCard(p.pos);
+            document.getElementById('buy-card-area').innerHTML = cardHtml;
 
             // Clean previous buttons
-            const footer = document.querySelector('#modal-buy .m3-btn').parentElement;
+            const footer = document.getElementById('buy-actions');
             footer.innerHTML = ""; // Clear all
 
             // 1. Buy Button
             const buyBtn = document.createElement('button');
             buyBtn.className = 'm3-btn';
             buyBtn.style.background = '#4caf50';
-            buyBtn.innerText = 'Comprar';
+            buyBtn.style.flex = '1';
+            buyBtn.innerText = `Comprar ($${t.p})`; // Show price in button
 
             // FIX: Validate Money
             if (p.money < t.p) {
@@ -321,15 +338,17 @@ function handle(p, dist) {
                 buyBtn.innerText = 'Sem Fundos';
                 buyBtn.style.background = 'rgba(255, 255, 255, 0.1)';
                 buyBtn.style.color = 'rgba(255, 255, 255, 0.5)';
+                buyBtn.style.cursor = 'not-allowed';
             } else {
                 buyBtn.onclick = doBuy;
             }
             footer.appendChild(buyBtn);
 
-            // 2. Auction Button (No Pass/Close without action)
+            // 2. Auction Button
             const auBtn = document.createElement('button');
             auBtn.className = 'm3-btn';
             auBtn.style.background = '#ff9800';
+            auBtn.style.flex = '1';
             auBtn.innerText = 'Leiloar';
             auBtn.onclick = () => { closeModal('modal-buy'); startAuction(p.pos); };
             footer.appendChild(auBtn);
@@ -824,9 +843,20 @@ function submitOffer() {
     currentTrade.state = 'REVIEW';
     renderNegotiationUI();
 
+    // Check if Target is BOT
+    const targetP = players[currentTrade.target];
+    if (targetP.name.includes("Bot")) {
+        const actions = document.getElementById('trade-actions');
+        actions.innerHTML = `<div style="width:100%; text-align:center; color:#ffeb3b; font-weight:bold; font-size:1.1rem; padding:20px">🤖 Analisando proposta...</div>`;
+
+        setTimeout(() => {
+            analyzeBotTrade();
+        }, 1500); // 1.5s thinking time
+        return;
+    }
+
     // In a real game, this would push to the other player.
     // Here we simulate the modal being passed to Player 2
-    // Maybe an interstitial alert?
     // showAlert(`Passe o dispositivo para ${players[currentTrade.target].name}!`);
 }
 
@@ -851,7 +881,15 @@ function counterOffer() {
 }
 
 function rejectTrade() {
-    closeModal('modal-negotiation');
+    // Persistent Reject UI
+    const actions = document.getElementById('trade-actions');
+    actions.innerHTML = `
+        <div style="width:100%; text-align:center; padding:15px; background:rgba(244, 67, 54, 0.2); border-radius:8px; margin-bottom:10px">
+            <div style="color:#f44336; font-weight:bold; font-size:1.2rem">🚫 Proposta Recusada</div>
+            <div style="color:#ccc; font-size:0.9rem">A negociação foi cancelada.</div>
+        </div>
+        <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">Fechar</button>
+    `;
     log("Negociação recusada.");
 }
 
@@ -913,9 +951,19 @@ function acceptTrade() {
     sndCash.play();
     log(`Negociação concluída entre ${p1.name} e ${p2.name}!`);
     updateHUD();
-    closeModal('modal-negotiation');
 
-    // If Manage was open, refresh it? Better just close it to be safe.
+    // Persistent Success UI
+    const actions = document.getElementById('trade-actions');
+    actions.innerHTML = `
+        <div style="width:100%; text-align:center; padding:15px; background:rgba(76, 175, 80, 0.2); border-radius:8px; margin-bottom:10px">
+            <div style="color:#4caf50; font-weight:bold; font-size:1.2rem">✅ Negócio Fechado!</div>
+            <div style="color:#ccc; font-size:0.9rem">Transferência realizada com sucesso.</div>
+        </div>
+        <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">Fechar</button>
+    `;
+
+    // Disable inputs to prevent changes after acceptance
+    document.querySelectorAll('#modal-negotiation input, #modal-negotiation button:not(.m3-btn)').forEach(el => el.disabled = true);
 }
 
 function getPlayerColor(id) {
@@ -1045,6 +1093,22 @@ function updateHUD() {
         card.innerHTML = `<div class="p-name" style="color:${color}">${p.token} ${p.name}</div><div class="p-money">$${p.money}</div>`;
         row.appendChild(card);
     });
+
+    highlightActiveTile();
+}
+
+function highlightActiveTile() {
+    // Remove from all
+    document.querySelectorAll('.tile').forEach(t => t.classList.remove('current-turn-glow'));
+
+    // Add to current player's tile
+    const p = players[turn];
+    const tile = document.getElementById(`tile-${p.pos}`);
+    if (tile) {
+        tile.classList.add('current-turn-glow');
+        // Match glow color to player color? Optional, but cool.
+        // For now, white pulse is good for visibility.
+    }
 }
 
 function sync() {
@@ -1055,7 +1119,14 @@ function sync() {
 }
 
 function log(m) { document.getElementById('log-box').innerHTML = `> ${m}<br>` + document.getElementById('log-box').innerHTML; }
-function showModal(id) { document.getElementById(id).style.display = 'block'; }
+function showModal(id) {
+    const el = document.getElementById(id);
+    if (el.classList.contains('modal-flex-container')) {
+        el.style.display = 'flex';
+    } else {
+        el.style.display = 'block';
+    }
+}
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().then(sync); else document.exitFullscreen().then(sync); }
 
@@ -1074,3 +1145,163 @@ window.onload = () => {
         }, 500); // Wait for opacity fade
     }, 2500); // 2.5s load time
 };
+
+function renderBuyCard(idx) {
+    const tile = music[idx];
+    const isRailUtil = tile.t === 'rail' || tile.t === 'company';
+
+    let rentStats = "";
+    if (!tile.t || tile.t === 'property') {
+        rentStats = `
+            <div class="rent-row"><span>Aluguel:</span> <span>$${tile.r[0]}</span></div>
+            <div class="rent-row"><span>1 Casa:</span> <span>$${tile.r[1]}</span></div>
+            <div class="rent-row"><span>2 Casas:</span> <span>$${tile.r[2]}</span></div>
+            <div class="rent-row"><span>3 Casas:</span> <span>$${tile.r[3]}</span></div>
+            <div class="rent-row"><span>4 Casas:</span> <span>$${tile.r[4]}</span></div>
+            <div class="rent-row"><span>HOTEL:</span> <span>$${tile.r[5]}</span></div>
+            <hr style="margin:5px 0; border:0; border-top:1px solid #ccc">
+            <div class="rent-row"><span>Custo Casa:</span> <span>$${tile.h}</span></div>
+        `;
+    } else if (tile.t === 'rail') {
+        rentStats = `
+            <div class="rent-row"><span>1 Estádio:</span> <span>$25</span></div>
+            <div class="rent-row"><span>2 Estádios:</span> <span>$50</span></div>
+            <div class="rent-row"><span>3 Estádios:</span> <span>$100</span></div>
+            <div class="rent-row"><span>4 Estádios:</span> <span>$200</span></div>
+        `;
+    } else {
+        rentStats = `
+            <div style="text-align:center; margin:10px 0">Se tiver 1 utilitário, aluguel é 4x dados.<br>Se tiver 2, é 10x dados.</div>
+        `;
+    }
+
+    const mortgageValue = music[idx].p / 2;
+
+    return `
+    <div class="deed-card" style="width:260px; font-size:0.9rem; box-shadow: 0 10px 20px rgba(0,0,0,0.3)">
+        <div class="deed-header" style="padding:15px; font-size:1.1rem; background:${tile.c || '#ccc'}; color:${tile.c === '#010101' ? 'white' : 'black'}">
+            ${tile.n}
+        </div>
+        <div class="deed-body" style="gap:5px; padding:15px">
+            ${rentStats}
+            <div class="rent-row" style="margin-top:10px; font-weight:bold; border-top:1px solid #ccc; padding-top:5px">
+                <span>Hipoteca:</span> <span>$${mortgageValue}</span>
+            </div>
+            <div class="rent-row" style="margin-top:5px; font-weight:bold; color:var(--md-primary)">
+                <span>Preço:</span> <span style="font-size:1.2rem">$${tile.p}</span>
+            </div>
+        </div>
+    </div>`;
+}
+
+function analyzeBotTrade() {
+    const me = players[currentTrade.target]; // The bot
+
+    // Helper para checar se completa um conjunto de cor
+    const completesSet = (player, propIdx) => {
+        const color = music[propIdx].c;
+        if (!color) return false; // Ignora utilitários/ferrovias
+
+        const allColorProps = music.filter(m => m.c === color);
+        const myProps = player.props.filter(p => music[p.idx].c === color);
+
+        // Se o player tem (Total - 1) e essa é a que falta
+        return myProps.length === (allColorProps.length - 1) && !myProps.find(p => p.idx === propIdx);
+    };
+
+    // Helper para checar se dar a propriedade quebra um conjunto
+    const breaksSet = (player, propIdx) => {
+        const color = music[propIdx].c;
+        if (!color) return false;
+
+        const allColorProps = music.filter(m => m.c === color);
+        const myProps = player.props.filter(p => music[p.idx].c === color);
+
+        // Se o player tem TODAS
+        return myProps.length === allColorProps.length;
+    };
+
+    // 1. Calcular Valor que o Bot DÁ
+    let valGive = currentTrade.getMoney;
+    currentTrade.getProps.forEach(idx => {
+        let pVal = music[idx].p;
+        // Se o Bot dá uma carta que quebra o set dele, cobra 2.5x mais caro
+        if (breaksSet(me, idx)) {
+            pVal *= 2.5;
+            log("🤖 Bot: Não quero quebrar meu conjunto!");
+        }
+        valGive += pVal;
+    });
+
+    // 2. Calcular Valor que o Bot RECEBE
+    let valGet = currentTrade.giveMoney;
+    currentTrade.giveProps.forEach(idx => {
+        let pVal = music[idx].p;
+        // Se o Bot recebe uma carta que completa o set dele, valoriza 2x
+        if (completesSet(me, idx)) {
+            pVal *= 2.0;
+            log("🤖 Bot: Uau! Isso completa meu conjunto!");
+        }
+        valGet += pVal;
+    });
+
+    // 3. Decisão
+    // "Fator Sardinha": Aceita se receber pelo menos 80% do valor que dá.
+    const threshold = 0.8;
+    const ratio = valGet / (valGive || 1);
+
+    log(`🤖 Análise: Dou (Valor Calc.) $${valGive}, Recebo (Valor Calc.) $${valGet}. Ratio: ${ratio.toFixed(2)}`);
+
+    if (valGet >= (valGive * threshold)) {
+        log("🤖 Bom negócio (ou sou bonzinho). Aceito!");
+        acceptTrade();
+    } else {
+        // Tenta Contra-Proposta (Pedir a diferença em dinheiro)
+        // O Bot quer pelo menos 100% do valor (Fair Value) na contra-proposta
+        const fairVal = valGive;
+        const deficit = Math.ceil(fairVal - valGet);
+        const partner = players[currentTrade.initiator];
+
+        if (deficit > 0 && partner.money >= (currentTrade.giveMoney + deficit)) {
+            // Pode fazer contra-proposta
+            log(`🤖 Recusado. Tentando contra-proposta de +$${deficit}.`);
+
+            // Atualiza o valor que o user tem que dar
+            currentTrade.giveMoney += deficit;
+
+            // Re-renderiza UI
+            renderNegotiationUI();
+
+            // Injeta mensagem
+            const actions = document.getElementById('trade-actions');
+            actions.innerHTML = `
+                <div style="width:100%; text-align:center; padding:10px; background:rgba(255,152,0,0.2); border-radius:8px; margin-bottom:10px">
+                    <div style="color:#ffeb3b; font-weight:bold">🤖 Negociação Recusada!</div>
+                    <div style="color:#ccc; font-size:0.9rem">Minha contra-proposta é: <br>Adicione <b>$${deficit}</b> e fechamos.</div>
+                </div>
+                <button class="m3-btn" style="background:#f44336; color:white" onclick="rejectTrade()">Cancelar</button>
+                <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ Aceitar Contra-Proposta</button>
+            `;
+
+            // IMPORTANTE: Hack para permitir que o "Aceitar" funcione agora como o User aceitando a proposta do Bot
+            // Como o estado ainda é REVIEW e os botões chamam acceptTrade...
+            // acceptTrade() pega initiator e target.
+            // Quando User propôs: Initiator = User, Target = Bot.
+            // Se User clica "Aceitar" agora:
+            // p1 (Initiator/User) GIVES giveMoney
+            // p2 (Target/Bot) GIVES getMoney
+            // Isso está CORRETO. O User aceita pagar o novo giveMoney.
+
+        } else {
+            // Não tem dinheiro ou diferença muito grande/complexa
+            log("🤖 Prejuízo demais e você não tem fundos. Recusado.");
+
+            // Mostrar motivo na UI antes de fechar?
+            const actions = document.getElementById('trade-actions');
+            actions.innerHTML = `
+                <div style="color:#f44336; font-weight:bold; padding:10px">🤖 Recusado! Proposta injusta.</div>
+            `;
+            setTimeout(() => rejectTrade(), 2000);
+        }
+    }
+}
