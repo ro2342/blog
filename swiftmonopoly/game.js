@@ -432,7 +432,23 @@ function updateAuctionUI() {
     const p = auc.players[auc.turn];
     document.getElementById('auc-bid').innerText = `$${auc.bid}`;
     document.getElementById('auc-leader').innerText = auc.leader ? `Líder: ${auc.leader.name}` : `Lance Inicial`;
-    document.getElementById('auc-turn').innerText = `Vez de: ${p.name}`;
+
+    // NEW: Show Balance
+    document.getElementById('auc-turn').innerHTML = `Vez de: <span style="font-weight:bold">${p.name}</span> <span style="font-size:0.9rem; color:#ccc">($${p.money})</span>`;
+
+    // NEW: Disable button if broke
+    const bidBtn = document.querySelector('#modal-auction .m3-btn'); // The first button is "Cobrir"
+    if (p.money < auc.bid + 10) {
+        bidBtn.disabled = true;
+        bidBtn.style.background = '#555';
+        bidBtn.style.color = '#888';
+        bidBtn.style.cursor = 'not-allowed';
+    } else {
+        bidBtn.disabled = false;
+        bidBtn.style.background = 'gold';
+        bidBtn.style.color = 'black';
+        bidBtn.style.cursor = 'pointer';
+    }
 
     if (p.name.includes("Bot")) {
         setTimeout(() => {
