@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Swiftie Poly Ultra</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Small inline style for setup only */
+    </style>
+</head>
+
+<body>
+
+    <div id="setup"
+        style="position:fixed; inset:0; background:var(--bg); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <h1 style="color:var(--md-primary); font-size: 2.5rem; margin-bottom: 20px;">Swiftie Poly Master</h1>
+        <div id="setup-box"
+            style="background:var(--md-surface); padding:25px; border-radius:24px; width:90%; max-width:450px; border:1px solid #333;">
+            <div id="player-inputs"></div>
+            <div style="display:flex; gap:10px; margin-top:15px">
+                <button class="m3-btn" style="flex:1" onclick="addP()">+ Jogador</button>
+                <button class="m3-btn" style="flex:2; background:#fff" onclick="startGame()">Começar Show</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-wrapper">
+        <div class="center-dash">
+            <button id="fs-btn"
+                style="position:absolute; top:10px; right:10px; color:#666; background:none; border:1px solid #444; padding:5px; border-radius:5px"
+                onclick="toggleFS()">TELA CHEIA</button>
+            <div id="status-row"></div>
+            <div class="dice-box">
+                <div id="d1" class="die">1</div>
+                <div id="d2" class="die">1</div>
+            </div>
+            <button id="roll-btn" class="m3-btn" style="width:200px; margin: 15px auto;" onclick="toss()">Girar
+                Dados</button>
+            <button class="m3-btn" style="background:#333; color:var(--md-primary); width:200px; margin: 0 auto;"
+                onclick="openManage()">Gerenciar</button>
+            <div id="log-box"
+                style="margin-top:10px; font-size:0.6rem; color:#888; height:40px; overflow:hidden; text-align:center">
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-turn" class="ui-modal" style="background:#d1c4e9; color:black; border:2px solid #673ab7">
+        <h1 id="turn-msg"></h1>
+    </div>
+
+    <div id="modal-buy" class="ui-modal">
+        <h2 id="buy-n"></h2>
+        <p id="buy-p"></p>
+        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center">
+            <button class="m3-btn" style="flex:1" onclick="doBuy()">Comprar</button>
+            <button class="m3-btn" style="flex:1; background:#ccc"
+                onclick="closeModal('modal-buy'); nextTurn()">Passar</button>
+        </div>
+    </div>
+
+    <div id="modal-pay" class="ui-modal">
+        <h2>Pagamento</h2>
+        <p id="pay-msg" style="margin:15px 0"></p>
+        <button class="m3-btn" id="pay-btn" style="width:100%">Pagar Agora</button>
+    </div>
+
+    <div id="modal-manage" class="ui-modal" style="width:90%; max-width:800px; max-height:80vh; overflow-y:auto;">
+        <h2>Suas Propriedades</h2>
+        <div id="manage-list" style="text-align:left; margin:15px 0"></div>
+        <button class="m3-btn" style="width:100%" onclick="closeModal('modal-manage')">Fechar</button>
+    </div>
+
+    <div id="modal-confirm" class="ui-modal" style="z-index: 11000;">
+        <h2 id="confirm-title">Tem certeza?</h2>
+        <p id="confirm-msg" style="margin:20px 0"></p>
+        <div style="display:flex; gap:10px">
+            <button id="confirm-yes-btn" class="m3-btn" style="flex:1; background:#f44336; color:white">Sim</button>
+            <button class="m3-btn" style="flex:1" onclick="closeModal('modal-confirm')">Não</button>
+        </div>
+    </div>
+
+    <div id="modal-fail" class="ui-modal" style="background:#f44336; color:white;">
+        <h1>FALÊNCIA!</h1>
+        <p id="fail-msg" style="margin:15px 0"></p>
+        <button class="m3-btn" style="background:white" onclick="location.reload()">Reiniciar Jogo</button>
+    </div>
+
+    <div id="modal-card" class="ui-modal" style="background:#673ab7; color:white;">
+        <h1>Sorte ou Revés?</h1>
+        <p id="card-msg" style="margin:20px 0; font-size:1.2rem; min-height:60px"></p>
+        <button class="m3-btn" style="background:white" onclick="closeModal('modal-card')">OK</button>
+    </div>
+
+    <!-- NEW MODALS -->
+    <div id="modal-alert" class="ui-modal" style="z-index: 10000;">
+        <h2 id="alert-title">Aviso</h2>
+        <p id="alert-msg" style="margin:20px 0"></p>
+        <button class="m3-btn" onclick="closeModal('modal-alert')">OK</button>
+    </div>
+
+    <div id="modal-trade" class="ui-modal">
+        <h2>Transferir Propriedade</h2>
+        <p id="trade-prop-name" style="color:var(--md-primary); font-weight:bold"></p>
+
+        <label>Transferir para:</label>
+        <select id="trade-target" style="width:100%; padding:10px; margin:10px 0; border-radius:8px"></select>
+
+        <label>Preço ($):</label>
+        <input type="number" id="trade-price" value="0"
+            style="width:100%; padding:10px; margin:10px 0; border-radius:8px">
+
+        <div style="display:flex; gap:10px; margin-top:15px">
+            <button class="m3-btn" onclick="confirmTrade()">Confirmar</button>
+            <button class="m3-btn" style="background:#ccc" onclick="closeModal('modal-trade')">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="modal-auction" class="ui-modal" style="background:#222; color:white; border:2px solid gold">
+        <h2 style="color:gold">🔨 Leilão!</h2>
+        <h3 id="auc-prop" style="margin-top:10px"></h3>
+
+        <div style="margin:20px 0; text-align:center">
+            <p style="font-size:0.8rem; color:#888">Lance Atual</p>
+            <div id="auc-bid" style="font-size:2rem; font-weight:bold; color:gold">$0</div>
+            <p id="auc-leader" style="font-size:0.9rem">Ninguém</p>
+        </div>
+
+        <div style="background:#333; padding:15px; border-radius:15px">
+            <p id="auc-turn" style="margin-bottom:10px">Vez de: Rod 1</p>
+            <div style="display:flex; gap:10px">
+                <button class="m3-btn" style="flex:1; background:gold; color:black" onclick="bidAuction()">Cobrir
+                    (+$10)</button>
+                <button class="m3-btn" style="flex:1; background:#f44336; color:white"
+                    onclick="passAuction()">Passar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
