@@ -474,17 +474,7 @@ function passAuction() {
 }
 
 function askPay(p, val, reason, cb) {
-    if (p.name.includes("Bot")) {
-        // Bot auto-pays
-        p.money -= val;
-        // Log handled either here or in callback, but callback is generic.
-        // Let's rely on the caller to log the specific transaction details if needed, 
-        // OR simply log the decrement here.
-        if (p.money < 0) fail(p); else cb();
-        return;
-    }
-
-    // Human UI
+    // Unified UI for Bot and Human
     showModal('modal-pay');
     const isRent = reason.includes("Aluguel para");
     const recipient = isRent ? reason.replace("Aluguel para ", "") : "O Banco";
@@ -505,17 +495,40 @@ function askPay(p, val, reason, cb) {
         <div style="font-size:0.8rem; color:#ccc">${reason}</div>
     `;
 
-    document.getElementById('pay-btn').onclick = () => {
+    const payBtn = document.getElementById('pay-btn');
+    // Reset button state
+    payBtn.disabled = false;
+    payBtn.innerText = "Pagar Agora";
+    payBtn.onclick = () => {
         p.money -= val;
         closeModal('modal-pay');
         if (p.money < 0) fail(p); else {
             sndCash.play();
-            // Show explicit confirmation alert/log
             log(`💰 PAGAMENTO: ${p.name} pagou $${val} para ${recipient}.`);
             cb();
         }
         updateHUD();
     };
+
+    if (p.name.includes("Bot")) {
+        payBtn.disabled = true;
+        payBtn.innerText = "Processando...";
+        setTimeout(() => {
+            // Auto-click pay
+            payBtn.disabled = false;
+            payBtn.click();
+        }, 1500); // 1.5s delay so user sees it
+        return;
+    }
+
+    // For humans, logic continues below (duplicate rendering code removed via this replacement)
+    // Actually, I need to be careful not to duplicate the UI setup code if I'm merging blocks.
+    // The original code had:
+    // if (bot) { ... return; }
+    // // Human UI ...
+
+    // I am replacing the TOP part. I need to replace the whole function essentially or handle the flow carefully.
+    // Let's replace the whole function to be safe and clean.
 }
 
 function calcRent(t, o, d) {
@@ -618,40 +631,295 @@ function openManage() {
     showModal('modal-manage');
 }
 
-function transfer(idx) {
-    tradeIdx = idx;
-    document.getElementById('trade-prop-name').innerText = music[idx].n;
+let currentTrade = {
+    initiator: null,
+    target: null,
+    giveMoney: 0,
+    giveProps: [], // Set of indices
+    getMoney: 0,
+    getProps: [], // Set of indices
+    state: 'DRAFT' // DRAFT, REVIEW
+};
+
+// 1. ENTRY POINT: Click "Trocar" on a property or generic button
+// 1. ENTRY POINT: Click "Trocar" on a property or generic button
+function transfer(idx = -1) {
+    tradeIdx = idx; // Global state for current trade property
+
+    let headerMsg = "Nova Negociação";
+    let subMsg = "Com quem você deseja negociar?";
+
+    // Safely handle property context
+    if (idx !== -1 && music[idx]) {
+        headerMsg = `Negociando: ${music[idx].n}`;
+        subMsg = "Escolha um parceiro para oferecer esta propriedade:";
+    }
+
+    const modalBody = document.getElementById('modal-trade');
+    if (!modalBody) { console.error("Modal Trade not found!"); return; }
+
+    // Generate fresh HTML every time to avoid ID conflicts or missing elements
+    modalBody.innerHTML = `
+        <h2>${headerMsg}</h2>
+        <p>${subMsg}</p>
+        <select id="trade-target" style="width:100%; padding:10px; margin:20px 0; border-radius:8px; font-size:1.1rem; background:rgba(255,255,255,0.1); color:white; border:1px solid #555"></select>
+        <div style="display:flex; gap:10px; justify-content:center">
+            <button class="m3-btn" style="background:#4caf50" onclick="initNegotiation()">Iniciar</button>
+            <button class="m3-btn" style="background:#555" onclick="closeModal('modal-trade')">Cancelar</button>
+        </div>
+    `;
+
+    // Populate Select
     const sel = document.getElementById('trade-target');
-    sel.innerHTML = "";
-    players.forEach((p, i) => {
-        if (i !== turn) sel.innerHTML += `<option value="${i}">${p.name}</option>`;
-    });
+    if (sel) {
+        players.forEach((p, i) => {
+            // Don't list yourself
+            if (i !== turn) {
+                sel.innerHTML += `<option value="${i}">${p.token} ${p.name}</option>`;
+            }
+        });
+    }
+
     showModal('modal-trade');
 }
 
-function confirmTrade() {
+// 2. INITIALIZE NEGOTIATION
+function initNegotiation() {
+    closeModal('modal-manage'); // Close manage if open
+    closeModal('modal-trade');
+
     const targetId = parseInt(document.getElementById('trade-target').value);
-    const price = parseInt(document.getElementById('trade-price').value);
-
-    if (isNaN(targetId) || isNaN(price)) return;
+    const me = players[turn];
     const target = players[targetId];
-    if (!target) return;
 
-    if (target.money < price) { showAlert("O comprador não tem fundos suficientes!"); return; }
+    currentTrade = {
+        initiator: me.id,
+        target: target.id,
+        giveMoney: 0,
+        giveProps: tradeIdx !== -1 && players[turn].props.find(p => p.idx === tradeIdx) ? [tradeIdx] : [],
+        getMoney: 0,
+        getProps: tradeIdx !== -1 && target.props.find(p => p.idx === tradeIdx) ? [tradeIdx] : [],
+        state: 'DRAFT'
+    };
 
-    const p = players[turn];
-    p.props = p.props.filter(x => x.idx !== tradeIdx);
-    p.money += price;
+    renderNegotiationUI();
+    showModal('modal-negotiation');
+    document.getElementById('modal-negotiation').style.display = 'flex';
+}
 
-    target.props.push({ idx: tradeIdx, houses: 0, mortgaged: false });
-    target.money -= price;
+// 3. RENDER UI
+function renderNegotiationUI() {
+    const p1 = players[currentTrade.initiator]; // Active User (Left)
+    const p2 = players[currentTrade.target];    // Opponent (Right)
+    const isReview = currentTrade.state === 'REVIEW';
 
-    document.getElementById(`owner-${tradeIdx}`).style.background = (target.id === 0 ? '#ff4081' : (target.id === 1 ? '#4caf50' : '#2196f3'));
+    // Headers
+    document.getElementById('trade-left-name').innerText = `${p1.token} ${p1.name} (Você)`;
+    document.getElementById('trade-right-name').innerText = `${p2.token} ${p2.name}`;
+
+    // Balances
+    document.getElementById('trade-left-balance').innerText = `Saldo disponível: $${p1.money}`;
+    document.getElementById('trade-right-balance').innerText = `Saldo disponível: $${p2.money}`;
+
+    // Inputs (Money)
+    const in1 = document.getElementById('trade-left-money');
+    const in2 = document.getElementById('trade-right-money');
+
+    in1.value = currentTrade.giveMoney;
+    in2.value = currentTrade.getMoney;
+
+    in1.disabled = isReview;
+    in2.disabled = isReview;
+
+    // Property Lists
+    renderPropList('trade-left-props', p1, currentTrade.giveProps, isReview, (idx, checked) => {
+        if (checked) currentTrade.giveProps.push(idx);
+        else currentTrade.giveProps = currentTrade.giveProps.filter(x => x !== idx);
+    });
+
+    renderPropList('trade-right-props', p2, currentTrade.getProps, isReview, (idx, checked) => {
+        if (checked) currentTrade.getProps.push(idx);
+        else currentTrade.getProps = currentTrade.getProps.filter(x => x !== idx);
+    });
+
+    // Actions Buttons
+    const actions = document.getElementById('trade-actions');
+    actions.innerHTML = "";
+
+    if (!isReview) {
+        actions.innerHTML = `
+            <button class="m3-btn" style="background:#f44336; color:white" onclick="closeModal('modal-negotiation')">Cancelar</button>
+            <button class="m3-btn" style="background:#4caf50; min-width:150px" onclick="submitOffer()">Fazer Oferta ➤</button>
+        `;
+    } else {
+        actions.innerHTML = `
+            <div style="margin-right:auto; align-self:center; color:#ccc">⏳ ${p2.name} está analisando...</div>
+            <button class="m3-btn" style="background:#f44336; color:white" onclick="rejectTrade()">Recusar</button>
+            <button class="m3-btn" style="background:#ff9800" onclick="counterOffer()">Contra-Proposta</button>
+            <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ Aceitar</button>
+        `;
+    }
+}
+
+function renderPropList(containerId, player, selectedIndices, disabled, onToggle) {
+    const div = document.getElementById(containerId);
+    div.innerHTML = "";
+
+    if (player.props.length === 0) {
+        div.innerHTML = "<div style='color:#666; font-size:0.8rem; text-align:center'>Sem propriedades</div>";
+        return;
+    }
+
+    player.props.forEach(pr => {
+        const m = music[pr.idx];
+        const isSel = selectedIndices.includes(pr.idx);
+
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.padding = '5px';
+        row.style.background = isSel ? 'rgba(76, 175, 80, 0.2)' : 'transparent';
+        row.style.borderBottom = '1px solid #333';
+
+        // Color Indicator
+        const colorDot = `<div style="width:12px; height:12px; background:${m.c}; border-radius:50%; margin-right:8px; border:1px solid #555"></div>`;
+
+        // Checkbox
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.checked = isSel;
+        chk.disabled = disabled;
+        chk.style.marginRight = '10px';
+        chk.onchange = (e) => {
+            onToggle(pr.idx, e.target.checked);
+            row.style.background = e.target.checked ? 'rgba(76, 175, 80, 0.2)' : 'transparent';
+        };
+
+        const lbl = document.createElement('span');
+        lbl.innerHTML = `${m.n}`;
+        if (pr.mortgaged) lbl.innerHTML += ` <span style='font-size:0.7rem; color:#f44336'>(Hip.)</span>`;
+
+        row.innerHTML = colorDot;
+        row.appendChild(chk);
+        row.appendChild(lbl);
+        div.appendChild(row);
+    });
+}
+
+// 4. LOGIC
+function updateTradeBalance() {
+    currentTrade.giveMoney = parseInt(document.getElementById('trade-left-money').value) || 0;
+    currentTrade.getMoney = parseInt(document.getElementById('trade-right-money').value) || 0;
+}
+
+function submitOffer() {
+    updateTradeBalance();
+    const p1 = players[currentTrade.initiator];
+
+    if (currentTrade.giveMoney > p1.money) { showAlert("Você não tem dinheiro suficiente para essa oferta!"); return; }
+
+    // Check if at least something is offered/requested
+    // (Optional: Allow gifts? Yes)
+
+    currentTrade.state = 'REVIEW';
+    renderNegotiationUI();
+
+    // In a real game, this would push to the other player.
+    // Here we simulate the modal being passed to Player 2
+    // Maybe an interstitial alert?
+    // showAlert(`Passe o dispositivo para ${players[currentTrade.target].name}!`);
+}
+
+function counterOffer() {
+    // Swap Roles
+    const tempId = currentTrade.initiator;
+    currentTrade.initiator = currentTrade.target;
+    currentTrade.target = tempId;
+
+    // Swap Proposed Assets
+    const tempMoney = currentTrade.giveMoney;
+    currentTrade.giveMoney = currentTrade.getMoney;
+    currentTrade.getMoney = tempMoney;
+
+    const tempProps = currentTrade.giveProps;
+    currentTrade.giveProps = currentTrade.getProps;
+    currentTrade.getProps = tempProps;
+
+    currentTrade.state = 'DRAFT';
+    renderNegotiationUI();
+    // showAlert(`Agora é a vez de ${players[currentTrade.initiator].name} editar a proposta.`);
+}
+
+function rejectTrade() {
+    closeModal('modal-negotiation');
+    log("Negociação recusada.");
+}
+
+function acceptTrade() {
+    const pRef1 = players[currentTrade.initiator]; // The one who made the LAST offer (Draft -> Submit)
+    // Wait, in logic:
+    // If P1 submited -> State REVIEW.
+    // The Active View is now P2 (Target).
+    // So if P2 accepts:
+    // P2 Gets: giveMoney, giveProps
+    // P2 Gives: getMoney, getProps
+
+    // But wait, my render logic for Review Mode says:
+    // "Left Side: You (Initiator)" -> displayed as the person who SENT the offer.
+    // "Right Side: Oponente (Target)" -> displayed as the person VIEWING/RECEIVING.
+
+    // Actually, let's keep it consistent with the data structure.
+    // Data: Initiator (P1) offers GiveMoney/GiveProps.
+    // Data: Target (P2) is asked for GetMoney/GetProps.
+    //
+    // So transfer is:
+    // P1 -> P2: GiveMoney, GiveProps
+    // P2 -> P1: GetMoney, GetProps
+
+    const p1 = players[currentTrade.initiator];
+    const p2 = players[currentTrade.target];
+
+    // Final Validation
+    if (p1.money < currentTrade.giveMoney) { showAlert(`${p1.name} não tem fundos!`); return; }
+    if (p2.money < currentTrade.getMoney) { showAlert(`${p2.name} não tem fundos!`); return; }
+
+    // Execute Money
+    p1.money -= currentTrade.giveMoney;
+    p2.money += currentTrade.giveMoney;
+
+    p2.money -= currentTrade.getMoney;
+    p1.money += currentTrade.getMoney;
+
+    // Execute Props (Move P1 -> P2)
+    currentTrade.giveProps.forEach(idx => {
+        const propIndex = p1.props.findIndex(x => x.idx === idx);
+        if (propIndex !== -1) {
+            const prop = p1.props.splice(propIndex, 1)[0];
+            p2.props.push(prop);
+            document.getElementById(`owner-${idx}`).style.background = getPlayerColor(p2.id); // Helper needed or inline
+        }
+    });
+
+    // Execute Props (Move P2 -> P1)
+    currentTrade.getProps.forEach(idx => {
+        const propIndex = p2.props.findIndex(x => x.idx === idx);
+        if (propIndex !== -1) {
+            const prop = p2.props.splice(propIndex, 1)[0];
+            p1.props.push(prop);
+            document.getElementById(`owner-${idx}`).style.background = getPlayerColor(p1.id);
+        }
+    });
 
     sndCash.play();
+    log(`Negociação concluída entre ${p1.name} e ${p2.name}!`);
     updateHUD();
-    closeModal('modal-trade');
-    openManage();
+    closeModal('modal-negotiation');
+
+    // If Manage was open, refresh it? Better just close it to be safe.
+}
+
+function getPlayerColor(id) {
+    return id === 0 ? '#ff4081' : (id === 1 ? '#4caf50' : (id === 2 ? '#2196f3' : '#ffeb3b'));
 }
 
 function bld(idx) {
