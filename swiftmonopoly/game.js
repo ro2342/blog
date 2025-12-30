@@ -7,7 +7,7 @@ const music = [
     { n: "GO", t: "s" },
     { n: "Picture To Burn", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50 },
     { n: "Our Song", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50 },
-    { n: "Sorte ou Revés", t: "card" },
+    { n: "SORTE OU REVÉS", t: "card" },
     { n: "TAXA", t: "tax", v: 200 },
     { n: "Eras Tour", p: 200, t: "rail" },
     { n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#fff176", h: 50 },
@@ -132,7 +132,13 @@ function startGame() {
     if (players.length === 1) players.push({ id: 1, name: "Bot Swift", money: 1500, pos: 0, props: [], token: '🐍', jail: 0 });
     document.getElementById('setup').remove();
     document.getElementById('game-wrapper').style.display = 'grid';
-    render(); startTurn();
+
+    // DELAY SYNC to ensure Grid Layout is painted
+    setTimeout(() => {
+        render();
+        sync();
+        startTurn();
+    }, 100);
 }
 
 function render() {
@@ -156,6 +162,20 @@ function render() {
         t.innerHTML += `<div>${d.n}</div><div class="price">${d.p ? '$' + d.p : ''}</div><div id="owner-${i}" class="owner-bar"></div>`;
         b.appendChild(t);
     });
+
+    // ----------------------------------------------------------------------------------
+    // FIX STATE PERSISTENCE: Re-apply ownership colors and houses from players array
+    // ----------------------------------------------------------------------------------
+    players.forEach(p => {
+        p.props.forEach(prop => {
+            const ownerBar = document.getElementById(`owner-${prop.idx}`);
+            if (ownerBar) {
+                ownerBar.style.background = (p.id === 0 ? '#ff4081' : (p.id === 1 ? '#4caf50' : '#2196f3'));
+            }
+            updateTile(prop.idx, prop);
+        });
+    });
+
     players.forEach(p => {
         const tk = document.createElement('div'); tk.id = `tk-${p.id}`; tk.className = 'token'; tk.innerText = p.token;
         tk.style.background = p.id === 0 ? '#ff4081' : (p.id === 1 ? '#4caf50' : '#2196f3');
@@ -171,32 +191,67 @@ function startTurn() {
     document.getElementById('turn-msg').innerText = `Vez de ${p.name}`;
     showModal('modal-turn');
 
-    // Auto-close for everyone after 1.5s
     setTimeout(() => {
         closeModal('modal-turn');
         if (p.name.includes("Bot")) {
-            document.getElementById('roll-btn').disabled = true;
+            // document.getElementById('roll-btn').disabled = true; // Button removed
             log(`🤖 ${p.name} vai jogar...`);
             setTimeout(toss, 1000);
         } else {
-            document.getElementById('roll-btn').disabled = false;
-            log(`👉 Sua vez!`);
+            // document.getElementById('roll-btn').disabled = false; // Button removed
+            log(`👉 Sua vez! Toque nos dados para jogar.`);
         }
     }, 1500);
 }
 
+// Dice State
+let d1Rot = { x: 0, y: 0 }, d2Rot = { x: 0, y: 0 };
+
+const faceAngles = {
+    1: { x: 0, y: 0 },
+    2: { x: 0, y: -90 },
+    3: { x: -90, y: 0 },
+    4: { x: 90, y: 0 },
+    5: { x: 0, y: 90 },
+    6: { x: 0, y: 180 },
+};
+
 function toss() {
     const p = players[turn];
-    const d1e = document.getElementById('d1'), d2e = document.getElementById('d2');
-    d1e.classList.add('rolling'); d2e.classList.add('rolling');
-    document.getElementById('roll-btn').disabled = true;
+    if (document.getElementById('d1-cube').style.pointerEvents === 'none') return; // Prevent double click
 
+    // Lock interaction
+    const cubes = [document.getElementById('d1-cube'), document.getElementById('d2-cube')];
+    cubes.forEach(c => c.style.pointerEvents = 'none'); // Disable clicking
+
+    // Determine Result
+    let d1 = Math.floor(Math.random() * 6) + 1;
+    let d2 = Math.floor(Math.random() * 6) + 1;
+
+    // Anti-Double Bias (50% reroll)
+    if (d1 === d2 && Math.random() > 0.5) d2 = Math.floor(Math.random() * 6) + 1;
+
+    // Calculate new rotation (add multiples of 360 for spinning)
+    const spins = 5; // Minimum full spins
+    d1Rot.x += (360 * spins) + faceAngles[d1].x - (d1Rot.x % 360);
+    d1Rot.y += (360 * spins) + faceAngles[d1].y - (d1Rot.y % 360);
+
+    d2Rot.x += (360 * spins) + faceAngles[d2].x - (d2Rot.x % 360);
+    d2Rot.y += (360 * spins) + faceAngles[d2].y - (d2Rot.y % 360);
+
+    // Apply Transform
+    cubes[0].style.transform = `rotateX(${d1Rot.x}deg) rotateY(${d1Rot.y}deg)`;
+    cubes[1].style.transform = `rotateX(${d2Rot.x}deg) rotateY(${d2Rot.y}deg)`;
+
+    // Wait for animation (600ms)
     setTimeout(() => {
-        const d1 = Math.floor(Math.random() * 6) + 1, d2 = Math.floor(Math.random() * 6) + 1;
-        d1e.classList.remove('rolling'); d2e.classList.remove('rolling');
-        d1e.innerText = d1; d2e.innerText = d2;
+        // Unlock
+        cubes.forEach(c => c.style.pointerEvents = 'auto');
 
         let moved = false;
+        // Game Logic
+        const glowers = document.querySelectorAll('.glow-active');
+        glowers.forEach(g => g.classList.remove('glow-active'));
 
         if (p.jail > 0) {
             if (d1 === d2) {
@@ -222,7 +277,7 @@ function toss() {
                 move(p, d1 + d2);
             }
         }
-    }, 500);
+    }, 700); // 600ms animation + 100ms buffer
 }
 
 function move(p, dist) {
@@ -250,24 +305,46 @@ function handle(p, dist) {
             document.getElementById('buy-n').innerText = t.n;
             document.getElementById('buy-p').innerText = `$${t.p}`;
 
-            // Clean/Re-add Auction Button
+            // Clean previous buttons
             const footer = document.querySelector('#modal-buy .m3-btn').parentElement;
-            const existingBtn = document.getElementById('btn-auction');
-            if (existingBtn) existingBtn.remove();
+            footer.innerHTML = ""; // Clear all
 
-            const aubtn = document.createElement('button');
-            aubtn.id = 'btn-auction';
-            aubtn.className = 'm3-btn';
-            aubtn.style.background = '#ff9800';
-            aubtn.innerText = 'Leiloar';
-            aubtn.onclick = () => { closeModal('modal-buy'); startAuction(p.pos); };
-            footer.appendChild(aubtn);
+            // 1. Buy Button
+            const buyBtn = document.createElement('button');
+            buyBtn.className = 'm3-btn';
+            buyBtn.style.background = '#4caf50';
+            buyBtn.innerText = 'Comprar';
+
+            // FIX: Validate Money
+            if (p.money < t.p) {
+                buyBtn.disabled = true;
+                buyBtn.innerText = 'Sem Fundos';
+                buyBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+                buyBtn.style.color = 'rgba(255, 255, 255, 0.5)';
+            } else {
+                buyBtn.onclick = doBuy;
+            }
+            footer.appendChild(buyBtn);
+
+            // 2. Auction Button (No Pass/Close without action)
+            const auBtn = document.createElement('button');
+            auBtn.className = 'm3-btn';
+            auBtn.style.background = '#ff9800';
+            auBtn.innerText = 'Leiloar';
+            auBtn.onclick = () => { closeModal('modal-buy'); startAuction(p.pos); };
+            footer.appendChild(auBtn);
 
             showModal('modal-buy');
         }
     } else if (owner && owner.id !== p.id) {
         const rent = calcRent(t, owner, dist);
-        askPay(p, rent, `Aluguel para ${owner.name}`, nextTurn);
+
+        // FIX: Pay the OWNER
+        askPay(p, rent, `Aluguel para ${owner.name}`, () => {
+            owner.money += rent; // Transfer Logic
+            log(`${owner.name} recebeu $${rent}.`);
+            nextTurn();
+        });
     } else nextTurn();
     updateHUD();
 }
@@ -279,8 +356,10 @@ function buy(p, i) {
 
     // Glow Effect
     const tile = document.getElementById(`tile-${i}`);
-    tile.classList.add('glow-active');
-    setTimeout(() => tile.classList.remove('glow-active'), 1000);
+    if (tile) {
+        tile.classList.add('glow-active');
+        setTimeout(() => tile.classList.remove('glow-active'), 1000);
+    }
 
     sndCash.play();
     if (p.money < 0) fail(p); else updateHUD();
@@ -338,8 +417,15 @@ function updateAuctionUI() {
         winner.money -= auc.bid;
         winner.props.push({ idx: auc.idx, houses: 0, mortgaged: false });
         log(`${winner.name} venceu o leilão de ${music[auc.idx].n} por $${auc.bid}!`);
+
+        const tile = document.getElementById(`tile-${auc.idx}`);
+        if (tile) {
+            tile.classList.add('glow-active');
+            setTimeout(() => tile.classList.remove('glow-active'), 1000);
+        }
+
         sndCash.play();
-        updateHUD(); render(); nextTurn();
+        updateHUD(); render(); nextTurn(); // Render to update ownership visually
         return;
     }
 
@@ -373,15 +459,45 @@ function passAuction() {
 
 function askPay(p, val, reason, cb) {
     if (p.name.includes("Bot")) {
+        // Bot auto-pays
         p.money -= val;
+        // Log handled either here or in callback, but callback is generic.
+        // Let's rely on the caller to log the specific transaction details if needed, 
+        // OR simply log the decrement here.
         if (p.money < 0) fail(p); else cb();
         return;
     }
+
+    // Human UI
     showModal('modal-pay');
-    document.getElementById('pay-msg').innerText = `${p.name}, pague $${val} (${reason})`;
+    const isRent = reason.includes("Aluguel para");
+    const recipient = isRent ? reason.replace("Aluguel para ", "") : "O Banco";
+
+    document.getElementById('pay-msg').innerHTML = `
+        <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-bottom:10px">
+            <div style="color:#ff9800; font-weight:bold; font-size:1.2rem; margin-bottom:10px">💸 PAGAMENTO 💸</div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px">
+                <span>De:</span> <span style="font-weight:bold">${p.name}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px">
+                <span>Para:</span> <span style="font-weight:bold">${recipient}</span>
+            </div>
+             <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; margin-top:5px">
+                <span>Valor:</span> <span style="color:#f44336; font-weight:bold; font-size:1.2rem">$${val}</span>
+            </div>
+        </div>
+        <div style="font-size:0.8rem; color:#ccc">${reason}</div>
+    `;
+
     document.getElementById('pay-btn').onclick = () => {
-        p.money -= val; closeModal('modal-pay');
-        if (p.money < 0) fail(p); else { sndCash.play(); cb(); }
+        p.money -= val;
+        closeModal('modal-pay');
+        if (p.money < 0) fail(p); else {
+            sndCash.play();
+            // Show explicit confirmation alert/log
+            log(`💰 PAGAMENTO: ${p.name} pagou $${val} para ${recipient}.`);
+            cb();
+        }
         updateHUD();
     };
 }
@@ -399,7 +515,7 @@ function fail(p) {
     updateHUD();
     document.getElementById('fail-msg').innerText = `FIM DE JOGO! ${p.name} faliu! O império musical desmoronou.`;
     showModal('modal-fail');
-    document.getElementById('roll-btn').disabled = true;
+    document.getElementById('roll-btn').disabled = true; // Button removed but id might be needed by fail... wait, I removed the button.
     const btns = document.querySelectorAll('.m3-btn');
     btns.forEach(b => {
         if (!b.innerText.includes('Reiniciar')) b.disabled = true;
@@ -439,10 +555,10 @@ function openManage() {
             `;
         } else if (tile.t === 'rail') {
             rentStats = `
-                <div class="rent-row"><span>1 Ferrovia:</span> <span>$25</span></div>
-                <div class="rent-row"><span>2 Ferrovias:</span> <span>$50</span></div>
-                <div class="rent-row"><span>3 Ferrovias:</span> <span>$100</span></div>
-                <div class="rent-row"><span>4 Ferrovias:</span> <span>$200</span></div>
+                <div class="rent-row"><span>1 Estádio:</span> <span>$25</span></div>
+                <div class="rent-row"><span>2 Estádios:</span> <span>$50</span></div>
+                <div class="rent-row"><span>3 Estádios:</span> <span>$100</span></div>
+                <div class="rent-row"><span>4 Estádios:</span> <span>$200</span></div>
             `;
         } else {
             rentStats = `
@@ -547,8 +663,10 @@ function bld(idx) {
 
     // Glow
     const tile = document.getElementById(`tile-${idx}`);
-    tile.classList.add('glow-active');
-    setTimeout(() => tile.classList.remove('glow-active'), 1000);
+    if (tile) {
+        tile.classList.add('glow-active');
+        setTimeout(() => tile.classList.remove('glow-active'), 1000);
+    }
 
     sndCash.play(); updateHUD(); openManage();
 }
@@ -570,8 +688,10 @@ function sellHouse(idx) {
 
     // Glow
     const tile = document.getElementById(`tile-${idx}`);
-    tile.classList.add('glow-active');
-    setTimeout(() => tile.classList.remove('glow-active'), 1000);
+    if (tile) {
+        tile.classList.add('glow-active');
+        setTimeout(() => tile.classList.remove('glow-active'), 1000);
+    }
 
     sndCash.play(); updateHUD(); openManage();
 }
@@ -624,8 +744,21 @@ function updateHUD() {
     const row = document.getElementById('status-row'); row.innerHTML = "";
     players.forEach((p, i) => {
         const card = document.createElement('div'); card.className = `p-card ${turn === i ? 'active' : ''}`;
-        card.style.background = turn === i ? (i === 0 ? '#ff4081' : '#4caf50') : '#2d2d30';
-        card.innerHTML = `<b>${p.token} ${p.name}</b><br>$${p.money}`;
+
+        // Dynamic Neon Color
+        const color = i === 0 ? '#ff4081' : (i === 1 ? '#4caf50' : (i === 2 ? '#2196f3' : '#ffeb3b'));
+
+        // Remove solid backgrounds, use glows
+        if (turn === i) {
+            card.style.border = `2px solid ${color}`;
+            card.style.boxShadow = `0 0 15px ${color}`;
+            // card.style.background = 'rgba(255,255,255,0.1)'; // Optional highlight
+        } else {
+            card.style.border = '1px solid rgba(255,255,255,0.1)';
+            card.style.boxShadow = 'none';
+        }
+
+        card.innerHTML = `<div class="p-name" style="color:${color}">${p.token} ${p.name}</div><div class="p-money">$${p.money}</div>`;
         row.appendChild(card);
     });
 }
@@ -643,5 +776,17 @@ function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().then(sync); else document.exitFullscreen().then(sync); }
 
 window.onload = () => {
-    addP();
+    addP(); // Prepare first input silently
+
+    // Simulate Loading
+    setTimeout(() => {
+        const load = document.getElementById('loading-screen');
+        const setup = document.getElementById('setup');
+
+        load.style.opacity = '0';
+        setTimeout(() => {
+            load.style.display = 'none';
+            setup.style.display = 'flex'; // Reveal setup
+        }, 500); // Wait for opacity fade
+    }, 2500); // 2.5s load time
 };

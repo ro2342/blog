@@ -1,41 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Roboto:wght@400;500;700&display=swap');
 
 :root {
-    /* M3 Design Tokens (Dark Theme - Swiftie Gold/Purple Vibe) */
-    --md-sys-color-primary: #D0BCFF;
-    --md-sys-color-on-primary: #381E72;
-    --md-sys-color-primary-container: #4F378B;
-    --md-sys-color-on-primary-container: #EADDFF;
+    /* Modern Eras Palette */
+    --bg-deep: #121212;
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --neon-primary: #D0BCFF;
+    --neon-accent: #f48fb1;
+    --text-main: #E6E1E5;
 
-    --md-sys-color-secondary: #CCC2DC;
-    --md-sys-color-on-secondary: #332D41;
-    --md-sys-color-secondary-container: #4A4458;
-    --md-sys-color-on-secondary-container: #E8DEF8;
+    /* Player Neons (Will be applied via JS dynamically ideally, but here are defaults) */
+    --p1-glow: #ff4081;
+    --p2-glow: #4caf50;
+    --p3-glow: #2196f3;
 
-    --md-sys-color-tertiary: #EFB8C8;
-    --md-sys-color-on-tertiary: #492532;
-    --md-sys-color-tertiary-container: #633B48;
-    --md-sys-color-on-tertiary-container: #FFD8E4;
-
-    --md-sys-color-error: #F2B8B5;
-    --md-sys-color-on-error: #601410;
-
-    --md-sys-color-background: #141218;
-    --md-sys-color-on-background: #E6E1E5;
-
-    --md-sys-color-surface: #141218;
-    --md-sys-color-on-surface: #E6E1E5;
-
-    --md-sys-color-surface-container-low: #1D1B20;
-    --md-sys-color-surface-container: #211F26;
-    --md-sys-color-surface-container-high: #2B2930;
-    --md-sys-color-surface-container-highest: #36343B;
-
-    --md-sys-shape-corner-small: 8px;
-    --md-sys-shape-corner-medium: 12px;
-    --md-sys-shape-corner-large: 16px;
-    --md-sys-shape-corner-extra-large: 28px;
-    --md-sys-shape-corner-full: 100px;
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Roboto', sans-serif;
 }
 
 * {
@@ -46,14 +26,54 @@
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background: var(--md-sys-color-background);
-    color: var(--md-sys-color-on-background);
+    font-family: var(--font-body);
+    background: radial-gradient(circle at 10% 20%, #2a1a3e 0%, #121212 90%);
+    color: var(--text-main);
     height: 100vh;
     display: flex;
     flex-direction: column;
     padding: 16px;
     overflow: hidden;
+    position: relative;
+}
+
+/* Background Spotlights */
+body::before {
+    content: '';
+    position: absolute;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(208, 188, 255, 0.08) 0%, transparent 70%);
+    top: -10%;
+    left: -10%;
+    border-radius: 50%;
+    animation: floatSpot 20s infinite alternate ease-in-out;
+    z-index: -1;
+    pointer-events: none;
+}
+
+body::after {
+    content: '';
+    position: absolute;
+    width: 50vw;
+    height: 50vw;
+    background: radial-gradient(circle, rgba(244, 143, 177, 0.05) 0%, transparent 70%);
+    bottom: -10%;
+    right: -10%;
+    border-radius: 50%;
+    animation: floatSpot 25s infinite alternate-reverse ease-in-out;
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes floatSpot {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(20px, 40px);
+    }
 }
 
 /* Grid 13x13 */
@@ -63,20 +83,20 @@ body {
     /* Hidden until start */
     grid-template-columns: repeat(13, 1fr);
     grid-template-rows: repeat(13, 1fr);
-    background: var(--md-sys-color-surface-container);
-    border: 1px solid var(--md-sys-color-surface-container-highest);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
     position: relative;
-    border-radius: var(--md-sys-shape-corner-medium);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    gap: 4px;
-    /* Separation */
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    gap: 3px;
     padding: 4px;
+    backdrop-filter: blur(10px);
 }
 
 .tile {
-    background: #E6E1E5;
-    color: #1D1B20;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #e0e0e0;
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -87,32 +107,32 @@ body {
     padding: 2px;
     position: relative;
     line-height: 1.1;
-    border-radius: 6px;
-    /* Rounded */
-    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 4px;
+    transition: transform 0.2s, box-shadow 0.2s, z-index 0s;
     overflow: hidden;
 }
 
-/* Special Tiles */
+/* Updated Special Tiles */
 .tile-go {
-    background: linear-gradient(135deg, #FFD700, #FFA000);
+    background: linear-gradient(135deg, #FFD700, #FDB813);
     color: black;
     border: 2px solid gold;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
 .tile-card {
-    background: linear-gradient(135deg, #673AB7, #9C27B0);
+    background: linear-gradient(135deg, #7B1FA2, #BA68C8);
     color: white;
 }
 
 .tile-jail {
-    background: repeating-linear-gradient(45deg, #607D8B, #607D8B 10px, #455A64 10px, #455A64 20px);
+    background: repeating-linear-gradient(45deg, #37474F, #37474F 10px, #263238 10px, #263238 20px);
     color: white;
+    border: 2px solid #546E7A;
 }
 
 .tile-special {
-    background: #FF9800;
+    background: #FF6D00;
     color: black;
 }
 
@@ -120,34 +140,35 @@ body {
 @keyframes glow-pulse {
     0% {
         box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
-        border-color: gold;
-        transform: scale(1);
+        z-index: 100;
+        transform: scale(1.1);
     }
 
     50% {
-        box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.5);
-        border-color: white;
-        transform: scale(1.05);
-        z-index: 10;
+        box-shadow: 0 0 30px 10px rgba(255, 215, 0, 0.6);
+        z-index: 100;
+        transform: scale(1.2);
+        border: 2px solid white;
     }
 
     100% {
         box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
-        border-color: transparent;
+        z-index: 1;
         transform: scale(1);
     }
 }
 
 .glow-active {
-    animation: glow-pulse 1s ease-out;
+    animation: glow-pulse 0.8s ease-out;
+    z-index: 100;
 }
 
 .tile-color {
     position: absolute;
     width: 100%;
-    height: 8px;
+    height: 25%;
     top: 0;
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .owner-bar {
@@ -158,263 +179,439 @@ body {
     transition: background 0.3s;
 }
 
+/* Glassmorphism Dashboard */
 .center-dash {
     grid-area: 2 / 2 / 13 / 13;
-    background: var(--md-sys-color-surface);
+    background: var(--glass-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     flex-direction: column;
+    justify-content: center;
     padding: 24px;
     position: relative;
-    border-radius: var(--md-sys-shape-corner-large);
-    border: 1px solid var(--md-sys-color-surface-container-highest);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
     margin: 8px;
-    gap: 16px;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+    gap: 20px;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+}
+
+/* Floating Action Button (Manage) */
+.fab-manage {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4081, #7c4dff);
+    color: white;
+    border: none;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 20px;
+}
+
+.fab-manage:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 15px 30px rgba(255, 64, 129, 0.4);
+}
+
+.fab-manage::after {
+    content: '💼';
+    font-size: 1.8rem;
 }
 
 /* Buttons */
 .m3-btn {
-    height: 40px;
-    border-radius: 20px;
-    padding: 0 24px;
-    border: none;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 500;
-    font-size: 0.875rem;
-    letter-spacing: 0.1px;
+    height: 44px;
+    border-radius: 22px;
+    padding: 0 28px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.8rem;
     cursor: pointer;
-    transition: background-color 0.2s, box-shadow 0.2s;
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    background: rgba(20, 20, 20, 0.8);
+    /* Darker default for contrast */
+    color: white;
+    transition: all 0.3s;
 }
 
 .m3-btn:hover {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
-    background: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)), var(--md-sys-color-primary);
+    background: var(--neon-primary);
+    color: black;
+    box-shadow: 0 0 20px var(--neon-primary);
+    border-color: transparent;
 }
 
-.m3-btn:disabled {
-    background: rgba(230, 225, 229, 0.12);
-    color: rgba(230, 225, 229, 0.38);
-    cursor: not-allowed;
-    box-shadow: none;
+/* Light context override (for Setup box) */
+#setup .m3-btn {
+    background: #6200ea !important;
+    /* Force Purple */
+    color: white !important;
+    border: none !important;
+    font-weight: bold;
+    opacity: 1 !important;
 }
 
-/* HUD */
+#setup .m3-btn:hover {
+    background: #3700b3 !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal specific overrides for Chance Card (White button issue) */
+#modal-card .m3-btn {
+    background: white !important;
+    color: #673ab7 !important;
+    /* Purple text on white btn */
+    font-weight: bold;
+}
+
+/* TICKET HUD STYLE - REVERTED TO SIDE-BY-SIDE */
 #status-row {
     display: flex;
-    justify-content: space-around;
-    gap: 12px;
+    justify-content: space-between;
+    /* Space out the cards */
+    gap: 8px;
+    width: 100%;
 }
 
 .p-card {
     flex: 1;
-    padding: 16px;
-    background: var(--md-sys-color-surface-container-high);
-    color: var(--md-sys-color-on-surface);
-    border-radius: var(--md-sys-shape-corner-medium);
-    text-align: center;
-    border: 2px solid transparent;
-    font-size: 0.9rem;
+    position: relative;
+    background: rgba(20, 20, 20, 0.9);
+    color: white;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: row;
+    /* Horizontal Layout */
+    align-items: center;
+    justify-content: space-between;
+    /* Name left, Money right */
     transition: all 0.3s ease;
 }
 
+/* Remove Ticket Stub line if not desired, keeping it simple for now as per "horrible" feedback on cards generally */
+.p-card::before {
+    display: none;
+}
+
 .p-card.active {
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    border-color: var(--md-sys-color-primary);
+    background: rgba(50, 50, 60, 1);
+    border: 2px solid var(--neon-primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
 
-/* Dice */
-.dice-box {
-    display: flex;
-    gap: 16px;
-    margin: auto;
-    perspective: 600px;
-}
-
-.die {
-    width: 56px;
-    height: 56px;
-    background: radial-gradient(circle at 30% 30%, #ffffff, #b0bec5);
-    color: #333;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
+.p-name {
+    font-family: var(--font-heading);
     font-weight: 700;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 -2px 5px rgba(0, 0, 0, 0.1);
-    border: 1px solid #90a4ae;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 0;
+    /* No margin */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+    /* Leave space for money */
+    text-align: left;
 }
 
-.rolling {
-    animation: shake 0.4s infinite linear;
+.p-money {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    color: #4caf50;
+    font-weight: bold;
+    text-shadow: none;
+    text-align: right;
+    margin-left: 8px;
 }
 
-@keyframes shake {
-    0% {
-        transform: translate(1px, 1px) rotate(0deg);
-    }
-
-    10% {
-        transform: translate(-1px, -2px) rotate(-10deg);
-    }
-
-    20% {
-        transform: translate(-3px, 0px) rotate(10deg);
-    }
-
-    30% {
-        transform: translate(3px, 2px) rotate(0deg);
-    }
-
-    40% {
-        transform: translate(1px, -1px) rotate(10deg);
-    }
-
-    50% {
-        transform: translate(-1px, 2px) rotate(-10deg);
-    }
-
-    60% {
-        transform: translate(-3px, 1px) rotate(0deg);
-    }
-
-    70% {
-        transform: translate(3px, 1px) rotate(-10deg);
-    }
-
-    80% {
-        transform: translate(-1px, -1px) rotate(10deg);
-    }
-
-    90% {
-        transform: translate(1px, 2px) rotate(0deg);
-    }
-
-    100% {
-        transform: translate(1px, -2px) rotate(-10deg);
-    }
-}
+/* ... skipped ... */
 
 .token {
     position: absolute;
+    /* CRITICAL: Required for JS movement */
     width: 32px;
     height: 32px;
     background: white;
+    /* Fallback */
     border-radius: 50%;
-    border: 2px solid white;
-    z-index: 100;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    border: 2px solid white;
+    font-size: 1.2rem;
+    z-index: 500;
+    /* Ensure on top of everything */
+    pointer-events: none;
+    /* Click through to tiles */
+    transition: top 0.5s, left 0.5s;
+    /* Smooth movement */
 }
 
-/* Modals */
+/* 3D Dice */
+.dice-box {
+    display: flex;
+    gap: 40px;
+    margin: 30px auto;
+    justify-content: center;
+    perspective: 1000px;
+}
+
+.scene {
+    width: 80px;
+    height: 80px;
+}
+
+/* Larger dice */
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.face {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: white;
+    border: 3px solid #111;
+    border-radius: 12px;
+    font-size: 36px;
+    font-weight: 900;
+    color: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+    backface-visibility: hidden;
+}
+
+/* 3D Coords (Size 80 -> Z=40) */
+.face1 {
+    transform: rotateY(0deg) translateZ(40px);
+}
+
+.face2 {
+    transform: rotateY(90deg) translateZ(40px);
+}
+
+.face3 {
+    transform: rotateX(90deg) translateZ(40px);
+}
+
+.face4 {
+    transform: rotateX(-90deg) translateZ(40px);
+}
+
+.face5 {
+    transform: rotateY(-90deg) translateZ(40px);
+}
+
+.face6 {
+    transform: rotateY(180deg) translateZ(40px);
+}
+
+/* Modals Modernized */
 .ui-modal {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: var(--md-sys-color-surface-container-high);
-    color: var(--md-sys-color-on-surface);
-    padding: 24px;
-    border-radius: 28px;
-    z-index: 9999;
-    width: auto;
-    min-width: 320px;
-    max-width: 90vw;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    z-index: 10000;
+    width: 90%;
+    /* Responsive Width */
+    max-width: 1000px;
+    /* Increased to allow 3 cards side-by-side */
     display: none;
     text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    border: none;
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+/* Ensure Manage List is Flex Grid */
+#manage-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.ui-modal h1,
+.ui-modal h2 {
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
 }
 
 /* Inputs */
 input[type="text"],
 input[type="number"],
 select {
-    background: var(--md-sys-color-surface-container-highest);
-    border: none;
-    border-bottom: 1px solid var(--md-sys-color-on-surface);
-    border-radius: 4px 4px 0 0;
-    height: 56px;
-    padding: 8px 16px;
-    color: var(--md-sys-color-on-surface);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    height: 50px;
+    padding: 0 16px;
+    color: white;
     font-size: 1rem;
     width: 100%;
-    margin-bottom: 0px;
-    transition: 0.2s;
+    margin-bottom: 10px;
 }
 
-/* Deed Cards */
-#manage-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    justify-content: center;
+input:focus,
+select:focus {
+    outline: 2px solid var(--neon-primary);
+    border-color: transparent;
 }
 
+/* Deed Cards (Manage) - CLASSIC REVERT */
 .deed-card {
-    background: #FFFBFE;
-    color: #1C1B1F;
-    border-radius: 12px;
+    background: #f5f5f5;
+    color: #000;
+    border: 1px solid #999;
+    border-radius: 6px;
     width: 220px;
+    /* Optimized for 3-col grid */
     font-size: 0.75rem;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    border: none;
+    overflow: visible;
+    /* Prevent cutting off shadows/content if any */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin: 0;
+    /* Margin handled by gap */
+    padding-bottom: 10px;
+    /* Space at bottom */
 }
 
 .deed-header {
-    background: #E7E0EC;
-    padding: 12px;
+    border-bottom: 2px solid #000;
+    padding: 10px;
     text-align: center;
-    font-weight: 700;
+    font-weight: 900;
+    color: inherit;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .deed-body {
-    padding: 16px;
+    padding: 10px;
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 6px;
-}
-
-.rent-row {
-    display: flex;
-    justify-content: space-between;
+    /* Increased gap */
+    text-align: center;
 }
 
 .deed-actions {
-    margin-top: 12px;
+    margin-top: 10px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    border-top: 1px solid #CAC4D0;
-    padding-top: 12px;
+    gap: 5px;
 }
 
-.deed-actions button {
-    height: 32px;
-    font-size: 0.75rem;
+.deed-actions .m3-btn {
+    height: 30px;
+    /* Compact buttons */
+    font-size: 0.7rem;
+    padding: 0 10px;
+    width: 100%;
+    /* Full width */
 }
 
-#setup h1 {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 400;
-    letter-spacing: -0.5px;
+.close-sticky {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.close-sticky:hover {
+    background: white;
+    color: black;
+}
+
+/* Animations */
+.loading-logo {
+    animation: logo-pulse 3s infinite ease-in-out;
+}
+
+@keyframes logo-pulse {
+    0% {
+        filter: brightness(0.2) grayscale(1) drop-shadow(0 0 0px var(--neon-primary));
+        transform: scale(0.95);
+    }
+
+    50% {
+        filter: brightness(1.2) grayscale(0) drop-shadow(0 0 30px var(--neon-primary));
+        transform: scale(1.05);
+    }
+
+    100% {
+        filter: brightness(0.2) grayscale(1) drop-shadow(0 0 0px var(--neon-primary));
+        transform: scale(0.95);
+    }
+}
+
+.center-logo {
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+}
+
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--neon-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.token {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    border: 2px solid white;
+    font-size: 1.2rem;
 }
