@@ -4,19 +4,19 @@ let players = [], turn = 0, housesBuilt = 0, doubles = 0;
 
 const music = [
     // LADO 1 (0-12): DEBUT & FEARLESS
-    { n: "INÍCIO<br><span style='font-size:0.5rem'>RECEBA $200 DE ROYALTIES</span>", t: "s" },
+    { n: "START<br><span style='font-size:0.5rem'>COLLECT $200 FROM ROYALTIES</span>", t: "s" },
     { n: "Picture To Burn", p: 60, r: [2, 10, 30, 90, 160, 250], c: "#b9d8b5", h: 50 },
     { n: "Our Song", p: 60, r: [4, 20, 60, 180, 320, 450], c: "#b9d8b5", h: 50 },
-    { n: "SORTE OU REVÉS", t: "card" },
-    { n: "TAXA<br><span style='font-size:0.5rem'>$100</span>", t: "tax", v: 100 },
+    { n: "CHANCE OR FATE", t: "card" },
+    { n: "INCOME TAX<br><span style='font-size:0.5rem'>PAY $100</span>", t: "tax", v: 100 },
     { n: "Eras Tour", p: 200, t: "rail" },
     { n: "Love Story", p: 100, r: [6, 30, 90, 270, 400, 550], c: "#fff176", h: 50 },
-    { n: "SORTE OU REVÉS", t: "card" },
+    { n: "CHANCE OR FATE", t: "card" },
     { n: "You Belong With Me", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#fff176", h: 50 },
     { n: "Fearless", p: 120, r: [8, 40, 100, 300, 450, 600], c: "#fff176", h: 50 },
     { n: "Enchanted", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#d1b2d1", h: 100 },
     { n: "Long Live", p: 160, r: [12, 60, 180, 500, 700, 900], c: "#d1b2d1", h: 100 },
-    { n: "MASTERS PRESAS<br><span style='font-size:0.5rem'>FIQUE SEM JOGAR POR ATÉ 3 TURNOS</span>", t: "s" },
+    { n: "STOLEN MASTERS<br><span style='font-size:0.5rem'>STAY IN JAIL FOR 3 TURNS</span>", t: "s" },
 
     // LADO 2 (12-24): RED & 1989
     { n: "Red", p: 140, r: [10, 50, 150, 450, 625, 750], c: "#8b0000", h: 100 },
@@ -28,9 +28,9 @@ const music = [
     { n: "Blank Space", p: 180, r: [14, 70, 200, 550, 750, 950], c: "#b1d4e0", h: 100 },
     { n: "Shake It Off", p: 200, r: [16, 80, 220, 600, 800, 1000], c: "#b1d4e0", h: 100 },
     { n: "Look What You Made Me Do", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#010101", h: 150 },
-    { n: "SORTE OU REVÉS", t: "card" },
+    { n: "CHANCE OR FATE", t: "card" },
     { n: "Delicate", p: 220, r: [18, 90, 250, 700, 875, 1050], c: "#010101", h: 150 },
-    { n: "HIATO", t: "s" }, // Renamed from BACKSTAGE
+    { n: "HIATUS", t: "s" },
 
     // LADO 3 (24-36): REP, LOVER, FOLKLORE, EVERMORE
     { n: "End Game", p: 240, r: [20, 100, 300, 750, 925, 1100], c: "#010101", h: 150 },
@@ -42,15 +42,15 @@ const music = [
     { n: "Eras Tour", p: 200, t: "rail" },
     { n: "seven", p: 300, r: [26, 130, 390, 900, 1100, 1275], c: "#cfcfcf", h: 200 },
     { n: "willow", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#795548", h: 200 },
-    { n: "SORTE OU REVÉS", t: "card" },
+    { n: "CHANCE OR FATE", t: "card" },
     { n: "champagne problems", p: 320, r: [28, 150, 450, 1000, 1200, 1400], c: "#795548", h: 200 },
-    { n: "MASTERS<br>VENDIDAS", t: "s" }, // Renamed from ENTRE EM HIATO
+    { n: "SOLD<br>MASTERS", t: "s" },
 
     // LADO 4 (36-48): MIDNIGHTS, TTPD, SHOWGIRL
     { n: "Anti-Hero", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#3c3abeff", h: 200 },
     { n: "Lavender Haze", p: 350, r: [35, 175, 500, 1100, 1300, 1500], c: "#3c3abeff", h: 200 },
     { n: "Karma", p: 380, r: [40, 185, 550, 1200, 1400, 1700], c: "#3c3abeff", h: 200 },
-    { n: "SORTE OU REVÉS", t: "card" },
+    { n: "CHANCE OR FATE", t: "card" },
     { n: "Eras Tour", p: 200, t: "rail" },
     { n: "Fortnight", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#85836dff", h: 200 },
     { n: "Down Bad", p: 400, r: [50, 200, 600, 1400, 1700, 2000], c: "#85836dff", h: 200 },
@@ -67,45 +67,45 @@ for (let i = 1; i <= 13; i++) grid.push(`1/${i}`);
 for (let i = 2; i <= 12; i++) grid.push(`${i}/13`);
 
 const chanceCards = [
-    { t: "Abertura da The Eras Tour! Avance para o Início e comece o show! (+$200)", a: (p) => { p.pos = 0; p.money += 200; sync(); } },
-    { t: "Suas masters foram vendidas sem seu consentimento! Vá direto para as Margens Presas.", a: (p) => { p.pos = 12; p.jail = 3; doubles = 0; sync(); } },
+    { t: "The Eras Tour Opening Night! Advance to START and begin the show! (+$200)", a: (p) => { p.pos = 0; p.money += 200; sync(); } },
+    { t: "Masters sold without consent! Go directly to Stolen Masters (Jail).", a: (p) => { p.pos = 12; p.jail = 3; doubles = 0; sync(); } },
     {
-        t: "Jatinho particular pronto! Avance para a próxima cidade da Eras Tour (Trem).", a: (p) => {
+        t: "Private Jet Ready! Advance to the next Eras Tour City (Railroad).", a: (p) => {
             if (p.pos < 5) p.pos = 5; else if (p.pos < 17) p.pos = 17; else if (p.pos < 31) p.pos = 31; else if (p.pos < 41) p.pos = 41; else p.pos = 5;
             sync(); handle(p, 0); return false;
         }
     },
-    { t: "Recorde de vendas de vinil! Receba $200.", a: (p) => { p.money += 200; } },
-    { t: "Exaustão pós-show. Pague $50 em vitaminas.", a: (p) => { p.money -= 50; } },
-    { t: "Venda de merch esgotada na lojinha! Receba $50.", a: (p) => { p.money += 50; } },
-    { t: "Ticket Dourado! Você recebeu suas masters de volta de graça. Use para libertá-las sem pagar nada.", a: (p) => { p.jailCard = true; } },
+    { t: "Vinyl Sales Record! Receive $200.", a: (p) => { p.money += 200; } },
+    { t: "Post-show Exhaustion. Pay $50 for vitamins.", a: (p) => { p.money -= 50; } },
+    { t: "Merch sold out! Receive $50.", a: (p) => { p.money += 50; } },
+    { t: "Golden Ticket! You got your masters back for free. Use to leave jail.", a: (p) => { p.jailCard = true; } },
     {
-        t: "Lançamento de álbum surpresa! Colete $50 de cada fã (jogador).", a: (p) => {
+        t: "Surprise Album Drop! Collect $50 from every fan (player).", a: (p) => {
             players.forEach(op => { if (op.id !== p.id) { op.money -= 50; p.money += 50; if (op.money < 0) fail(op); } });
         }
     },
-    { t: "Taylor's Version superou a original! Receba $1000 de royalties.", a: (p) => { p.money += 1000; } },
-    { t: "Reembolso de processo ganho contra DJ. Receba $20.", a: (p) => { p.money += 20; } },
+    { t: "Taylor's Version outsold the original! Receive $1000 royalties.", a: (p) => { p.money += 1000; } },
+    { t: "Won lawsuit against DJ. Receive $20 symbolic damages.", a: (p) => { p.money += 20; } },
     {
-        t: "Sessão secreta com fãs! Receba $10 de cada um.", a: (p) => {
+        t: "Secret Session with Fans! Receive $10 from each.", a: (p) => {
             players.forEach(op => { if (op.id !== p.id) { op.money -= 10; p.money += 10; if (op.money < 0) fail(op); } });
         }
     },
-    { t: "Assinou contrato milionário com a Republic Records. Receba $1000.", a: (p) => { p.money += 1000; } },
-    { t: "Multa por atraso no palco. Pague $100.", a: (p) => { p.money -= 100; } },
-    { t: "Compra de figurinos novos da Versace. Pague $50.", a: (p) => { p.money -= 50; } },
-    { t: "Escreveu música para outro artista. Receba $25.", a: (p) => { p.money += 25; } },
+    { t: "Signed millionaire contract with Republic Records. Receive $1000.", a: (p) => { p.money += 1000; } },
+    { t: "Late for stage fine. Pay $100.", a: (p) => { p.money -= 100; } },
+    { t: "Bought new Versace costumes. Pay $50.", a: (p) => { p.money -= 50; } },
+    { t: "Wrote a song for another artist. Receive $25.", a: (p) => { p.money += 25; } },
     {
-        t: "Renovação dos estádios. Pague $40 por casa e $115 por hotel.", a: (p) => {
+        t: "Stadium Renovations. Pay $40 per house and $115 per hotel.", a: (p) => {
             let bill = 0;
             p.props.forEach(pr => { bill += pr.houses === 5 ? 115 : pr.houses * 40; });
             p.money -= bill;
         }
     },
-    { t: "Capa da revista TIME! Pessoa do Ano. Receba $10.", a: (p) => { p.money += 10; } },
-    { t: "Fã clube oficial cresceu. Receba $100.", a: (p) => { p.money += 100; } },
-    { t: "Vá passear na 'The Life of a Showgirl'. Você consegue.", a: (p) => { p.pos = 45; sync(); handle(p, 0); return false; } },
-    { t: "Crise existencial. Avance para 'Anti-Hero'. Sou eu, oi!", a: (p) => { p.pos = 37; sync(); handle(p, 0); return false; } }
+    { t: "TIME Person of the Year Cover! Receive $10.", a: (p) => { p.money += 10; } },
+    { t: "Official Fan Club grew. Receive $100.", a: (p) => { p.money += 100; } },
+    { t: "Go take a walk on 'The Life of a Showgirl'. You got this.", a: (p) => { p.pos = 45; sync(); handle(p, 0); return false; } },
+    { t: "Existential Crisis. Advance to 'Anti-Hero'. It's me, hi!", a: (p) => { p.pos = 37; sync(); handle(p, 0); return false; } }
 ];
 
 let auc = { idx: -1, players: [], turn: 0, bid: 0, leader: null };
@@ -132,7 +132,7 @@ function addP() {
     row.style.cssText = "display:flex; gap:10px; margin-bottom:10px; align-items:center;";
 
     row.innerHTML = `
-        <input type="text" id="p-n-${id}" value="Jogador ${id + 1}" style="flex:3; border-radius:4px 4px 0 0;" placeholder="Nome">
+        <input type="text" id="p-n-${id}" value="Player ${id + 1}" style="flex:3; border-radius:4px 4px 0 0;" placeholder="Name">
         <button id="rand-btn-${id}" style="background:#673ab7; color:white; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.2rem">🎲</button>
         <select id="p-e-${id}" style="flex:1; border-radius:4px 4px 0 0;">${tokens.map(t => `<option>${t}</option>`).join('')}</select>
         <button id="del-btn-${id}" style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer">✕</button>
@@ -175,11 +175,11 @@ function render() {
         const t = document.createElement('div'); t.className = 'tile'; t.id = `tile-${i}`; t.style.gridArea = grid[i];
 
         // Special Styles
-        if (d.n === "GO" || d.n.includes("INÍCIO")) t.classList.add('tile-go');
+        if (d.n === "START" || d.n.includes("START")) t.classList.add('tile-go');
         else if (d.t === "card") t.classList.add('tile-card');
-        else if (d.n.includes("MASTERS PRESAS")) t.classList.add('tile-jail');
-        else if (d.n.includes("HIATO")) t.classList.add('tile-hiato');
-        else if (d.n.includes("VENDIDAS") || d.n.includes("ENTRE EM")) t.classList.add('tile-gotojail');
+        else if (d.n.includes("STOLEN MASTERS")) t.classList.add('tile-jail');
+        else if (d.n.includes("HIATUS")) t.classList.add('tile-hiato');
+        else if (d.n.includes("SOLD") || d.n.includes("STOLEN")) t.classList.add('tile-gotojail');
         else if (d.t === "s" || d.t === "tax") t.classList.add('tile-special');
         else if (d.t === "rail") t.classList.add('tile-rail');
         else if (d.t === "util") t.classList.add('tile-util');
@@ -214,18 +214,18 @@ function startTurn() {
     const p = players[turn];
     updateHUD();
 
-    document.getElementById('turn-msg').innerText = `Vez de ${p.name}`;
+    document.getElementById('turn-msg').innerText = `${p.name}'s Turn`;
     showModal('modal-turn');
 
     setTimeout(() => {
         closeModal('modal-turn');
         if (p.name.includes("Bot")) {
             // document.getElementById('roll-btn').disabled = true; // Button removed
-            log(`🤖 ${p.name} vai jogar...`);
+            log(`🤖 ${p.name} is playing...`);
             setTimeout(toss, 1000);
         } else {
             // document.getElementById('roll-btn').disabled = false; // Button removed
-            log(`👉 Sua vez! Toque nos dados para jogar.`);
+            log(`👉 Your turn! Tap the dice to roll.`);
         }
     }, 1500);
 }
@@ -282,13 +282,13 @@ function toss() {
         if (p.jail > 0) {
             if (d1 === d2) {
                 p.jail = 0;
-                log("Saiu do Hiato!");
+                log("Out of Hiatus!");
                 doubles = 0;
                 moved = true;
                 move(p, d1 + d2);
             } else {
                 p.jail--;
-                log(`Ainda no Hiato (${p.jail})`);
+                log(`Still in Hiatus (${p.jail})`);
                 doubles = 0;
                 nextTurn();
             }
@@ -296,7 +296,7 @@ function toss() {
             if (d1 === d2) doubles++; else doubles = 0;
 
             if (doubles === 3) {
-                log("3 Doubles! Vai pro Hiato!");
+                log("3 Doubles! Go to Hiatus!");
                 p.pos = 12; p.jail = 3; doubles = 0; sync(); nextTurn();
             } else {
                 moved = true;
@@ -308,7 +308,7 @@ function toss() {
 
 function move(p, dist) {
     let old = p.pos; p.pos = (p.pos + dist) % 48;
-    if (p.pos < old) { p.money += 200; log("Passou pelo GO! +$200"); sndCash.play(); }
+    if (p.pos < old) { p.money += 200; log("Passed GO! +$200"); sndCash.play(); }
     sync(); setTimeout(() => handle(p, dist), 500);
 }
 
@@ -316,7 +316,7 @@ function handle(p, dist) {
     const t = music[p.pos];
     if (p.pos === 36) { p.pos = 12; p.jail = 3; doubles = 0; sync(); nextTurn(); return; }
     if (t.t === "card") { drawCard(p); return; }
-    if (t.t === "tax") return askPay(p, t.v, "Taxa", nextTurn);
+    if (t.t === "tax") return askPay(p, t.v, "Tax", nextTurn);
 
     const owner = players.find(x => x.props.some(y => y.idx === p.pos));
     if (t.p && !owner) {
@@ -338,14 +338,14 @@ function handle(p, dist) {
 
             footer.innerHTML = `
                 <div style="text-align:center; padding:10px; color:#aaa; font-size:1.1rem; border-bottom:1px solid #333; margin-bottom:10px">
-                    Seu Saldo: <span style="color:#4caf50; font-weight:bold">$${p.money}</span>
+                    Your Balance: <span style="color:#4caf50; font-weight:bold">$${p.money}</span>
                 </div>
                 <div style="display:flex; gap:10px">
                     <button class="m3-btn" style="background:${canBuy ? '#4caf50' : 'rgba(255,255,255,0.1)'}; color:${canBuy ? 'white' : 'rgba(255,255,255,0.5)'}; flex:1; cursor:${canBuy ? 'pointer' : 'not-allowed'}" 
                         ${canBuy ? 'onclick="doBuy()"' : 'disabled'}>
-                        ${canBuy ? `Comprar ($${t.p})` : 'Sem Fundos'}
+                        ${canBuy ? `Buy ($${t.p})` : 'Insufficient Funds'}
                     </button>
-                    <button class="m3-btn" style="background:#ff9800; flex:1" onclick="closeModal('modal-buy'); startAuction(${p.pos})">Leiloar</button>
+                    <button class="m3-btn" style="background:#ff9800; flex:1" onclick="closeModal('modal-buy'); startAuction(${p.pos})">Auction</button>
                 </div>
             `;
 
@@ -355,9 +355,9 @@ function handle(p, dist) {
         const rent = calcRent(t, owner, dist);
 
         // FIX: Pay the OWNER
-        askPay(p, rent, `Aluguel para ${owner.name}`, () => {
+        askPay(p, rent, `Rent for ${owner.name}`, () => {
             owner.money += rent; // Transfer Logic
-            log(`${owner.name} recebeu $${rent}.`);
+            log(`${owner.name} received $${rent}.`);
             nextTurn();
         });
     } else nextTurn();
@@ -421,7 +421,7 @@ function startAuction(idx) {
 function updateAuctionUI() {
     if (auc.players.length === 0) {
         closeModal('modal-auction');
-        log("Leilão cancelado (sem participantes).");
+        log("Auction cancelled (no participants).");
         nextTurn();
         return;
     }
@@ -431,7 +431,7 @@ function updateAuctionUI() {
         closeModal('modal-auction');
         winner.money -= auc.bid;
         winner.props.push({ idx: auc.idx, houses: 0, mortgaged: false });
-        log(`${winner.name} venceu o leilão de ${music[auc.idx].n} por $${auc.bid}!`);
+        log(`${winner.name} won the auction for ${music[auc.idx].n} for $${auc.bid}!`);
 
         const tile = document.getElementById(`tile-${auc.idx}`);
         if (tile) {
@@ -446,10 +446,10 @@ function updateAuctionUI() {
 
     const p = auc.players[auc.turn];
     document.getElementById('auc-bid').innerText = `$${auc.bid}`;
-    document.getElementById('auc-leader').innerText = auc.leader ? `Líder: ${auc.leader.name}` : `Lance Inicial`;
+    document.getElementById('auc-leader').innerText = auc.leader ? `Leader: ${auc.leader.name}` : `Starting Bid`;
 
     // NEW: Show Balance
-    document.getElementById('auc-turn').innerHTML = `Vez de: <span style="font-weight:bold">${p.name}</span> <span style="font-size:0.9rem; color:#ccc">($${p.money})</span>`;
+    document.getElementById('auc-turn').innerHTML = `Turn: <span style="font-weight:bold">${p.name}</span> <span style="font-size:0.9rem; color:#ccc">($${p.money})</span>`;
 
     // NEW: Disable button if broke
     const bidBtn = document.querySelector('#modal-auction .m3-btn'); // The first button is "Cobrir"
@@ -475,7 +475,7 @@ function updateAuctionUI() {
 
 function bidAuction() {
     const p = auc.players[auc.turn];
-    if (p.money < auc.bid + 10) { showAlert("Sem fundos para cobrir!"); return; }
+    if (p.money < auc.bid + 10) { showAlert("Insufficient funds to cover the bid!"); return; }
     auc.bid += 10;
     auc.leader = p;
     auc.turn = (auc.turn + 1) % auc.players.length;
@@ -491,20 +491,20 @@ function passAuction() {
 function askPay(p, val, reason, cb) {
     // Unified UI for Bot and Human
     showModal('modal-pay');
-    const isRent = reason.includes("Aluguel para");
-    const recipient = isRent ? reason.replace("Aluguel para ", "") : "O Banco";
+    const isRent = reason.includes("Rent for");
+    const recipient = isRent ? reason.replace("Rent for ", "") : "The Bank";
 
     document.getElementById('pay-msg').innerHTML = `
         <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-bottom:10px">
-            <div style="color:#ff9800; font-weight:bold; font-size:1.2rem; margin-bottom:10px">💸 PAGAMENTO 💸</div>
+            <div style="color:#ff9800; font-weight:bold; font-size:1.2rem; margin-bottom:10px">💸 PAYMENT 💸</div>
             <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-                <span>De:</span> <span style="font-weight:bold">${p.name} <span style="font-weight:normal; color:#ccc; font-size:0.9rem">(Saldo: $${p.money})</span></span>
+                <span>From:</span> <span style="font-weight:bold">${p.name} <span style="font-weight:normal; color:#ccc; font-size:0.9rem">(Balance: $${p.money})</span></span>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-                <span>Para:</span> <span style="font-weight:bold">${recipient}</span>
+                <span>To:</span> <span style="font-weight:bold">${recipient}</span>
             </div>
              <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; margin-top:5px">
-                <span>Valor:</span> <span style="color:#f44336; font-weight:bold; font-size:1.2rem">$${val}</span>
+                <span>Amount:</span> <span style="color:#f44336; font-weight:bold; font-size:1.2rem">$${val}</span>
             </div>
         </div>
         <div style="font-size:0.8rem; color:#ccc">${reason}</div>
@@ -513,13 +513,13 @@ function askPay(p, val, reason, cb) {
     const payBtn = document.getElementById('pay-btn');
     // Reset button state
     payBtn.disabled = false;
-    payBtn.innerText = "Pagar Agora";
+    payBtn.innerText = "Pay Now";
     payBtn.onclick = () => {
         p.money -= val;
         closeModal('modal-pay');
         if (p.money < 0) fail(p); else {
             sndCash.play();
-            log(`💰 PAGAMENTO: ${p.name} pagou $${val} para ${recipient}.`);
+            log(`💰 PAYMENT: ${p.name} paid $${val} to ${recipient}.`);
             cb();
         }
         updateHUD();
@@ -527,7 +527,7 @@ function askPay(p, val, reason, cb) {
 
     if (p.name.includes("Bot")) {
         payBtn.disabled = true;
-        payBtn.innerText = "Processando...";
+        payBtn.innerText = "Processing...";
         setTimeout(() => {
             // Auto-click pay
             payBtn.disabled = false;
@@ -557,12 +557,12 @@ function calcRent(t, o, d) {
 function fail(p) {
     p.money = 0;
     updateHUD();
-    document.getElementById('fail-msg').innerText = `FIM DE JOGO! ${p.name} faliu! O império musical desmoronou.`;
+    document.getElementById('fail-msg').innerText = `GAME OVER! ${p.name} went bankrupt! The music empire collapsed.`;
     showModal('modal-fail');
     document.getElementById('roll-btn').disabled = true; // Button removed but id might be needed by fail... wait, I removed the button.
     const btns = document.querySelectorAll('.m3-btn');
     btns.forEach(b => {
-        if (!b.innerText.includes('Reiniciar')) b.disabled = true;
+        if (!b.innerText.includes('Restart')) b.disabled = true;
     });
 }
 
@@ -571,7 +571,7 @@ function openManage() {
     list.innerHTML = "";
 
     if (players[turn].props.length === 0) {
-        list.innerHTML = "<p style='color:#888; text-align:center; width:100%'>Você não possui propriedades.</p>";
+        list.innerHTML = "<p style='color:#888; text-align:center; width:100%'>You don't own any properties.</p>";
     }
 
     players[turn].props.forEach(pr => {
@@ -582,31 +582,32 @@ function openManage() {
         const canSellHouse = !isRailUtil && pr.houses > 0;
         const mortgageValue = tile.p / 2;
         const unmortgageCost = Math.ceil(mortgageValue * 1.1);
-        const canMortgage = !pr.mortgaged && pr.houses === 0;
         const canUnmortgage = pr.mortgaged && players[turn].money >= unmortgageCost;
+        const canMortgage = !pr.mortgaged && pr.houses === 0;
+
 
         let rentStats = "";
         if (!isRailUtil) {
             rentStats = `
-                <div class="rent-row"><span>Aluguel:</span> <span>$${tile.r[0]}</span></div>
-                <div class="rent-row"><span>1 Casa:</span> <span>$${tile.r[1]}</span></div>
-                <div class="rent-row"><span>2 Casas:</span> <span>$${tile.r[2]}</span></div>
-                <div class="rent-row"><span>3 Casas:</span> <span>$${tile.r[3]}</span></div>
-                <div class="rent-row"><span>4 Casas:</span> <span>$${tile.r[4]}</span></div>
+                <div class="rent-row"><span>Rent:</span> <span>$${tile.r[0]}</span></div>
+                <div class="rent-row"><span>1 House:</span> <span>$${tile.r[1]}</span></div>
+                <div class="rent-row"><span>2 Houses:</span> <span>$${tile.r[2]}</span></div>
+                <div class="rent-row"><span>3 Houses:</span> <span>$${tile.r[3]}</span></div>
+                <div class="rent-row"><span>4 Houses:</span> <span>$${tile.r[4]}</span></div>
                 <div class="rent-row"><span>HOTEL:</span> <span>$${tile.r[5]}</span></div>
                 <hr style="margin:5px 0; border:0; border-top:1px solid #ccc">
-                <div class="rent-row"><span>Custo Casa:</span> <span>$${tile.h}</span></div>
+                <div class="rent-row"><span>House Cost:</span> <span>$${tile.h}</span></div>
             `;
         } else if (tile.t === 'rail') {
             rentStats = `
-                <div class="rent-row"><span>1 Estádio:</span> <span>$25</span></div>
-                <div class="rent-row"><span>2 Estádios:</span> <span>$50</span></div>
-                <div class="rent-row"><span>3 Estádios:</span> <span>$100</span></div>
-                <div class="rent-row"><span>4 Estádios:</span> <span>$200</span></div>
+                <div class="rent-row"><span>1 Stadium:</span> <span>$25</span></div>
+                <div class="rent-row"><span>2 Stadiums:</span> <span>$50</span></div>
+                <div class="rent-row"><span>3 Stadiums:</span> <span>$100</span></div>
+                <div class="rent-row"><span>4 Stadiums:</span> <span>$200</span></div>
             `;
         } else {
             rentStats = `
-                <div style="text-align:center; margin:10px 0">Se tiver 1 utilitário, aluguel é 4x dados.<br>Se tiver 2, é 10x dados.</div>
+                <div style="text-align:center; margin:10px 0">If one utility is owned, rent is 4x dice.<br>If both are owned, it's 10x dice.</div>
             `;
         }
 
@@ -614,12 +615,12 @@ function openManage() {
         <div class="deed-card" style="${pr.mortgaged ? 'opacity:0.6;' : ''}">
             <div class="deed-header" style="background:${tile.c || '#ccc'}; color:${tile.c === '#010101' ? 'white' : 'black'}">
                 ${tile.n}
-                <div style="font-size:0.6rem; margin-top:2px">${pr.mortgaged ? '(HIPOTECADA)' : (isRailUtil ? '' : (pr.houses === 5 ? '🏨' : '🏠'.repeat(pr.houses)))}</div>
+                <div style="font-size:0.6rem; margin-top:2px">${pr.mortgaged ? '(MORTGAGED)' : (isRailUtil ? '' : (pr.houses === 5 ? '🏨' : '🏠'.repeat(pr.houses)))}</div>
             </div>
             <div class="deed-body">
                 ${rentStats}
                 <div class="rent-row" style="margin-top:auto; font-weight:bold">
-                    <span>Hipoteca:</span> <span>$${mortgageValue}</span>
+                    <span>Mortgage:</span> <span>$${mortgageValue}</span>
                 </div>
                 
                 <div class="deed-actions">
@@ -630,13 +631,13 @@ function openManage() {
                     </div>` : ''}
                     
                     ${pr.mortgaged ?
-                `<button class="m3-btn" ${canUnmortgage ? '' : 'disabled'} style="background:#4caf50" onclick="unmtg(${pr.idx})">Desipotecar (-$${unmortgageCost})</button>` :
-                `<button class="m3-btn" ${canMortgage ? '' : 'disabled'} style="background:#673ab7; color:white" onclick="mtg(${pr.idx})">Hipotecar (+$${mortgageValue})</button>`
+                `<button class="m3-btn" ${canUnmortgage ? '' : 'disabled'} style="background:#4caf50" onclick="unmtg(${pr.idx})">Unmortgage (-$${unmortgageCost})</button>` :
+                `<button class="m3-btn" ${canMortgage ? '' : 'disabled'} style="background:#673ab7; color:white" onclick="mtg(${pr.idx})">Mortgage (+$${mortgageValue})</button>`
             }
                     
                     <div style="display:flex; gap:2px">
-                        <button class="m3-btn" style="background:#00bcd4; flex:1" onclick="transfer(${pr.idx})">Trocar</button>
-                        <button class="m3-btn" style="background:#f44336; color:white; flex:1" onclick="sl(${pr.idx})">Vender</button>
+                        <button class="m3-btn" style="background:#00bcd4; flex:1" onclick="transfer(${pr.idx})">Trade</button>
+                        <button class="m3-btn" style="background:#f44336; color:white; flex:1" onclick="sl(${pr.idx})">Sell</button>
                     </div>
                 </div>
             </div>
@@ -661,13 +662,13 @@ let currentTrade = {
 function transfer(idx = -1) {
     tradeIdx = idx; // Global state for current trade property
 
-    let headerMsg = "Nova Negociação";
-    let subMsg = "Com quem você deseja negociar?";
+    let headerMsg = "New Trade";
+    let subMsg = "Who do you want to trade with?";
 
     // Safely handle property context
     if (idx !== -1 && music[idx]) {
-        headerMsg = `Negociando: ${music[idx].n}`;
-        subMsg = "Escolha um parceiro para oferecer esta propriedade:";
+        headerMsg = `Trading: ${music[idx].n}`;
+        subMsg = "Choose a partner to offer this property:";
     }
 
     const modalBody = document.getElementById('modal-trade');
@@ -679,8 +680,8 @@ function transfer(idx = -1) {
         <p>${subMsg}</p>
         <select id="trade-target" style="width:100%; padding:10px; margin:20px 0; border-radius:8px; font-size:1.1rem; background:rgba(255,255,255,0.1); color:white; border:1px solid #555"></select>
         <div style="display:flex; gap:10px; justify-content:center">
-            <button class="m3-btn" style="background:#4caf50" onclick="initNegotiation()">Iniciar</button>
-            <button class="m3-btn" style="background:#555" onclick="closeModal('modal-trade')">Cancelar</button>
+            <button class="m3-btn" style="background:#4caf50" onclick="initNegotiation()">Start</button>
+            <button class="m3-btn" style="background:#555" onclick="closeModal('modal-trade')">Cancel</button>
         </div>
     `;
 
@@ -729,12 +730,12 @@ function renderNegotiationUI() {
     const isReview = currentTrade.state === 'REVIEW';
 
     // Headers
-    document.getElementById('trade-left-name').innerText = `${p1.token} ${p1.name} (Você)`;
+    document.getElementById('trade-left-name').innerText = `${p1.token} ${p1.name} (You)`;
     document.getElementById('trade-right-name').innerText = `${p2.token} ${p2.name}`;
 
     // Balances
-    document.getElementById('trade-left-balance').innerText = `Saldo disponível: $${p1.money}`;
-    document.getElementById('trade-right-balance').innerText = `Saldo disponível: $${p2.money}`;
+    document.getElementById('trade-left-balance').innerText = `Available Balance: $${p1.money}`;
+    document.getElementById('trade-right-balance').innerText = `Available Balance: $${p2.money}`;
 
     // Inputs (Money)
     const in1 = document.getElementById('trade-left-money');
@@ -763,15 +764,15 @@ function renderNegotiationUI() {
 
     if (!isReview) {
         actions.innerHTML = `
-            <button class="m3-btn" style="background:#f44336; color:white" onclick="closeModal('modal-negotiation')">Cancelar</button>
-            <button class="m3-btn" style="background:#4caf50; min-width:150px" onclick="submitOffer()">Fazer Oferta ➤</button>
+            <button class="m3-btn" style="background:#f44336; color:white" onclick="closeModal('modal-negotiation')">Cancel</button>
+            <button class="m3-btn" style="background:#4caf50; min-width:150px" onclick="submitOffer()">Make Offer ➤</button>
         `;
     } else {
         actions.innerHTML = `
-            <div style="margin-right:auto; align-self:center; color:#ccc">⏳ ${p2.name} está analisando...</div>
-            <button class="m3-btn" style="background:#f44336; color:white" onclick="rejectTrade()">Recusar</button>
-            <button class="m3-btn" style="background:#ff9800" onclick="counterOffer()">Contra-Proposta</button>
-            <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ Aceitar</button>
+            <div style="margin-right:auto; align-self:center; color:#ccc">⏳ ${p2.name} is reviewing...</div>
+            <button class="m3-btn" style="background:#f44336; color:white" onclick="rejectTrade()">Reject</button>
+            <button class="m3-btn" style="background:#ff9800" onclick="counterOffer()">Counter-Offer</button>
+            <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ Accept</button>
         `;
     }
 }
@@ -781,7 +782,7 @@ function renderPropList(containerId, player, selectedIndices, disabled, onToggle
     div.innerHTML = "";
 
     if (player.props.length === 0) {
-        div.innerHTML = "<div style='color:#666; font-size:0.8rem; text-align:center'>Sem propriedades</div>";
+        div.innerHTML = "<div style='color:#666; font-size:0.8rem; text-align:center'>No properties</div>";
         return;
     }
 
@@ -812,7 +813,7 @@ function renderPropList(containerId, player, selectedIndices, disabled, onToggle
 
         const lbl = document.createElement('span');
         lbl.innerHTML = `${m.n}`;
-        if (pr.mortgaged) lbl.innerHTML += ` <span style='font-size:0.7rem; color:#f44336'>(Hip.)</span>`;
+        if (pr.mortgaged) lbl.innerHTML += ` <span style='font-size:0.7rem; color:#f44336'>(Mortgaged)</span>`;
 
         row.innerHTML = colorDot;
         row.appendChild(chk);
@@ -831,7 +832,7 @@ function submitOffer() {
     updateTradeBalance();
     const p1 = players[currentTrade.initiator];
 
-    if (currentTrade.giveMoney > p1.money) { showAlert("Você não tem dinheiro suficiente para essa oferta!"); return; }
+    if (currentTrade.giveMoney > p1.money) { showAlert("You don't have enough money for this offer!"); return; }
 
     // Check if at least something is offered/requested
     // (Optional: Allow gifts? Yes)
@@ -843,7 +844,7 @@ function submitOffer() {
     const targetP = players[currentTrade.target];
     if (targetP.name.includes("Bot")) {
         const actions = document.getElementById('trade-actions');
-        actions.innerHTML = `<div style="width:100%; text-align:center; color:#ffeb3b; font-weight:bold; font-size:1.1rem; padding:20px">🤖 Analisando proposta...</div>`;
+        actions.innerHTML = `<div style="width:100%; text-align:center; color:#ffeb3b; font-weight:bold; font-size:1.1rem; padding:20px">🤖 Analyzing proposal...</div>`;
 
         setTimeout(() => {
             analyzeBotTrade();
@@ -881,12 +882,12 @@ function rejectTrade() {
     const actions = document.getElementById('trade-actions');
     actions.innerHTML = `
         <div style="width:100%; text-align:center; padding:15px; background:rgba(244, 67, 54, 0.2); border-radius:8px; margin-bottom:10px">
-            <div style="color:#f44336; font-weight:bold; font-size:1.2rem">🚫 Proposta Recusada</div>
-            <div style="color:#ccc; font-size:0.9rem">A negociação foi cancelada.</div>
+            <div style="color:#f44336; font-weight:bold; font-size:1.2rem">🚫 Proposal Rejected</div>
+            <div style="color:#ccc; font-size:0.9rem">The negotiation has been cancelled.</div>
         </div>
-        <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">Fechar</button>
+        <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">Close</button>
     `;
-    log("Negociação recusada.");
+    log("Negotiation rejected.");
 }
 
 function acceptTrade() {
@@ -914,8 +915,8 @@ function acceptTrade() {
     const p2 = players[currentTrade.target];
 
     // Final Validation
-    if (p1.money < currentTrade.giveMoney) { showAlert(`${p1.name} não tem fundos!`); return; }
-    if (p2.money < currentTrade.getMoney) { showAlert(`${p2.name} não tem fundos!`); return; }
+    if (p1.money < currentTrade.giveMoney) { showAlert(`${p1.name} has insufficient funds!`); return; }
+    if (p2.money < currentTrade.getMoney) { showAlert(`${p2.name} has insufficient funds!`); return; }
 
     // Execute Money
     p1.money -= currentTrade.giveMoney;
@@ -945,17 +946,17 @@ function acceptTrade() {
     });
 
     sndCash.play();
-    log(`Negociação concluída entre ${p1.name} e ${p2.name}!`);
+    log(`Trade completed between ${p1.name} and ${p2.name}!`);
     updateHUD();
 
     // Persistent Success UI
     const actions = document.getElementById('trade-actions');
     actions.innerHTML = `
         <div style="width:100%; text-align:center; padding:15px; background:rgba(76, 175, 80, 0.2); border-radius:8px; margin-bottom:10px">
-            <div style="color:#4caf50; font-weight:bold; font-size:1.2rem">✅ Negócio Fechado!</div>
-            <div style="color:#ccc; font-size:0.9rem">Transferência realizada com sucesso.</div>
+            <div style="color:#4caf50; font-weight:bold; font-size:1.2rem">✅ Deal Closed!</div>
+            <div style="color:#ccc; font-size:0.9rem">Transfer successfully completed.</div>
         </div>
-        <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">Fechar</button>
+        <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">Close</button>
     `;
 
     // Disable inputs to prevent changes after acceptance
@@ -973,7 +974,7 @@ function bld(idx) {
     const myPropsOfColor = p.props.filter(mp => music[mp.idx].c === thisPropColor);
 
     if (allPropsOfColor.length !== myPropsOfColor.length) {
-        showAlert("Você precisa ter TODAS as propriedades dessa cor para construir!");
+        showAlert("You must own ALL properties of this color to build!");
         return;
     }
 
@@ -981,7 +982,7 @@ function bld(idx) {
     const minH = Math.min(...houses);
 
     if (pr.houses > minH) {
-        showAlert("Regra de Construção Uniforme: Construa igualmente!");
+        showAlert("Uniform Building Rule: Build evenly!");
         return;
     }
 
@@ -1007,7 +1008,7 @@ function sellHouse(idx) {
     const maxH = Math.max(...houses);
 
     if (pr.houses < maxH) {
-        showAlert("Regra de Venda Uniforme: Venda das mais altas primeiro!");
+        showAlert("Uniform Selling Rule: Sell from the highest first!");
         return;
     }
 
@@ -1049,8 +1050,8 @@ function updateTile(idx, pr) {
 
 function sl(idx) {
     sellIdx = idx;
-    document.getElementById('confirm-title').innerText = "Vender Propriedade?";
-    document.getElementById('confirm-msg').innerText = `Vender ${music[idx].n} devolverá ao banco por $${music[idx].p / 2}. Confirmar?`;
+    document.getElementById('confirm-title').innerText = "Sell Property?";
+    document.getElementById('confirm-msg').innerText = `Selling ${music[idx].n} will return it to the bank for $${music[idx].p / 2}. Confirm?`;
     document.getElementById('confirm-yes-btn').onclick = doSell;
     showModal('modal-confirm');
 }
@@ -1144,30 +1145,30 @@ window.onload = () => {
 
 function renderBuyCard(idx) {
     const tile = music[idx];
-    const isRailUtil = tile.t === 'rail' || tile.t === 'company';
+    const isRailUtil = tile.t === 'rail' || tile.t === 'util';
 
     let rentStats = "";
     if (!tile.t || tile.t === 'property') {
         rentStats = `
-            <div class="rent-row"><span>Aluguel:</span> <span>$${tile.r[0]}</span></div>
-            <div class="rent-row"><span>1 Casa:</span> <span>$${tile.r[1]}</span></div>
-            <div class="rent-row"><span>2 Casas:</span> <span>$${tile.r[2]}</span></div>
-            <div class="rent-row"><span>3 Casas:</span> <span>$${tile.r[3]}</span></div>
-            <div class="rent-row"><span>4 Casas:</span> <span>$${tile.r[4]}</span></div>
+            <div class="rent-row"><span>Rent:</span> <span>$${tile.r[0]}</span></div>
+            <div class="rent-row"><span>1 House:</span> <span>$${tile.r[1]}</span></div>
+            <div class="rent-row"><span>2 Houses:</span> <span>$${tile.r[2]}</span></div>
+            <div class="rent-row"><span>3 Houses:</span> <span>$${tile.r[3]}</span></div>
+            <div class="rent-row"><span>4 Houses:</span> <span>$${tile.r[4]}</span></div>
             <div class="rent-row"><span>HOTEL:</span> <span>$${tile.r[5]}</span></div>
             <hr style="margin:5px 0; border:0; border-top:1px solid #ccc">
-            <div class="rent-row"><span>Custo Casa:</span> <span>$${tile.h}</span></div>
+            <div class="rent-row"><span>House Cost:</span> <span>$${tile.h}</span></div>
         `;
     } else if (tile.t === 'rail') {
         rentStats = `
-            <div class="rent-row"><span>1 Estádio:</span> <span>$25</span></div>
-            <div class="rent-row"><span>2 Estádios:</span> <span>$50</span></div>
-            <div class="rent-row"><span>3 Estádios:</span> <span>$100</span></div>
-            <div class="rent-row"><span>4 Estádios:</span> <span>$200</span></div>
+            <div class="rent-row"><span>1 Stadium:</span> <span>$25</span></div>
+            <div class="rent-row"><span>2 Stadiums:</span> <span>$50</span></div>
+            <div class="rent-row"><span>3 Stadiums:</span> <span>$100</span></div>
+            <div class="rent-row"><span>4 Stadiums:</span> <span>$200</span></div>
         `;
     } else {
         rentStats = `
-            <div style="text-align:center; margin:10px 0">Se tiver 1 utilitário, aluguel é 4x dados.<br>Se tiver 2, é 10x dados.</div>
+            <div style="text-align:center; margin:10px 0">If one utility is owned, rent is 4x dice.<br>If both are owned, it's 10x dice.</div>
         `;
     }
 
@@ -1181,10 +1182,10 @@ function renderBuyCard(idx) {
         <div class="deed-body" style="gap:5px; padding:15px">
             ${rentStats}
             <div class="rent-row" style="margin-top:10px; font-weight:bold; border-top:1px solid #ccc; padding-top:5px">
-                <span>Hipoteca:</span> <span>$${mortgageValue}</span>
+                <span>Mortgage:</span> <span>$${mortgageValue}</span>
             </div>
             <div class="rent-row" style="margin-top:5px; font-weight:bold; color:var(--md-primary)">
-                <span>Preço:</span> <span style="font-size:1.2rem">$${tile.p}</span>
+                <span>Price:</span> <span style="font-size:1.2rem">$${tile.p}</span>
             </div>
         </div>
     </div>`;

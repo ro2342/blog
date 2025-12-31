@@ -1,48 +1,48 @@
 # Monopoly (Taylor's Version) 🧣✨
 
-Bem-vindo ao **Monopoly (Taylor's Version)**! Uma recriação temática e moderna do clássico jogo de tabuleiro, totalmente inspirada no universo musical da Taylor Swift.
+Welcome to **Monopoly (Taylor's Version)**! A thematic and modern recreation of the classic board game, completely inspired by the musical universe of Taylor Swift.
 
-## 🎵 Sobre o Jogo
-Este projeto é uma versão web interativa do Banco Imobiliário, onde as propriedades são músicas, os tokens são ícones icônicos de eras e o dinheiro é... bem, necessário para comprar ingressos e álbuns!
+## 🎵 About the Game
+This project is an interactive web version of Monopoly where properties are songs, tokens are iconic era symbols, and money is... well, needed to buy tickets and albums!
 
-O jogo foi construído com **HTML5, CSS3 e JavaScript puro**, focado em uma experiência visual *premium* com efeitos de neon, glassmorphism e animações fluidas.
+Built with **HTML5, CSS3, and pure JavaScript**, focusing on a *premium* visual experience with neon effects, glassmorphism, and fluid animations.
 
-## ✨ Funcionalidades Principais
+## ✨ Key Features
 
-### 🎨 Visual & Imersão
-*   **Design Premium**: Interface escura (`Dark Mode`) com acabamento em vidro (Glassmorphism).
-*   **Cores de Neon**: Cada jogador possui uma cor vibrante (Rosa, Verde, Azul, Amarelo) que ilumina sua interface e peças.
-*   **Tabuleiro Temático**:
-    *   **Propriedades**: Músicas de todas as Eras (Debut a TTPD).
-    *   **Trens**: Substituídos pela **The Eras Tour**.
-    *   **Utilidades**: "Buyback Masters" e "Taylor's Version".
-    *   **Prisão/Estacionamento**: "Masters Presas" (Barras Vermelhas) e "Hiato" (Gradiente Pastel).
-*   **Destaque de Turno**: A casa do jogador ativo pulsa para fácil visualização.
+### 🎨 Visuals & Immersion
+*   **Premium Design**: Dark Interface (`Dark Mode`) with Glassmorphism finish.
+*   **Neon Colors**: Each player has a vibrant neon color (Pink, Green, Blue, Yellow) that illuminates their interface and tokens.
+*   **Themed Board**:
+    *   **Properties**: Songs from all Eras (Debut to TTPD).
+    *   **Trains**: Replaced by **The Eras Tour**.
+    *   **Utilities**: "Buyback Masters" and "Taylor's Version".
+    *   **Jail/Parking**: "Stolen Masters" (Red Bars) and "Hiatus" (Pastel Gradient).
+*   **Turn Highlight**: The active player's tile pulses for easy visibility.
 
-### 🤖 Gameplay Inteligente
-*   **Bot Swift (IA)**:
-    *   Jogue contra o computador se estiver sozinho.
-    *   O Bot faz lances em leilões, gerencia propriedades e **negocia com você** (fazendo contra-propostas inteligentes!).
-*   **Sistema de Leilão**: Se ninguém comprar a música, ela vai a leilão!
-*   **Negociação Dinâmica**: Troque propriedades e dinheiro com outros jogadores em uma interface moderna de "arrastar e soltar" (visual).
+### 🤖 Smart Gameplay
+*   **Swift Bot (AI)**:
+    *   Play against the computer if you're solo.
+    *   The Bot bids in auctions, manages properties, and **negotiates with you** (making smart counter-offers!).
+*   **Auction System**: If no one buys a song, it goes to auction!
+*   **Dynamic Trading**: Trade properties and money with other players in a modern "drag and drop" (visual) interface.
 
-### 🛠️ UX (Experiência)
-*   **Cards de Jogador**: Visual estilo "Escritura" vertical no topo da tela.
-*   **Popups Inteligentes**: Janelas de gerenciamento e troca com cabeçalhos fixos para facilitar a navegação.
-*   **Setup Personalizado**: 
-    *   Escolha seu nome ou use o **Dado da Sorte (🎲)** para receber um nome aleatório do universo da Taylor (ex: *Meredith, Betty, Este*).
+### 🛠️ UX (Experience)
+*   **Player Cards**: Vertical "Deed" style visuals at the top of the screen.
+*   **Smart Modals**: Management and Trade windows with sticky headers for easy navigation.
+*   **Custom Setup**: 
+    *   Choose your name or use the **Lucky Dice (🎲)** to draw a random name from the Taylor universe (e.g., *Meredith, Betty, Este*).
 
-## 🚀 Como Jogar
-1.  Abra o arquivo `index.html` em seu navegador.
-2.  Na tela de setup, adicione os jogadores.
-3.  Clique no dado 🎲 para sortear um nome temático ou digite o seu.
-4.  Clique em **"Começar Show"**.
-5.  Role os dados clicando neles e divirtam-se!
+## 🚀 How to Play
+1.  Open the `index.html` file in your browser.
+2.  On the setup screen, add players.
+3.  Click the dice 🎲 to draw a themed name or type your own.
+4.  Click **"Start Show"**.
+5.  Roll the dice by clicking them and have fun!
 
-## 💻 Tecnologias
+## 💻 Technologies
 *   HTML5
 *   CSS3 (Flexbox, Grid, Animations, Custom Properties)
 *   JavaScript (ES6+)
 
 ---
-*"Eu tive o melhor dia com você hoje."* - The Best Day
+*"I had the best day with you today."* - The Best Day
