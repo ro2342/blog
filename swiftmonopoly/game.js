@@ -125,13 +125,24 @@ function randomizeName(id) {
 function addP() {
     const div = document.getElementById('player-inputs');
     if (div.children.length >= 4) return;
-    const id = div.children.length;
-    div.innerHTML += `<div id="p-row-${id}" style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
-    <input type="text" id="p-n-${id}" value="Jogador ${id + 1}" style="flex:3; border-radius:4px 4px 0 0;" placeholder="Nome">
-    <button onclick="randomizeName(${id})" style="background:#673ab7; color:white; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.2rem">🎲</button>
-    <select id="p-e-${id}" style="flex:1; border-radius:4px 4px 0 0;">${tokens.map(t => `<option>${t}</option>`).join('')}</select>
-    <button onclick="document.getElementById('p-row-${id}').remove()" style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer">✕</button>
-</div>`;
+    const id = div.children.length; // Use current length as ID base
+
+    const row = document.createElement('div');
+    row.id = `p-row-${id}`;
+    row.style.cssText = "display:flex; gap:10px; margin-bottom:10px; align-items:center;";
+
+    row.innerHTML = `
+        <input type="text" id="p-n-${id}" value="Jogador ${id + 1}" style="flex:3; border-radius:4px 4px 0 0;" placeholder="Nome">
+        <button id="rand-btn-${id}" style="background:#673ab7; color:white; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.2rem">🎲</button>
+        <select id="p-e-${id}" style="flex:1; border-radius:4px 4px 0 0;">${tokens.map(t => `<option>${t}</option>`).join('')}</select>
+        <button id="del-btn-${id}" style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer">✕</button>
+    `;
+
+    div.appendChild(row);
+
+    // Bind events separately to avoid string escaping madness
+    document.getElementById(`rand-btn-${id}`).onclick = () => randomizeName(id);
+    document.getElementById(`del-btn-${id}`).onclick = () => row.remove();
 }
 
 function startGame() {
@@ -321,9 +332,24 @@ function handle(p, dist) {
             const cardHtml = renderBuyCard(p.pos);
             document.getElementById('buy-card-area').innerHTML = cardHtml;
 
+            // NEW: Show Current Balance
+            const balanceDiv = document.createElement('div');
+            balanceDiv.style.cssText = "text-align:center; padding:10px; color:#aaa; font-size:1.1rem; border-bottom:1px solid #333; margin-bottom:10px";
+            balanceDiv.innerHTML = `Seu Saldo: <span style="color:#4caf50; font-weight:bold">$${p.money}</span>`;
+
             // Clean previous buttons
             const footer = document.getElementById('buy-actions');
             footer.innerHTML = ""; // Clear all
+
+            // Prepend balance to footer or insert before? 
+            // Better to insert it into the area before buttons.
+            footer.appendChild(balanceDiv);
+
+            // Container for buttons for layout
+            const btnContainer = document.createElement('div');
+            btnContainer.style.display = 'flex';
+            btnContainer.style.gap = '10px';
+            btnContainer.style.marginTop = '10px';
 
             // 1. Buy Button
             const buyBtn = document.createElement('button');
@@ -342,7 +368,7 @@ function handle(p, dist) {
             } else {
                 buyBtn.onclick = doBuy;
             }
-            footer.appendChild(buyBtn);
+            btnContainer.appendChild(buyBtn);
 
             // 2. Auction Button
             const auBtn = document.createElement('button');
@@ -502,7 +528,7 @@ function askPay(p, val, reason, cb) {
         <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-bottom:10px">
             <div style="color:#ff9800; font-weight:bold; font-size:1.2rem; margin-bottom:10px">💸 PAGAMENTO 💸</div>
             <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-                <span>De:</span> <span style="font-weight:bold">${p.name}</span>
+                <span>De:</span> <span style="font-weight:bold">${p.name} <span style="font-weight:normal; color:#ccc; font-size:0.9rem">(Saldo: $${p.money})</span></span>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:5px">
                 <span>Para:</span> <span style="font-weight:bold">${recipient}</span>

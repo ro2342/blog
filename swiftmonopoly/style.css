@@ -84,15 +84,19 @@ body::after {
     grid-template-columns: repeat(13, 1fr);
     grid-template-rows: repeat(13, 1fr);
     background: transparent;
-    /* Removed solid background */
-    /* border: 1px solid var(--glass-border); Removed border */
+
+    /* Responsive Square Layout */
+    width: 95vmin;
+    height: 95vmin;
+    max-width: 100vh;
+    max-height: 100vh;
+    margin: auto;
+    /* Center it */
+
     position: relative;
-    /* border-radius: 20px; Not needed if invisible */
-    /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); Removed box-shadow */
-    gap: 6px;
-    /* Increased gap for floating card look */
+    gap: 4px;
+    /* Slightly tighter gap for small screens */
     padding: 10px;
-    /* backdrop-filter: blur(10px); Removed blur from back */
 }
 
 .tile {

@@ -13,7 +13,7 @@ O jogo foi construído com **HTML5, CSS3 e JavaScript puro**, focado em uma expe
 *   **Design Premium**: Interface escura (`Dark Mode`) com acabamento em vidro (Glassmorphism).
 *   **Cores de Neon**: Cada jogador possui uma cor vibrante (Rosa, Verde, Azul, Amarelo) que ilumina sua interface e peças.
 *   **Tabuleiro Temático**:
-    *   **Propriedades**: Músicas de todas as Eras (Debut a The Life of a Showgirl).
+    *   **Propriedades**: Músicas de todas as Eras (Debut a TTPD).
     *   **Trens**: Substituídos pela **The Eras Tour**.
     *   **Utilidades**: "Buyback Masters" e "Taylor's Version".
     *   **Prisão/Estacionamento**: "Masters Presas" (Barras Vermelhas) e "Hiato" (Gradiente Pastel).
@@ -46,4 +46,3 @@ O jogo foi construído com **HTML5, CSS3 e JavaScript puro**, focado em uma expe
 
 ---
 *"Eu tive o melhor dia com você hoje."* - The Best Day
-
