@@ -67,8 +67,8 @@ for (let i = 1; i <= 13; i++) grid.push(`1/${i}`);
 for (let i = 2; i <= 12; i++) grid.push(`${i}/13`);
 
 const chanceCards = [
-    { t: "Abertura da The Eras Tour! Avance para o GO e comece o show! (+$200)", a: (p) => { p.pos = 0; p.money += 200; sync(); } },
-    { t: "Kanye interrompeu seu discurso! Vá direto para o Hiato.", a: (p) => { p.pos = 12; p.jail = 3; doubles = 0; sync(); } },
+    { t: "Abertura da The Eras Tour! Avance para o Início e comece o show! (+$200)", a: (p) => { p.pos = 0; p.money += 200; sync(); } },
+    { t: "Suas masters foram vendidas sem seu consentimento! Vá direto para as Margens Presas.", a: (p) => { p.pos = 12; p.jail = 3; doubles = 0; sync(); } },
     {
         t: "Jatinho particular pronto! Avance para a próxima cidade da Eras Tour (Trem).", a: (p) => {
             if (p.pos < 5) p.pos = 5; else if (p.pos < 17) p.pos = 17; else if (p.pos < 31) p.pos = 31; else if (p.pos < 41) p.pos = 41; else p.pos = 5;
@@ -78,20 +78,20 @@ const chanceCards = [
     { t: "Recorde de vendas de vinil! Receba $200.", a: (p) => { p.money += 200; } },
     { t: "Exaustão pós-show. Pague $50 em vitaminas.", a: (p) => { p.money -= 50; } },
     { t: "Venda de merch esgotada na lojinha! Receba $50.", a: (p) => { p.money += 50; } },
-    { t: "Ticket Dourado! Saia do Hiato de graça.", a: (p) => { p.jailCard = true; } },
+    { t: "Ticket Dourado! Você recebeu suas masters de volta de graça. Use para libertá-las sem pagar nada.", a: (p) => { p.jailCard = true; } },
     {
         t: "Lançamento de álbum surpresa! Colete $50 de cada fã (jogador).", a: (p) => {
             players.forEach(op => { if (op.id !== p.id) { op.money -= 50; p.money += 50; if (op.money < 0) fail(op); } });
         }
     },
-    { t: "Taylor's Version superou a original! Receba $100 de royalties.", a: (p) => { p.money += 100; } },
+    { t: "Taylor's Version superou a original! Receba $1000 de royalties.", a: (p) => { p.money += 1000; } },
     { t: "Reembolso de processo ganho contra DJ. Receba $20.", a: (p) => { p.money += 20; } },
     {
         t: "Sessão secreta com fãs! Receba $10 de cada um.", a: (p) => {
             players.forEach(op => { if (op.id !== p.id) { op.money -= 10; p.money += 10; if (op.money < 0) fail(op); } });
         }
     },
-    { t: "Assinou contrato milionário com a Republic Records. Receba $100.", a: (p) => { p.money += 100; } },
+    { t: "Assinou contrato milionário com a Republic Records. Receba $1000.", a: (p) => { p.money += 1000; } },
     { t: "Multa por atraso no palco. Pague $100.", a: (p) => { p.money -= 100; } },
     { t: "Compra de figurinos novos da Versace. Pague $50.", a: (p) => { p.money -= 50; } },
     { t: "Escreveu música para outro artista. Receba $25.", a: (p) => { p.money += 25; } },
@@ -332,52 +332,22 @@ function handle(p, dist) {
             const cardHtml = renderBuyCard(p.pos);
             document.getElementById('buy-card-area').innerHTML = cardHtml;
 
-            // NEW: Show Current Balance
-            const balanceDiv = document.createElement('div');
-            balanceDiv.style.cssText = "text-align:center; padding:10px; color:#aaa; font-size:1.1rem; border-bottom:1px solid #333; margin-bottom:10px";
-            balanceDiv.innerHTML = `Seu Saldo: <span style="color:#4caf50; font-weight:bold">$${p.money}</span>`;
-
-            // Clean previous buttons
+            // NEW: Show Current Balance + Buttons (innerHTML restoration)
             const footer = document.getElementById('buy-actions');
-            footer.innerHTML = ""; // Clear all
+            const canBuy = p.money >= t.p;
 
-            // Prepend balance to footer or insert before? 
-            // Better to insert it into the area before buttons.
-            footer.appendChild(balanceDiv);
-
-            // Container for buttons for layout
-            const btnContainer = document.createElement('div');
-            btnContainer.style.display = 'flex';
-            btnContainer.style.gap = '10px';
-            btnContainer.style.marginTop = '10px';
-
-            // 1. Buy Button
-            const buyBtn = document.createElement('button');
-            buyBtn.className = 'm3-btn';
-            buyBtn.style.background = '#4caf50';
-            buyBtn.style.flex = '1';
-            buyBtn.innerText = `Comprar ($${t.p})`; // Show price in button
-
-            // FIX: Validate Money
-            if (p.money < t.p) {
-                buyBtn.disabled = true;
-                buyBtn.innerText = 'Sem Fundos';
-                buyBtn.style.background = 'rgba(255, 255, 255, 0.1)';
-                buyBtn.style.color = 'rgba(255, 255, 255, 0.5)';
-                buyBtn.style.cursor = 'not-allowed';
-            } else {
-                buyBtn.onclick = doBuy;
-            }
-            btnContainer.appendChild(buyBtn);
-
-            // 2. Auction Button
-            const auBtn = document.createElement('button');
-            auBtn.className = 'm3-btn';
-            auBtn.style.background = '#ff9800';
-            auBtn.style.flex = '1';
-            auBtn.innerText = 'Leiloar';
-            auBtn.onclick = () => { closeModal('modal-buy'); startAuction(p.pos); };
-            footer.appendChild(auBtn);
+            footer.innerHTML = `
+                <div style="text-align:center; padding:10px; color:#aaa; font-size:1.1rem; border-bottom:1px solid #333; margin-bottom:10px">
+                    Seu Saldo: <span style="color:#4caf50; font-weight:bold">$${p.money}</span>
+                </div>
+                <div style="display:flex; gap:10px">
+                    <button class="m3-btn" style="background:${canBuy ? '#4caf50' : 'rgba(255,255,255,0.1)'}; color:${canBuy ? 'white' : 'rgba(255,255,255,0.5)'}; flex:1; cursor:${canBuy ? 'pointer' : 'not-allowed'}" 
+                        ${canBuy ? 'onclick="doBuy()"' : 'disabled'}>
+                        ${canBuy ? `Comprar ($${t.p})` : 'Sem Fundos'}
+                    </button>
+                    <button class="m3-btn" style="background:#ff9800; flex:1" onclick="closeModal('modal-buy'); startAuction(${p.pos})">Leiloar</button>
+                </div>
+            `;
 
             showModal('modal-buy');
         }
