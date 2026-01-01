@@ -219,6 +219,15 @@ function startTurn() {
 
     setTimeout(() => {
         closeModal('modal-turn');
+
+        // JAIL CARD CHECK
+        if (p.jail > 0 && p.jailCard) {
+            p.jail = 0;
+            p.jailCard = false;
+            showAlert("Used Get Out of Jail Free Card! 🎟️");
+            updateHUD();
+        }
+
         if (p.name.includes("Bot")) {
             // document.getElementById('roll-btn').disabled = true; // Button removed
             log(`🤖 ${p.name} is playing...`);
@@ -1087,7 +1096,7 @@ function updateHUD() {
             card.style.boxShadow = 'none';
         }
 
-        card.innerHTML = `<div class="p-name" style="color:${color}">${p.token} ${p.name}</div><div class="p-money">$${p.money}</div>`;
+        card.innerHTML = `<div class="p-name" style="color:${color}">${p.token} ${p.name} ${p.jailCard ? '🎟️' : ''}</div><div class="p-money">$${p.money}</div>`;
         row.appendChild(card);
     });
 
@@ -1225,7 +1234,7 @@ function analyzeBotTrade() {
         // Se o Bot dá uma carta que quebra o set dele, cobra 2.5x mais caro
         if (breaksSet(me, idx)) {
             pVal *= 2.5;
-            log("🤖 Bot: Não quero quebrar meu conjunto!");
+            log("🤖 Bot: I don't want to break my set!");
         }
         valGive += pVal;
     });
@@ -1237,7 +1246,7 @@ function analyzeBotTrade() {
         // Se o Bot recebe uma carta que completa o set dele, valoriza 2x
         if (completesSet(me, idx)) {
             pVal *= 2.0;
-            log("🤖 Bot: Uau! Isso completa meu conjunto!");
+            log("🤖 Bot: Wow! This completes my set!");
         }
         valGet += pVal;
     });
@@ -1247,10 +1256,10 @@ function analyzeBotTrade() {
     const threshold = 0.8;
     const ratio = valGet / (valGive || 1);
 
-    log(`🤖 Análise: Dou (Valor Calc.) $${valGive}, Recebo (Valor Calc.) $${valGet}. Ratio: ${ratio.toFixed(2)}`);
+    log(`🤖 Analysis: I give (Calc. Val.) $${valGive}, I get (Calc. Val.) $${valGet}. Ratio: ${ratio.toFixed(2)}`);
 
     if (valGet >= (valGive * threshold)) {
-        log("🤖 Bom negócio (ou sou bonzinho). Aceito!");
+        log("🤖 Good deal (or I'm just nice). Accepted!");
         acceptTrade();
     } else {
         // Tenta Contra-Proposta (Pedir a diferença em dinheiro)
@@ -1261,7 +1270,7 @@ function analyzeBotTrade() {
 
         if (deficit > 0 && partner.money >= (currentTrade.giveMoney + deficit)) {
             // Pode fazer contra-proposta
-            log(`🤖 Recusado. Tentando contra-proposta de +$${deficit}.`);
+            log(`🤖 Refused. Trying counter-offer of +$${deficit}.`);
 
             // Atualiza o valor que o user tem que dar
             currentTrade.giveMoney += deficit;
@@ -1273,11 +1282,11 @@ function analyzeBotTrade() {
             const actions = document.getElementById('trade-actions');
             actions.innerHTML = `
                 <div style="width:100%; text-align:center; padding:10px; background:rgba(255,152,0,0.2); border-radius:8px; margin-bottom:10px">
-                    <div style="color:#ffeb3b; font-weight:bold">🤖 Negociação Recusada!</div>
-                    <div style="color:#ccc; font-size:0.9rem">Minha contra-proposta é: <br>Adicione <b>$${deficit}</b> e fechamos.</div>
+                    <div style="color:#ffeb3b; font-weight:bold">🤖 Negotiation Rejected!</div>
+                    <div style="color:#ccc; font-size:0.9rem">My counter-offer is: <br>Add <b>$${deficit}</b> and it's a deal.</div>
                 </div>
-                <button class="m3-btn" style="background:#f44336; color:white" onclick="rejectTrade()">Cancelar</button>
-                <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ Aceitar Contra-Proposta</button>
+                <button class="m3-btn" style="background:#f44336; color:white" onclick="rejectTrade()">Cancel</button>
+                <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ Accept Counter-Offer</button>
             `;
 
             // IMPORTANTE: Hack para permitir que o "Aceitar" funcione agora como o User aceitando a proposta do Bot
@@ -1291,12 +1300,12 @@ function analyzeBotTrade() {
 
         } else {
             // Não tem dinheiro ou diferença muito grande/complexa
-            log("🤖 Prejuízo demais e você não tem fundos. Recusado.");
+            log("🤖 Too much loss and you have no funds. Rejected.");
 
             // Mostrar motivo na UI antes de fechar?
             const actions = document.getElementById('trade-actions');
             actions.innerHTML = `
-                <div style="color:#f44336; font-weight:bold; padding:10px">🤖 Recusado! Proposta injusta.</div>
+                <div style="color:#f44336; font-weight:bold; padding:10px">🤖 Rejected! Unfair offer.</div>
             `;
             setTimeout(() => rejectTrade(), 2000);
         }
