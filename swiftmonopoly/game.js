@@ -1226,19 +1226,26 @@ function updateAuctionUI() {
     function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().then(sync); else document.exitFullscreen().then(sync); }
 
     window.onload = () => {
-        addP(); // Prepare first input silently
+        addP();
 
-        // Simulate Loading
+        // Loading Flow
         setTimeout(() => {
             const load = document.getElementById('loading-screen');
-            const setup = document.getElementById('setup');
-
             load.style.opacity = '0';
             setTimeout(() => {
                 load.style.display = 'none';
-                setup.style.display = 'flex'; // Reveal setup
-            }, 500); // Wait for opacity fade
-        }, 2500); // 2.5s load time
+
+                // Show Language Selection instead of Setup
+                const lang = document.getElementById('lang-select');
+                if (lang) {
+                    lang.style.opacity = '1';
+                    lang.style.pointerEvents = 'auto';
+                } else {
+                    // Fallback if index.html is old
+                    document.getElementById('setup').style.display = 'flex';
+                }
+            }, 500);
+        }, 1500);
     };
 
     function renderBuyCard(idx) {
@@ -1400,4 +1407,51 @@ function updateAuctionUI() {
             }
         }
     }
+
+    // Language Support Functions
+    function setLang(l) {
+        curLang = l;
+        document.getElementById('lang-select').style.opacity = 0;
+        setTimeout(() => document.getElementById('lang-select').style.display = 'none', 500);
+
+        document.getElementById('setup').style.display = 'flex'; // Show Setup
+
+        // Update Static strings
+        updateDataStrings();
+    }
+
+    function updateDataStrings() {
+        // Update Music Array (Special Names)
+        const L = LANGUAGES[curLang];
+
+        // Map special tiles manually or logic
+        // We know indices:
+        // 0: START, 4: TAX, 12: JAIL(Stolen), etc.
+        // Actually, better to just update the specific ones based on type or index
+
+        music[0].n = `${L.ui.start}<br><span style='font-size:0.5rem'>${curLang === 'de' ? 'SAMMLE $200' : 'COLLECT $200 FROM ROYALTIES'}</span>`;
+        music[4].n = `${L.ui.tax}<br><span style='font-size:0.5rem'>${L.ui.taxDesc}</span>`;
+        music[12].n = `${L.ui.jail}<br><span style='font-size:0.5rem'>${curLang === 'de' ? '3 Runden warten' : 'STAY IN JAIL FOR 3 TURNS'}</span>`;
+        music[24].n = L.ui.parking;
+
+        // Chances
+        music.forEach(m => {
+            if (m.t === 'card') m.n = L.ui.chance;
+            if (m.n.includes("Buyback")) m.n = L.ui.luxury;
+            if (m.n.includes("Taylor's Version")) m.n = L.ui.utility;
+            // Note: Song titles remain English as requested
+        });
+
+        // Update HTML Elements with data-i18n
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            el.innerText = t(key);
+        });
+
+        // Update inputs placeholder
+        document.querySelectorAll('input[placeholder]').forEach(el => {
+            el.placeholder = t('setup.namePlaceholder');
+        });
+    }
+
 }
