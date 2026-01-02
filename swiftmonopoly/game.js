@@ -1,17 +1,6 @@
 const sndCash = new Audio('https://www.soundjay.com/misc/sounds/cash-register-05.mp3');
 const tokens = ['🧣', '🐍', '🫶', '💎', '🎸', '🐈'];
 let players = [], turn = 0, housesBuilt = 0, doubles = 0;
-let curLang = 'en';
-
-function t(key, params = {}) {
-    let text = key.split('.').reduce((o, i) => o[i], LANGUAGES[curLang]);
-    if (!text) return key;
-    for (let p in params) {
-        text = text.replace(`{${p}}`, params[p]);
-    }
-    return text;
-}
-
 
 const music = [
     // LADO 1 (0-12): DEBUT & FEARLESS
@@ -128,54 +117,6 @@ const tsNames = [
     "Dorothea", "Peter", "Wendy", "Juliet", "Cassandra", "Jack Leopards", "Nils Sjöberg", "Rebekah", "Este"
 ];
 
-// Initial Load: Show Language Select
-window.onload = () => {
-    // Hide native loader for now, wait for lang select
-    setTimeout(() => {
-        document.getElementById('loading-screen').style.opacity = 0;
-        setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 500);
-
-        const ls = document.getElementById('lang-select');
-        ls.style.pointerEvents = 'auto';
-        ls.style.opacity = 1;
-    }, 1500);
-};
-
-function setLang(l) {
-    curLang = l;
-    document.getElementById('lang-select').style.display = 'none';
-    document.getElementById('setup').style.display = 'flex'; // Show Setup
-
-    // Update Static UI
-    document.getElementById('setup-title').innerText = t('setup.title');
-    document.getElementById('btn-add-p').innerText = t('setup.addPlayer');
-    document.getElementById('btn-start').innerText = t('setup.startShow');
-    document.getElementById('fs-btn').innerText = t('ui.fullscreen');
-
-    updateDataStrings();
-    addP(); // Add first player default
-    addP();
-}
-
-function updateDataStrings() {
-    // Update Music/Board Names (Only special tiles are translated, songs are constant)
-    const L = LANGUAGES[curLang].ui;
-    music.forEach(m => {
-        if (m.n.includes("START")) m.n = `${L.start}<br><span style='font-size:0.5rem'>${curLang === 'de' ? 'SAMMLE $200' : 'COLLECT $200'}</span>`; // Partial
-        if (m.t === 's' && m.v === undefined && !m.n.includes("START")) {
-            if (m.n.includes("STOLEN")) m.n = `${L.jail}<br><span style='font-size:0.5rem'>${curLang === 'de' ? '3 RUNDEN' : '3 TURNS'}</span>`;
-            else if (m.n.includes("HIATUS")) m.n = L.parking;
-            else if (m.n.includes("SOLD")) m.n = L.gotoJail;
-        }
-        if (m.t === 'tax') m.n = `${L.tax}<br><span style='font-size:0.5rem'>${L.taxDesc}</span>`;
-        if (m.t === 'card') m.n = L.chance;
-        if (m.t === 'util') {
-            if (m.n.includes("Buyback")) m.n = L.luxury;
-            if (m.n.includes("Taylor")) m.n = L.utility;
-        }
-    });
-}
-
 function randomizeName(id) {
     const name = tsNames[Math.floor(Math.random() * tsNames.length)];
     document.getElementById(`p-n-${id}`).value = name;
@@ -191,7 +132,7 @@ function addP() {
     row.style.cssText = "display:flex; gap:10px; margin-bottom:10px; align-items:center;";
 
     row.innerHTML = `
-        <input type="text" id="p-n-${id}" value="Player ${id + 1}" style="flex:3; border-radius:4px 4px 0 0;" placeholder="${t('setup.namePlaceholder')}">
+        <input type="text" id="p-n-${id}" value="Player ${id + 1}" style="flex:3; border-radius:4px 4px 0 0;" placeholder="Name">
         <button id="rand-btn-${id}" style="background:#673ab7; color:white; border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.2rem">🎲</button>
         <select id="p-e-${id}" style="flex:1; border-radius:4px 4px 0 0;">${tokens.map(t => `<option>${t}</option>`).join('')}</select>
         <button id="del-btn-${id}" style="background:var(--md-sys-color-error-container); color:var(--md-sys-color-on-error-container); border:none; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer">✕</button>
@@ -273,7 +214,7 @@ function startTurn() {
     const p = players[turn];
     updateHUD();
 
-    document.getElementById('turn-msg').innerText = `${p.name} ${t('ui.turn')}`;
+    document.getElementById('turn-msg').innerText = `${p.name}'s Turn`;
     showModal('modal-turn');
 
     setTimeout(() => {
@@ -289,11 +230,11 @@ function startTurn() {
 
         if (p.name.includes("Bot")) {
             // document.getElementById('roll-btn').disabled = true; // Button removed
-            log(`🤖 ${p.name} ${t('ui.botPlaying')}`);
+            log(`🤖 ${p.name} is playing...`);
             setTimeout(toss, 1000);
         } else {
             // document.getElementById('roll-btn').disabled = false; // Button removed
-            log(`👉 ${t('ui.rollDice')}`);
+            log(`👉 Your turn! Tap the dice to roll.`);
         }
     }, 1500);
 }
@@ -350,39 +291,33 @@ function toss() {
         if (p.jail > 0) {
             if (d1 === d2) {
                 p.jail = 0;
-                if (d1 === d2) {
-                    p.jail = 0;
-                    log(t('logs.jailLeave'));
-                    doubles = 0;
-                    moved = true;
-                    move(p, d1 + d2);
-                } else {
-                    p.jail--;
-                } else {
-                    p.jail--;
-                    log(t('logs.jailStay', { turns: p.jail }));
-                    doubles = 0;
-                    nextTurn();
-                }
+                log("Out of Hiatus!");
+                doubles = 0;
+                moved = true;
+                move(p, d1 + d2);
             } else {
-                if (d1 === d2) doubles++; else doubles = 0;
+                p.jail--;
+                log(`Still in Hiatus (${p.jail})`);
+                doubles = 0;
+                nextTurn();
+            }
+        } else {
+            if (d1 === d2) doubles++; else doubles = 0;
 
-                if (doubles === 3) {
-                    if (doubles === 3) {
-                        log(t('logs.jailEnter'));
-                        p.pos = 12; p.jail = 3; doubles = 0; sync(); nextTurn();
-                    } else {
-                        moved = true;
-                        move(p, d1 + d2);
-                    }
-                }
-            }, 700); // 600ms animation + 100ms buffer
+            if (doubles === 3) {
+                log("3 Doubles! Go to Hiatus!");
+                p.pos = 12; p.jail = 3; doubles = 0; sync(); nextTurn();
+            } else {
+                moved = true;
+                move(p, d1 + d2);
+            }
+        }
+    }, 700); // 600ms animation + 100ms buffer
 }
 
 function move(p, dist) {
     let old = p.pos; p.pos = (p.pos + dist) % 48;
-    let old = p.pos; p.pos = (p.pos + dist) % 48;
-    if (p.pos < old) { p.money += 200; log(t('logs.passedGo')); sndCash.play(); }
+    if (p.pos < old) { p.money += 200; log("Passed GO! +$200"); sndCash.play(); }
     sync(); setTimeout(() => handle(p, dist), 500);
 }
 
@@ -390,7 +325,7 @@ function handle(p, dist) {
     const t = music[p.pos];
     if (p.pos === 36) { p.pos = 12; p.jail = 3; doubles = 0; sync(); nextTurn(); return; }
     if (t.t === "card") { drawCard(p); return; }
-    if (t.t === "tax") return askPay(p, t.v, t('ui.tax'), nextTurn);
+    if (t.t === "tax") return askPay(p, t.v, "Tax", nextTurn);
 
     const owner = players.find(x => x.props.some(y => y.idx === p.pos));
     if (t.p && !owner) {
@@ -411,15 +346,15 @@ function handle(p, dist) {
             const canBuy = p.money >= t.p;
 
             footer.innerHTML = `
-                    <div style="text-align:center; padding:10px; color:#aaa; font-size:1.1rem; border-bottom:1px solid #333; margin-bottom:10px">
-                    ${t('ui.balance')}: <span style="color:#4caf50; font-weight:bold">$${p.money}</span>
+                <div style="text-align:center; padding:10px; color:#aaa; font-size:1.1rem; border-bottom:1px solid #333; margin-bottom:10px">
+                    Your Balance: <span style="color:#4caf50; font-weight:bold">$${p.money}</span>
                 </div>
                 <div style="display:flex; gap:10px">
                     <button class="m3-btn" style="background:${canBuy ? '#4caf50' : 'rgba(255,255,255,0.1)'}; color:${canBuy ? 'white' : 'rgba(255,255,255,0.5)'}; flex:1; cursor:${canBuy ? 'pointer' : 'not-allowed'}" 
                         ${canBuy ? 'onclick="doBuy()"' : 'disabled'}>
-                        ${canBuy ? `${t('ui.buy')} ($${t.p})` : t('ui.insufficientFunds')}
+                        ${canBuy ? `Buy ($${t.p})` : 'Insufficient Funds'}
                     </button>
-                    <button class="m3-btn" style="background:#ff9800; flex:1" onclick="closeModal('modal-buy'); startAuction(${p.pos})">${t('ui.auction')}</button>
+                    <button class="m3-btn" style="background:#ff9800; flex:1" onclick="closeModal('modal-buy'); startAuction(${p.pos})">Auction</button>
                 </div>
             `;
 
@@ -429,9 +364,9 @@ function handle(p, dist) {
         const rent = calcRent(t, owner, dist);
 
         // FIX: Pay the OWNER
-        askPay(p, rent, `${t('ui.rent')} ${t('ui.for')} ${owner.name}`, () => {
+        askPay(p, rent, `Rent for ${owner.name}`, () => {
             owner.money += rent; // Transfer Logic
-            log(t('logs.rentPaid', { amount: rent, recipient: owner.name }));
+            log(`${owner.name} received $${rent}.`);
             nextTurn();
         });
     } else nextTurn();
@@ -461,21 +396,13 @@ function nextTurn() {
 }
 
 function drawCard(p) {
-    const cardText = LANGUAGES[curLang].cards[Math.floor(Math.random() * LANGUAGES[curLang].cards.length)];
-    // Map text back to index to find action? No, actions are same order.
-    // The chanceCards array in game.js has actions paired with text.
-    // I need to use the index to get the text from LANGUAGES and the action from chanceCards.
-
-    const idx = Math.floor(Math.random() * chanceCards.length);
-    const cObj = chanceCards[idx];
-    const cText = LANGUAGES[curLang].cards[idx];
-
-    document.getElementById('card-msg').innerText = cText;
+    const c = chanceCards[Math.floor(Math.random() * chanceCards.length)];
+    document.getElementById('card-msg').innerText = c.t;
     showModal('modal-card');
 
     const execute = () => {
         closeModal('modal-card');
-        const ret = cObj.a(p);
+        const ret = c.a(p);
         updateHUD();
         if (p.money < 0) fail(p);
         else if (ret !== false) nextTurn();
@@ -503,222 +430,206 @@ function startAuction(idx) {
 function updateAuctionUI() {
     if (auc.players.length === 0) {
         closeModal('modal-auction');
-        if (auc.players.length === 0) {
-            closeModal('modal-auction');
-            log(t('logs.auctionCancel'));
-            nextTurn();
-            return;
-        }
-
-        if (auc.players.length === 1 && auc.leader) {
-            const winner = auc.players[0];
-            closeModal('modal-auction');
-            winner.money -= auc.bid;
-            winner.props.push({ idx: auc.idx, houses: 0, mortgaged: false });
-            winner.props.push({ idx: auc.idx, houses: 0, mortgaged: false });
-            log(t('logs.auctionWon', { name: winner.name, prop: music[auc.idx].n, amount: auc.bid }));
-
-            const tile = document.getElementById(`tile-${auc.idx}`);
-            if (tile) {
-                tile.classList.add('glow-active');
-                setTimeout(() => tile.classList.remove('glow-active'), 1000);
-            }
-
-            sndCash.play();
-            updateHUD(); render(); nextTurn(); // Render to update ownership visually
-            return;
-        }
-
-        const p = auc.players[auc.turn];
-        document.getElementById('auc-bid').innerText = `$${auc.bid}`;
-        document.getElementById('auc-leader').innerText = auc.leader ? `${t('ui.leader')}: ${auc.leader.name}` : t('ui.startingBid');
-
-        // NEW: Show Balance
-        document.getElementById('auc-turn').innerHTML = `${t('ui.turn')}: <span style="font-weight:bold">${p.name}</span> <span style="font-size:0.9rem; color:#ccc">($${p.money})</span>`;
-
-        // NEW: Disable button if broke
-        const bidBtn = document.querySelector('#modal-auction .m3-btn'); // The first button is "Cobrir"
-        if (p.money < auc.bid + 10) {
-            bidBtn.disabled = true;
-            bidBtn.style.background = '#555';
-            bidBtn.style.color = '#888';
-            bidBtn.style.cursor = 'not-allowed';
-        } else {
-            bidBtn.disabled = false;
-            bidBtn.style.background = 'gold';
-            bidBtn.style.color = 'black';
-            bidBtn.style.cursor = 'pointer';
-        }
-
-        if (p.name.includes("Bot")) {
-            setTimeout(() => {
-                if (p.money > auc.bid + 10 && Math.random() > 0.1) bidAuction();
-                else passAuction();
-            }, 1000);
-        }
+        log("Auction cancelled (no participants).");
+        nextTurn();
+        return;
     }
 
-    function bidAuction() {
-        const p = auc.players[auc.turn];
-        if (p.money < auc.bid + 10) { showAlert("Insufficient funds to cover the bid!"); return; }
-        auc.bid += 10;
-        auc.leader = p;
-        auc.turn = (auc.turn + 1) % auc.players.length;
-        updateAuctionUI();
+    if (auc.players.length === 1 && auc.leader) {
+        const winner = auc.players[0];
+        closeModal('modal-auction');
+        winner.money -= auc.bid;
+        winner.props.push({ idx: auc.idx, houses: 0, mortgaged: false });
+        log(`${winner.name} won the auction for ${music[auc.idx].n} for $${auc.bid}!`);
+
+        const tile = document.getElementById(`tile-${auc.idx}`);
+        if (tile) {
+            tile.classList.add('glow-active');
+            setTimeout(() => tile.classList.remove('glow-active'), 1000);
+        }
+
+        sndCash.play();
+        updateHUD(); render(); nextTurn(); // Render to update ownership visually
+        return;
     }
 
-    function passAuction() {
-        auc.players.splice(auc.turn, 1);
-        if (auc.turn >= auc.players.length) auc.turn = 0;
-        updateAuctionUI();
+    const p = auc.players[auc.turn];
+    document.getElementById('auc-bid').innerText = `$${auc.bid}`;
+    document.getElementById('auc-leader').innerText = auc.leader ? `Leader: ${auc.leader.name}` : `Starting Bid`;
+
+    // NEW: Show Balance
+    document.getElementById('auc-turn').innerHTML = `Turn: <span style="font-weight:bold">${p.name}</span> <span style="font-size:0.9rem; color:#ccc">($${p.money})</span>`;
+
+    // NEW: Disable button if broke
+    const bidBtn = document.querySelector('#modal-auction .m3-btn'); // The first button is "Cobrir"
+    if (p.money < auc.bid + 10) {
+        bidBtn.disabled = true;
+        bidBtn.style.background = '#555';
+        bidBtn.style.color = '#888';
+        bidBtn.style.cursor = 'not-allowed';
+    } else {
+        bidBtn.disabled = false;
+        bidBtn.style.background = 'gold';
+        bidBtn.style.color = 'black';
+        bidBtn.style.cursor = 'pointer';
     }
 
-    function askPay(p, val, reason, cb) {
-        // Unified UI for Bot and Human
-        showModal('modal-pay');
-        showModal('modal-pay');
-        const isRent = reason.includes(t('ui.rent'));
-        const recipient = isRent ? reason.replace(`${t('ui.rent')} ${t('ui.for')} `, "") : "The Bank";
+    if (p.name.includes("Bot")) {
+        setTimeout(() => {
+            if (p.money > auc.bid + 10 && Math.random() > 0.1) bidAuction();
+            else passAuction();
+        }, 1000);
+    }
+}
 
-        document.getElementById('pay-msg').innerHTML = `
+function bidAuction() {
+    const p = auc.players[auc.turn];
+    if (p.money < auc.bid + 10) { showAlert("Insufficient funds to cover the bid!"); return; }
+    auc.bid += 10;
+    auc.leader = p;
+    auc.turn = (auc.turn + 1) % auc.players.length;
+    updateAuctionUI();
+}
+
+function passAuction() {
+    auc.players.splice(auc.turn, 1);
+    if (auc.turn >= auc.players.length) auc.turn = 0;
+    updateAuctionUI();
+}
+
+function askPay(p, val, reason, cb) {
+    // Unified UI for Bot and Human
+    showModal('modal-pay');
+    const isRent = reason.includes("Rent for");
+    const recipient = isRent ? reason.replace("Rent for ", "") : "The Bank";
+
+    document.getElementById('pay-msg').innerHTML = `
         <div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-bottom:10px">
-            <div style="color:#ff9800; font-weight:bold; font-size:1.2rem; margin-bottom:10px">💸 ${t('ui.payment')} 💸</div>
+            <div style="color:#ff9800; font-weight:bold; font-size:1.2rem; margin-bottom:10px">💸 PAYMENT 💸</div>
             <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-                <span>${t('ui.from')}:</span> <span style="font-weight:bold">${p.name} <span style="font-weight:normal; color:#ccc; font-size:0.9rem">(${t('ui.balance')}: $${p.money})</span></span>
+                <span>From:</span> <span style="font-weight:bold">${p.name} <span style="font-weight:normal; color:#ccc; font-size:0.9rem">(Balance: $${p.money})</span></span>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-                <span>${t('ui.to')}:</span> <span style="font-weight:bold">${recipient}</span>
+                <span>To:</span> <span style="font-weight:bold">${recipient}</span>
             </div>
              <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.2); padding-top:5px; margin-top:5px">
-                <span>${t('ui.amount')}:</span> <span style="color:#f44336; font-weight:bold; font-size:1.2rem">$${val}</span>
+                <span>Amount:</span> <span style="color:#f44336; font-weight:bold; font-size:1.2rem">$${val}</span>
             </div>
         </div>
         <div style="font-size:0.8rem; color:#ccc">${reason}</div>
     `;
 
-        const payBtn = document.getElementById('pay-btn');
-        // Reset button state
-        payBtn.disabled = false;
-        payBtn.innerText = t('ui.pay');
-        payBtn.onclick = () => {
-            p.money -= val;
-            closeModal('modal-pay');
-            if (p.money < 0) fail(p); else {
-                sndCash.play();
-                if (p.money < 0) fail(p); else {
-                    sndCash.play();
-                    log(`💰 ${t('ui.payment')}: ${t('logs.rentPaid', { amount: val, recipient: recipient })}`);
-                    cb();
-                }
-                cb();
-            }
-            updateHUD();
-        };
-
-        if (p.name.includes("Bot")) {
-            payBtn.disabled = true;
-            payBtn.innerText = "Processing...";
-            setTimeout(() => {
-                // Auto-click pay
-                payBtn.disabled = false;
-                payBtn.click();
-            }, 1500); // 1.5s delay so user sees it
-            return;
+    const payBtn = document.getElementById('pay-btn');
+    // Reset button state
+    payBtn.disabled = false;
+    payBtn.innerText = "Pay Now";
+    payBtn.onclick = () => {
+        p.money -= val;
+        closeModal('modal-pay');
+        if (p.money < 0) fail(p); else {
+            sndCash.play();
+            log(`💰 PAYMENT: ${p.name} paid $${val} to ${recipient}.`);
+            cb();
         }
-
-        // For humans, logic continues below (duplicate rendering code removed via this replacement)
-        // Actually, I need to be careful not to duplicate the UI setup code if I'm merging blocks.
-        // The original code had:
-        // if (bot) { ... return; }
-        // // Human UI ...
-
-        // I am replacing the TOP part. I need to replace the whole function essentially or handle the flow carefully.
-        // Let's replace the whole function to be safe and clean.
-    }
-
-    function calcRent(t, o, d) {
-        const pr = o.props.find(x => x.idx === music.indexOf(t));
-        if (pr.mortgaged) return 0;
-        if (t.t === "rail") return [0, 25, 50, 100, 200][o.props.filter(x => music[x.idx].t === "rail").length];
-        if (t.t === "util") return d * (o.props.filter(x => music[x.idx].t === "util").length === 1 ? 4 : 10);
-        return t.r[pr.houses];
-    }
-
-    function fail(p) {
-        p.money = 0;
         updateHUD();
-        document.getElementById('fail-msg').innerText = `GAME OVER! ${p.name} went bankrupt! The music empire collapsed.`;
-        showModal('modal-fail');
-        document.getElementById('roll-btn').disabled = true; // Button removed but id might be needed by fail... wait, I removed the button.
-        const btns = document.querySelectorAll('.m3-btn');
-        btns.forEach(b => {
-            if (!b.innerText.includes('Restart')) b.disabled = true;
-        });
+    };
+
+    if (p.name.includes("Bot")) {
+        payBtn.disabled = true;
+        payBtn.innerText = "Processing...";
+        setTimeout(() => {
+            // Auto-click pay
+            payBtn.disabled = false;
+            payBtn.click();
+        }, 1500); // 1.5s delay so user sees it
+        return;
     }
 
-    function openManage() {
-        const list = document.getElementById('manage-list');
-        list.innerHTML = "";
+    // For humans, logic continues below (duplicate rendering code removed via this replacement)
+    // Actually, I need to be careful not to duplicate the UI setup code if I'm merging blocks.
+    // The original code had:
+    // if (bot) { ... return; }
+    // // Human UI ...
 
-        if (players[turn].props.length === 0) {
-            if (players[turn].props.length === 0) {
-                list.innerHTML = `<p style='color:#888; text-align:center; width:100%'>${t('ui.noProps')}</p>`;
-            }
-        }
+    // I am replacing the TOP part. I need to replace the whole function essentially or handle the flow carefully.
+    // Let's replace the whole function to be safe and clean.
+}
 
-        players[turn].props.forEach(pr => {
-            const tile = music[pr.idx];
-            const isRailUtil = tile.t === 'rail' || tile.t === 'util';
-            const houseCost = tile.h || 0;
-            const canBuild = !pr.mortgaged && !isRailUtil && players[turn].money >= houseCost && pr.houses < 5;
-            const canSellHouse = !isRailUtil && pr.houses > 0;
-            const mortgageValue = tile.p / 2;
-            const unmortgageCost = Math.ceil(mortgageValue * 1.1);
-            const canUnmortgage = pr.mortgaged && players[turn].money >= unmortgageCost;
-            const canMortgage = !pr.mortgaged && pr.houses === 0;
+function calcRent(t, o, d) {
+    const pr = o.props.find(x => x.idx === music.indexOf(t));
+    if (pr.mortgaged) return 0;
+    if (t.t === "rail") return [0, 25, 50, 100, 200][o.props.filter(x => music[x.idx].t === "rail").length];
+    if (t.t === "util") return d * (o.props.filter(x => music[x.idx].t === "util").length === 1 ? 4 : 10);
+    return t.r[pr.houses];
+}
+
+function fail(p) {
+    p.money = 0;
+    updateHUD();
+    document.getElementById('fail-msg').innerText = `GAME OVER! ${p.name} went bankrupt! The music empire collapsed.`;
+    showModal('modal-fail');
+    document.getElementById('roll-btn').disabled = true; // Button removed but id might be needed by fail... wait, I removed the button.
+    const btns = document.querySelectorAll('.m3-btn');
+    btns.forEach(b => {
+        if (!b.innerText.includes('Restart')) b.disabled = true;
+    });
+}
+
+function openManage() {
+    const list = document.getElementById('manage-list');
+    list.innerHTML = "";
+
+    if (players[turn].props.length === 0) {
+        list.innerHTML = "<p style='color:#888; text-align:center; width:100%'>You don't own any properties.</p>";
+    }
+
+    players[turn].props.forEach(pr => {
+        const tile = music[pr.idx];
+        const isRailUtil = tile.t === 'rail' || tile.t === 'util';
+        const houseCost = tile.h || 0;
+        const canBuild = !pr.mortgaged && !isRailUtil && players[turn].money >= houseCost && pr.houses < 5;
+        const canSellHouse = !isRailUtil && pr.houses > 0;
+        const mortgageValue = tile.p / 2;
+        const unmortgageCost = Math.ceil(mortgageValue * 1.1);
+        const canUnmortgage = pr.mortgaged && players[turn].money >= unmortgageCost;
+        const canMortgage = !pr.mortgaged && pr.houses === 0;
 
 
-            let rentStats = "";
-            if (!isRailUtil) {
-                rentStats = `
-                <div class="rent-row"><span>${t('ui.rent')}:</span> <span>$${tile.r[0]}</span></div>
-                <div class="rent-row"><span>1 🏠:</span> <span>$${tile.r[1]}</span></div>
-                <div class="rent-row"><span>2 🏠:</span> <span>$${tile.r[2]}</span></div>
-                <div class="rent-row"><span>3 🏠:</span> <span>$${tile.r[3]}</span></div>
-                <div class="rent-row"><span>4 🏠:</span> <span>$${tile.r[4]}</span></div>
+        let rentStats = "";
+        if (!isRailUtil) {
+            rentStats = `
+                <div class="rent-row"><span>Rent:</span> <span>$${tile.r[0]}</span></div>
+                <div class="rent-row"><span>1 House:</span> <span>$${tile.r[1]}</span></div>
+                <div class="rent-row"><span>2 Houses:</span> <span>$${tile.r[2]}</span></div>
+                <div class="rent-row"><span>3 Houses:</span> <span>$${tile.r[3]}</span></div>
+                <div class="rent-row"><span>4 Houses:</span> <span>$${tile.r[4]}</span></div>
                 <div class="rent-row"><span>HOTEL:</span> <span>$${tile.r[5]}</span></div>
                 <hr style="margin:5px 0; border:0; border-top:1px solid #ccc">
-                <div class="rent-row"><span>${t('ui.houseCost')}:</span> <span>$${tile.h}</span></div>
+                <div class="rent-row"><span>House Cost:</span> <span>$${tile.h}</span></div>
             `;
-            } else if (tile.t === 'rail') {
-                const rNames = LANGUAGES[curLang].ui.railRent;
-                rentStats = `
-                <div class="rent-row"><span>${rNames[0]}:</span> <span>$25</span></div>
-                <div class="rent-row"><span>${rNames[1]}:</span> <span>$50</span></div>
-                <div class="rent-row"><span>${rNames[2]}:</span> <span>$100</span></div>
-                <div class="rent-row"><span>${rNames[3]}:</span> <span>$200</span></div>
+        } else if (tile.t === 'rail') {
+            rentStats = `
+                <div class="rent-row"><span>1 Stadium:</span> <span>$25</span></div>
+                <div class="rent-row"><span>2 Stadiums:</span> <span>$50</span></div>
+                <div class="rent-row"><span>3 Stadiums:</span> <span>$100</span></div>
+                <div class="rent-row"><span>4 Stadiums:</span> <span>$200</span></div>
             `;
-            } else {
-                rentStats = `
-                <div style="text-align:center; margin:10px 0">${t('ui.utilRent')}</div>
+        } else {
+            rentStats = `
+                <div style="text-align:center; margin:10px 0">If one utility is owned, rent is 4x dice.<br>If both are owned, it's 10x dice.</div>
             `;
-            }
+        }
 
-            let html = `
+        let html = `
         <div class="deed-card" style="${pr.mortgaged ? 'opacity:0.6;' : ''}">
             <div class="deed-header" style="background:${tile.c || '#ccc'}; color:${tile.c === '#010101' ? 'white' : 'black'}">
                 ${tile.n}
-            <div class="deed-header" style="background:${tile.c || '#ccc'}; color:${tile.c === '#010101' ? 'white' : 'black'}">
-                ${tile.n}
-                <div style="font-size:0.6rem; margin-top:2px">${pr.mortgaged ? t('ui.mortgaged') : (isRailUtil ? '' : (pr.houses === 5 ? '🏨' : '🏠'.repeat(pr.houses)))}</div>
-            </div>
+                <div style="font-size:0.6rem; margin-top:2px">${pr.mortgaged ? '(MORTGAGED)' : (isRailUtil ? '' : (pr.houses === 5 ? '🏨' : '🏠'.repeat(pr.houses)))}</div>
             </div>
             <div class="deed-body">
                 ${rentStats}
                 <div class="rent-row" style="margin-top:auto; font-weight:bold">
-                <div class="rent-row" style="margin-top:auto; font-weight:bold">
-                    <span>${t('ui.mortgage')}:</span> <span>$${mortgageValue}</span>
-                </div>
+                    <span>Mortgage:</span> <span>$${mortgageValue}</span>
                 </div>
                 
                 <div class="deed-actions">
@@ -729,327 +640,327 @@ function updateAuctionUI() {
                     </div>` : ''}
                     
                     ${pr.mortgaged ?
-                    `<button class="m3-btn" ${canUnmortgage ? '' : 'disabled'} style="background:#4caf50" onclick="unmtg(${pr.idx})">${t('ui.unmortgage')} (-$${unmortgageCost})</button>` :
-                    `<button class="m3-btn" ${canMortgage ? '' : 'disabled'} style="background:#673ab7; color:white" onclick="mtg(${pr.idx})">${t('ui.mortgage')} (+$${mortgageValue})</button>`
-                }
+                `<button class="m3-btn" ${canUnmortgage ? '' : 'disabled'} style="background:#4caf50" onclick="unmtg(${pr.idx})">Unmortgage (-$${unmortgageCost})</button>` :
+                `<button class="m3-btn" ${canMortgage ? '' : 'disabled'} style="background:#673ab7; color:white" onclick="mtg(${pr.idx})">Mortgage (+$${mortgageValue})</button>`
+            }
                     
                     <div style="display:flex; gap:2px">
-                        <button class="m3-btn" style="background:#00bcd4; flex:1" onclick="transfer(${pr.idx})">${t('ui.trade')}</button>
-                        <button class="m3-btn" style="background:#f44336; color:white; flex:1" onclick="sl(${pr.idx})">${t('ui.sell')}</button>
+                        <button class="m3-btn" style="background:#00bcd4; flex:1" onclick="transfer(${pr.idx})">Trade</button>
+                        <button class="m3-btn" style="background:#f44336; color:white; flex:1" onclick="sl(${pr.idx})">Sell</button>
                     </div>
                 </div>
             </div>
         </div>`;
-            list.innerHTML += html;
-        });
-        showModal('modal-manage');
+        list.innerHTML += html;
+    });
+    showModal('modal-manage');
+}
+
+let currentTrade = {
+    initiator: null,
+    target: null,
+    giveMoney: 0,
+    giveProps: [], // Set of indices
+    getMoney: 0,
+    getProps: [], // Set of indices
+    state: 'DRAFT' // DRAFT, REVIEW
+};
+
+// 1. ENTRY POINT: Click "Trocar" on a property or generic button
+// 1. ENTRY POINT: Click "Trocar" on a property or generic button
+function transfer(idx = -1) {
+    tradeIdx = idx; // Global state for current trade property
+
+    let headerMsg = "New Trade";
+    let subMsg = "Who do you want to trade with?";
+
+    // Safely handle property context
+    if (idx !== -1 && music[idx]) {
+        headerMsg = `Trading: ${music[idx].n}`;
+        subMsg = "Choose a partner to offer this property:";
     }
 
-    let currentTrade = {
-        initiator: null,
-        target: null,
-        giveMoney: 0,
-        giveProps: [], // Set of indices
-        getMoney: 0,
-        getProps: [], // Set of indices
-        state: 'DRAFT' // DRAFT, REVIEW
-    };
+    const modalBody = document.getElementById('modal-trade');
+    if (!modalBody) { console.error("Modal Trade not found!"); return; }
 
-    // 1. ENTRY POINT: Click "Trocar" on a property or generic button
-    // 1. ENTRY POINT: Click "Trocar" on a property or generic button
-    function transfer(idx = -1) {
-        tradeIdx = idx; // Global state for current trade property
-
-        let headerMsg = t('ui.tradeTitle');
-        let subMsg = t('ui.tradeSub');
-
-        // Safely handle property context
-        if (idx !== -1 && music[idx]) {
-            headerMsg = t('ui.tradePropHeader', { prop: music[idx].n });
-            subMsg = t('ui.tradePropSub');
-        }
-
-        const modalBody = document.getElementById('modal-trade');
-        if (!modalBody) { console.error("Modal Trade not found!"); return; }
-
-        // Generate fresh HTML every time to avoid ID conflicts or missing elements
-        modalBody.innerHTML = `
+    // Generate fresh HTML every time to avoid ID conflicts or missing elements
+    modalBody.innerHTML = `
         <h2>${headerMsg}</h2>
         <p>${subMsg}</p>
         <select id="trade-target" style="width:100%; padding:10px; margin:20px 0; border-radius:8px; font-size:1.1rem; background:rgba(255,255,255,0.1); color:white; border:1px solid #555"></select>
         <div style="display:flex; gap:10px; justify-content:center">
-            <button class="m3-btn" style="background:#4caf50" onclick="initNegotiation()">${t('ui.start')}</button>
-            <button class="m3-btn" style="background:#555" onclick="closeModal('modal-trade')">${t('ui.cancel')}</button>
+            <button class="m3-btn" style="background:#4caf50" onclick="initNegotiation()">Start</button>
+            <button class="m3-btn" style="background:#555" onclick="closeModal('modal-trade')">Cancel</button>
         </div>
     `;
 
-        // Populate Select
-        const sel = document.getElementById('trade-target');
-        if (sel) {
-            players.forEach((p, i) => {
-                // Don't list yourself
-                if (i !== turn) {
-                    sel.innerHTML += `<option value="${i}">${p.token} ${p.name}</option>`;
-                }
-            });
-        }
-
-        showModal('modal-trade');
+    // Populate Select
+    const sel = document.getElementById('trade-target');
+    if (sel) {
+        players.forEach((p, i) => {
+            // Don't list yourself
+            if (i !== turn) {
+                sel.innerHTML += `<option value="${i}">${p.token} ${p.name}</option>`;
+            }
+        });
     }
 
-    // 2. INITIALIZE NEGOTIATION
-    function initNegotiation() {
-        closeModal('modal-manage'); // Close manage if open
-        closeModal('modal-trade');
+    showModal('modal-trade');
+}
 
-        const targetId = parseInt(document.getElementById('trade-target').value);
-        const me = players[turn];
-        const target = players[targetId];
+// 2. INITIALIZE NEGOTIATION
+function initNegotiation() {
+    closeModal('modal-manage'); // Close manage if open
+    closeModal('modal-trade');
 
-        currentTrade = {
-            initiator: me.id,
-            target: target.id,
-            giveMoney: 0,
-            giveProps: tradeIdx !== -1 && players[turn].props.find(p => p.idx === tradeIdx) ? [tradeIdx] : [],
-            getMoney: 0,
-            getProps: tradeIdx !== -1 && target.props.find(p => p.idx === tradeIdx) ? [tradeIdx] : [],
-            state: 'DRAFT'
+    const targetId = parseInt(document.getElementById('trade-target').value);
+    const me = players[turn];
+    const target = players[targetId];
+
+    currentTrade = {
+        initiator: me.id,
+        target: target.id,
+        giveMoney: 0,
+        giveProps: tradeIdx !== -1 && players[turn].props.find(p => p.idx === tradeIdx) ? [tradeIdx] : [],
+        getMoney: 0,
+        getProps: tradeIdx !== -1 && target.props.find(p => p.idx === tradeIdx) ? [tradeIdx] : [],
+        state: 'DRAFT'
+    };
+
+    renderNegotiationUI();
+    showModal('modal-negotiation');
+    document.getElementById('modal-negotiation').style.display = 'flex';
+}
+
+// 3. RENDER UI
+function renderNegotiationUI() {
+    const p1 = players[currentTrade.initiator]; // Active User (Left)
+    const p2 = players[currentTrade.target];    // Opponent (Right)
+    const isReview = currentTrade.state === 'REVIEW';
+
+    // Headers
+    document.getElementById('trade-left-name').innerText = `${p1.token} ${p1.name} (You)`;
+    document.getElementById('trade-right-name').innerText = `${p2.token} ${p2.name}`;
+
+    // Balances
+    document.getElementById('trade-left-balance').innerText = `Available Balance: $${p1.money}`;
+    document.getElementById('trade-right-balance').innerText = `Available Balance: $${p2.money}`;
+
+    // Inputs (Money)
+    const in1 = document.getElementById('trade-left-money');
+    const in2 = document.getElementById('trade-right-money');
+
+    in1.value = currentTrade.giveMoney;
+    in2.value = currentTrade.getMoney;
+
+    in1.disabled = isReview;
+    in2.disabled = isReview;
+
+    // Property Lists
+    renderPropList('trade-left-props', p1, currentTrade.giveProps, isReview, (idx, checked) => {
+        if (checked) currentTrade.giveProps.push(idx);
+        else currentTrade.giveProps = currentTrade.giveProps.filter(x => x !== idx);
+    });
+
+    renderPropList('trade-right-props', p2, currentTrade.getProps, isReview, (idx, checked) => {
+        if (checked) currentTrade.getProps.push(idx);
+        else currentTrade.getProps = currentTrade.getProps.filter(x => x !== idx);
+    });
+
+    // Actions Buttons
+    const actions = document.getElementById('trade-actions');
+    actions.innerHTML = "";
+
+    if (!isReview) {
+        actions.innerHTML = `
+            <button class="m3-btn" style="background:#f44336; color:white" onclick="closeModal('modal-negotiation')">Cancel</button>
+            <button class="m3-btn" style="background:#4caf50; min-width:150px" onclick="submitOffer()">Make Offer ➤</button>
+        `;
+    } else {
+        actions.innerHTML = `
+            <div style="margin-right:auto; align-self:center; color:#ccc">⏳ ${p2.name} is reviewing...</div>
+            <button class="m3-btn" style="background:#f44336; color:white" onclick="rejectTrade()">Reject</button>
+            <button class="m3-btn" style="background:#ff9800" onclick="counterOffer()">Counter-Offer</button>
+            <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ Accept</button>
+        `;
+    }
+}
+
+function renderPropList(containerId, player, selectedIndices, disabled, onToggle) {
+    const div = document.getElementById(containerId);
+    div.innerHTML = "";
+
+    if (player.props.length === 0) {
+        div.innerHTML = "<div style='color:#666; font-size:0.8rem; text-align:center'>No properties</div>";
+        return;
+    }
+
+    player.props.forEach(pr => {
+        const m = music[pr.idx];
+        const isSel = selectedIndices.includes(pr.idx);
+
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.padding = '5px';
+        row.style.background = isSel ? 'rgba(76, 175, 80, 0.2)' : 'transparent';
+        row.style.borderBottom = '1px solid #333';
+
+        // Color Indicator
+        const colorDot = `<div style="width:12px; height:12px; background:${m.c}; border-radius:50%; margin-right:8px; border:1px solid #555"></div>`;
+
+        // Checkbox
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.checked = isSel;
+        chk.disabled = disabled;
+        chk.style.marginRight = '10px';
+        chk.onchange = (e) => {
+            onToggle(pr.idx, e.target.checked);
+            row.style.background = e.target.checked ? 'rgba(76, 175, 80, 0.2)' : 'transparent';
         };
 
-        renderNegotiationUI();
-        showModal('modal-negotiation');
-        document.getElementById('modal-negotiation').style.display = 'flex';
-    }
+        const lbl = document.createElement('span');
+        lbl.innerHTML = `${m.n}`;
+        if (pr.mortgaged) lbl.innerHTML += ` <span style='font-size:0.7rem; color:#f44336'>(Mortgaged)</span>`;
 
-    // 3. RENDER UI
-    function renderNegotiationUI() {
-        const p1 = players[currentTrade.initiator]; // Active User (Left)
-        const p2 = players[currentTrade.target];    // Opponent (Right)
-        const isReview = currentTrade.state === 'REVIEW';
+        row.innerHTML = colorDot;
+        row.appendChild(chk);
+        row.appendChild(lbl);
+        div.appendChild(row);
+    });
+}
 
-        // Headers
-        document.getElementById('trade-left-name').innerText = `${p1.token} ${p1.name} ${t('ui.you')}`;
-        document.getElementById('trade-right-name').innerText = `${p2.token} ${p2.name}`;
+// 4. LOGIC
+function updateTradeBalance() {
+    currentTrade.giveMoney = parseInt(document.getElementById('trade-left-money').value) || 0;
+    currentTrade.getMoney = parseInt(document.getElementById('trade-right-money').value) || 0;
+}
 
-        // Balances
-        document.getElementById('trade-left-balance').innerText = `${t('ui.balance')}: $${p1.money}`;
-        document.getElementById('trade-right-balance').innerText = `${t('ui.balance')}: $${p2.money}`;
+function submitOffer() {
+    updateTradeBalance();
+    const p1 = players[currentTrade.initiator];
 
-        // Inputs (Money)
-        const in1 = document.getElementById('trade-left-money');
-        const in2 = document.getElementById('trade-right-money');
+    if (currentTrade.giveMoney > p1.money) { showAlert("You don't have enough money for this offer!"); return; }
 
-        in1.value = currentTrade.giveMoney;
-        in2.value = currentTrade.getMoney;
+    // Check if at least something is offered/requested
+    // (Optional: Allow gifts? Yes)
 
-        in1.disabled = isReview;
-        in2.disabled = isReview;
+    currentTrade.state = 'REVIEW';
+    renderNegotiationUI();
 
-        // Property Lists
-        renderPropList('trade-left-props', p1, currentTrade.giveProps, isReview, (idx, checked) => {
-            if (checked) currentTrade.giveProps.push(idx);
-            else currentTrade.giveProps = currentTrade.giveProps.filter(x => x !== idx);
-        });
-
-        renderPropList('trade-right-props', p2, currentTrade.getProps, isReview, (idx, checked) => {
-            if (checked) currentTrade.getProps.push(idx);
-            else currentTrade.getProps = currentTrade.getProps.filter(x => x !== idx);
-        });
-
-        // Actions Buttons
+    // Check if Target is BOT
+    const targetP = players[currentTrade.target];
+    if (targetP.name.includes("Bot")) {
         const actions = document.getElementById('trade-actions');
-        actions.innerHTML = "";
+        actions.innerHTML = `<div style="width:100%; text-align:center; color:#ffeb3b; font-weight:bold; font-size:1.1rem; padding:20px">🤖 Analyzing proposal...</div>`;
 
-        if (!isReview) {
-            actions.innerHTML = `
-            <button class="m3-btn" style="background:#f44336; color:white" onclick="closeModal('modal-negotiation')">${t('ui.cancel')}</button>
-            <button class="m3-btn" style="background:#4caf50; min-width:150px" onclick="submitOffer()">${t('ui.makeOffer')}</button>
-        `;
-        } else {
-            actions.innerHTML = `
-            <div style="margin-right:auto; align-self:center; color:#ccc">⏳ ${p2.name} ${t('ui.reviewing')}</div>
-            <button class="m3-btn" style="background:#f44336; color:white" onclick="rejectTrade()">${t('ui.reject')}</button>
-            <button class="m3-btn" style="background:#ff9800" onclick="counterOffer()">${t('ui.counter')}</button>
-            <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ ${t('ui.accept')}</button>
-        `;
-        }
+        setTimeout(() => {
+            analyzeBotTrade();
+        }, 1500); // 1.5s thinking time
+        return;
     }
 
-    function renderPropList(containerId, player, selectedIndices, disabled, onToggle) {
-        const div = document.getElementById(containerId);
-        div.innerHTML = "";
+    // In a real game, this would push to the other player.
+    // Here we simulate the modal being passed to Player 2
+    // showAlert(`Passe o dispositivo para ${players[currentTrade.target].name}!`);
+}
 
-        if (player.props.length === 0) {
-            div.innerHTML = "<div style='color:#666; font-size:0.8rem; text-align:center'>No properties</div>";
-            return;
-        }
+function counterOffer() {
+    // Swap Roles
+    const tempId = currentTrade.initiator;
+    currentTrade.initiator = currentTrade.target;
+    currentTrade.target = tempId;
 
-        player.props.forEach(pr => {
-            const m = music[pr.idx];
-            const isSel = selectedIndices.includes(pr.idx);
+    // Swap Proposed Assets
+    const tempMoney = currentTrade.giveMoney;
+    currentTrade.giveMoney = currentTrade.getMoney;
+    currentTrade.getMoney = tempMoney;
 
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.padding = '5px';
-            row.style.background = isSel ? 'rgba(76, 175, 80, 0.2)' : 'transparent';
-            row.style.borderBottom = '1px solid #333';
+    const tempProps = currentTrade.giveProps;
+    currentTrade.giveProps = currentTrade.getProps;
+    currentTrade.getProps = tempProps;
 
-            // Color Indicator
-            const colorDot = `<div style="width:12px; height:12px; background:${m.c}; border-radius:50%; margin-right:8px; border:1px solid #555"></div>`;
+    currentTrade.state = 'DRAFT';
+    renderNegotiationUI();
+    // showAlert(`Agora é a vez de ${players[currentTrade.initiator].name} editar a proposta.`);
+}
 
-            // Checkbox
-            const chk = document.createElement('input');
-            chk.type = 'checkbox';
-            chk.checked = isSel;
-            chk.disabled = disabled;
-            chk.style.marginRight = '10px';
-            chk.onchange = (e) => {
-                onToggle(pr.idx, e.target.checked);
-                row.style.background = e.target.checked ? 'rgba(76, 175, 80, 0.2)' : 'transparent';
-            };
-
-            const lbl = document.createElement('span');
-            lbl.innerHTML = `${m.n}`;
-            if (pr.mortgaged) lbl.innerHTML += ` <span style='font-size:0.7rem; color:#f44336'>(Mortgaged)</span>`;
-
-            row.innerHTML = colorDot;
-            row.appendChild(chk);
-            row.appendChild(lbl);
-            div.appendChild(row);
-        });
-    }
-
-    // 4. LOGIC
-    function updateTradeBalance() {
-        currentTrade.giveMoney = parseInt(document.getElementById('trade-left-money').value) || 0;
-        currentTrade.getMoney = parseInt(document.getElementById('trade-right-money').value) || 0;
-    }
-
-    function submitOffer() {
-        updateTradeBalance();
-        const p1 = players[currentTrade.initiator];
-
-        if (currentTrade.giveMoney > p1.money) { showAlert(t('ui.insufficientFundsOffer')); return; }
-
-        // Check if at least something is offered/requested
-        // (Optional: Allow gifts? Yes)
-
-        currentTrade.state = 'REVIEW';
-        renderNegotiationUI();
-
-        // Check if Target is BOT
-        const targetP = players[currentTrade.target];
-        if (targetP.name.includes("Bot")) {
-            const actions = document.getElementById('trade-actions');
-            actions.innerHTML = `<div style="width:100%; text-align:center; color:#ffeb3b; font-weight:bold; font-size:1.1rem; padding:20px">🤖 ${t('ui.analyzing')}</div>`;
-
-            setTimeout(() => {
-                analyzeBotTrade();
-            }, 1500); // 1.5s thinking time
-            return;
-        }
-
-        // In a real game, this would push to the other player.
-        // Here we simulate the modal being passed to Player 2
-        // showAlert(`Passe o dispositivo para ${players[currentTrade.target].name}!`);
-    }
-
-    function counterOffer() {
-        // Swap Roles
-        const tempId = currentTrade.initiator;
-        currentTrade.initiator = currentTrade.target;
-        currentTrade.target = tempId;
-
-        // Swap Proposed Assets
-        const tempMoney = currentTrade.giveMoney;
-        currentTrade.giveMoney = currentTrade.getMoney;
-        currentTrade.getMoney = tempMoney;
-
-        const tempProps = currentTrade.giveProps;
-        currentTrade.giveProps = currentTrade.getProps;
-        currentTrade.getProps = tempProps;
-
-        currentTrade.state = 'DRAFT';
-        renderNegotiationUI();
-        // showAlert(`Agora é a vez de ${players[currentTrade.initiator].name} editar a proposta.`);
-    }
-
-    function rejectTrade() {
-        // Persistent Reject UI
-        const actions = document.getElementById('trade-actions');
-        actions.innerHTML = `
+function rejectTrade() {
+    // Persistent Reject UI
+    const actions = document.getElementById('trade-actions');
+    actions.innerHTML = `
         <div style="width:100%; text-align:center; padding:15px; background:rgba(244, 67, 54, 0.2); border-radius:8px; margin-bottom:10px">
-            <div style="color:#f44336; font-weight:bold; font-size:1.2rem">🚫 ${t('ui.proposalRejected')}</div>
-            <div style="color:#ccc; font-size:0.9rem">${t('ui.negotiationCancelled')}</div>
+            <div style="color:#f44336; font-weight:bold; font-size:1.2rem">🚫 Proposal Rejected</div>
+            <div style="color:#ccc; font-size:0.9rem">The negotiation has been cancelled.</div>
         </div>
-        <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">${t('ui.close')}</button>
+        <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">Close</button>
     `;
-        log(t('logs.tradeRej'));
-    }
+    log("Negotiation rejected.");
+}
 
-    function acceptTrade() {
-        const pRef1 = players[currentTrade.initiator]; // The one who made the LAST offer (Draft -> Submit)
-        // Wait, in logic:
-        // If P1 submited -> State REVIEW.
-        // The Active View is now P2 (Target).
-        // So if P2 accepts:
-        // P2 Gets: giveMoney, giveProps
-        // P2 Gives: getMoney, getProps
+function acceptTrade() {
+    const pRef1 = players[currentTrade.initiator]; // The one who made the LAST offer (Draft -> Submit)
+    // Wait, in logic:
+    // If P1 submited -> State REVIEW.
+    // The Active View is now P2 (Target).
+    // So if P2 accepts:
+    // P2 Gets: giveMoney, giveProps
+    // P2 Gives: getMoney, getProps
 
-        // But wait, my render logic for Review Mode says:
-        // "Left Side: You (Initiator)" -> displayed as the person who SENT the offer.
-        // "Right Side: Oponente (Target)" -> displayed as the person VIEWING/RECEIVING.
+    // But wait, my render logic for Review Mode says:
+    // "Left Side: You (Initiator)" -> displayed as the person who SENT the offer.
+    // "Right Side: Oponente (Target)" -> displayed as the person VIEWING/RECEIVING.
 
-        // Actually, let's keep it consistent with the data structure.
-        // Data: Initiator (P1) offers GiveMoney/GiveProps.
-        // Data: Target (P2) is asked for GetMoney/GetProps.
-        //
-        // So transfer is:
-        // P1 -> P2: GiveMoney, GiveProps
-        // P2 -> P1: GetMoney, GetProps
+    // Actually, let's keep it consistent with the data structure.
+    // Data: Initiator (P1) offers GiveMoney/GiveProps.
+    // Data: Target (P2) is asked for GetMoney/GetProps.
+    //
+    // So transfer is:
+    // P1 -> P2: GiveMoney, GiveProps
+    // P2 -> P1: GetMoney, GetProps
 
-        const p1 = players[currentTrade.initiator];
-        const p2 = players[currentTrade.target];
+    const p1 = players[currentTrade.initiator];
+    const p2 = players[currentTrade.target];
 
-        // Final Validation
-        if (p1.money < currentTrade.giveMoney) { showAlert(`${p1.name} has insufficient funds!`); return; }
-        if (p2.money < currentTrade.getMoney) { showAlert(`${p2.name} has insufficient funds!`); return; }
+    // Final Validation
+    if (p1.money < currentTrade.giveMoney) { showAlert(`${p1.name} has insufficient funds!`); return; }
+    if (p2.money < currentTrade.getMoney) { showAlert(`${p2.name} has insufficient funds!`); return; }
 
-        // Execute Money
-        p1.money -= currentTrade.giveMoney;
-        p2.money += currentTrade.giveMoney;
+    // Execute Money
+    p1.money -= currentTrade.giveMoney;
+    p2.money += currentTrade.giveMoney;
 
-        p2.money -= currentTrade.getMoney;
-        p1.money += currentTrade.getMoney;
+    p2.money -= currentTrade.getMoney;
+    p1.money += currentTrade.getMoney;
 
-        // Execute Props (Move P1 -> P2)
-        currentTrade.giveProps.forEach(idx => {
-            const propIndex = p1.props.findIndex(x => x.idx === idx);
-            if (propIndex !== -1) {
-                const prop = p1.props.splice(propIndex, 1)[0];
-                p2.props.push(prop);
-                document.getElementById(`owner-${idx}`).style.background = getPlayerColor(p2.id); // Helper needed or inline
-            }
-        });
+    // Execute Props (Move P1 -> P2)
+    currentTrade.giveProps.forEach(idx => {
+        const propIndex = p1.props.findIndex(x => x.idx === idx);
+        if (propIndex !== -1) {
+            const prop = p1.props.splice(propIndex, 1)[0];
+            p2.props.push(prop);
+            document.getElementById(`owner-${idx}`).style.background = getPlayerColor(p2.id); // Helper needed or inline
+        }
+    });
 
-        // Execute Props (Move P2 -> P1)
-        currentTrade.getProps.forEach(idx => {
-            const propIndex = p2.props.findIndex(x => x.idx === idx);
-            if (propIndex !== -1) {
-                const prop = p2.props.splice(propIndex, 1)[0];
-                p1.props.push(prop);
-                document.getElementById(`owner-${idx}`).style.background = getPlayerColor(p1.id);
-            }
-        });
+    // Execute Props (Move P2 -> P1)
+    currentTrade.getProps.forEach(idx => {
+        const propIndex = p2.props.findIndex(x => x.idx === idx);
+        if (propIndex !== -1) {
+            const prop = p2.props.splice(propIndex, 1)[0];
+            p1.props.push(prop);
+            document.getElementById(`owner-${idx}`).style.background = getPlayerColor(p1.id);
+        }
+    });
 
-        sndCash.play();
-        log(`Trade completed between ${p1.name} and ${p2.name}!`);
-        updateHUD();
+    sndCash.play();
+    log(`Trade completed between ${p1.name} and ${p2.name}!`);
+    updateHUD();
 
-        // Persistent Success UI
-        const actions = document.getElementById('trade-actions');
-        actions.innerHTML = `
+    // Persistent Success UI
+    const actions = document.getElementById('trade-actions');
+    actions.innerHTML = `
         <div style="width:100%; text-align:center; padding:15px; background:rgba(76, 175, 80, 0.2); border-radius:8px; margin-bottom:10px">
             <div style="color:#4caf50; font-weight:bold; font-size:1.2rem">✅ Deal Closed!</div>
             <div style="color:#ccc; font-size:0.9rem">Transfer successfully completed.</div>
@@ -1057,204 +968,197 @@ function updateAuctionUI() {
         <button class="m3-btn" style="background:#555; width:100%" onclick="closeModal('modal-negotiation')">Close</button>
     `;
 
-        // Disable inputs to prevent changes after acceptance
-        document.querySelectorAll('#modal-negotiation input, #modal-negotiation button:not(.m3-btn)').forEach(el => el.disabled = true);
+    // Disable inputs to prevent changes after acceptance
+    document.querySelectorAll('#modal-negotiation input, #modal-negotiation button:not(.m3-btn)').forEach(el => el.disabled = true);
+}
+
+function getPlayerColor(id) {
+    return id === 0 ? '#ff4081' : (id === 1 ? '#4caf50' : (id === 2 ? '#2196f3' : '#ffeb3b'));
+}
+
+function bld(idx) {
+    const p = players[turn], pr = p.props.find(x => x.idx === idx);
+    const thisPropColor = music[idx].c;
+    const allPropsOfColor = music.filter(m => m.c === thisPropColor);
+    const myPropsOfColor = p.props.filter(mp => music[mp.idx].c === thisPropColor);
+
+    if (allPropsOfColor.length !== myPropsOfColor.length) {
+        showAlert("You must own ALL properties of this color to build!");
+        return;
     }
 
-    function getPlayerColor(id) {
-        return id === 0 ? '#ff4081' : (id === 1 ? '#4caf50' : (id === 2 ? '#2196f3' : '#ffeb3b'));
+    const houses = myPropsOfColor.map(mp => mp.houses);
+    const minH = Math.min(...houses);
+
+    if (pr.houses > minH) {
+        showAlert("Uniform Building Rule: Build evenly!");
+        return;
     }
 
-    function bld(idx) {
-        const p = players[turn], pr = p.props.find(x => x.idx === idx);
-        const thisPropColor = music[idx].c;
-        const allPropsOfColor = music.filter(m => m.c === thisPropColor);
-        const myPropsOfColor = p.props.filter(mp => music[mp.idx].c === thisPropColor);
+    p.money -= music[idx].h; pr.houses++;
+    if (p.money < 0) { fail(p); return; }
+    updateTile(idx, pr);
 
-        if (allPropsOfColor.length !== myPropsOfColor.length) {
-            showAlert("You must own ALL properties of this color to build!");
-            return;
-        }
-
-        const houses = myPropsOfColor.map(mp => mp.houses);
-        const minH = Math.min(...houses);
-
-        if (pr.houses > minH) {
-            showAlert("Uniform Building Rule: Build evenly!");
-            return;
-        }
-
-        p.money -= music[idx].h; pr.houses++;
-        if (p.money < 0) { fail(p); return; }
-        updateTile(idx, pr);
-
-        // Glow
-        const tile = document.getElementById(`tile-${idx}`);
-        if (tile) {
-            tile.classList.add('glow-active');
-            setTimeout(() => tile.classList.remove('glow-active'), 1000);
-        }
-
-        sndCash.play(); updateHUD(); openManage();
+    // Glow
+    const tile = document.getElementById(`tile-${idx}`);
+    if (tile) {
+        tile.classList.add('glow-active');
+        setTimeout(() => tile.classList.remove('glow-active'), 1000);
     }
 
-    function sellHouse(idx) {
-        const p = players[turn], pr = p.props.find(x => x.idx === idx);
-        const thisPropColor = music[idx].c;
-        const myPropsOfColor = p.props.filter(mp => music[mp.idx].c === thisPropColor);
-        const houses = myPropsOfColor.map(mp => mp.houses);
-        const maxH = Math.max(...houses);
+    sndCash.play(); updateHUD(); openManage();
+}
 
-        if (pr.houses < maxH) {
-            showAlert("Uniform Selling Rule: Sell from the highest first!");
-            return;
-        }
+function sellHouse(idx) {
+    const p = players[turn], pr = p.props.find(x => x.idx === idx);
+    const thisPropColor = music[idx].c;
+    const myPropsOfColor = p.props.filter(mp => music[mp.idx].c === thisPropColor);
+    const houses = myPropsOfColor.map(mp => mp.houses);
+    const maxH = Math.max(...houses);
 
-        p.money += music[idx].h / 2; pr.houses--;
-        updateTile(idx, pr);
-
-        // Glow
-        const tile = document.getElementById(`tile-${idx}`);
-        if (tile) {
-            tile.classList.add('glow-active');
-            setTimeout(() => tile.classList.remove('glow-active'), 1000);
-        }
-
-        sndCash.play(); updateHUD(); openManage();
+    if (pr.houses < maxH) {
+        showAlert("Uniform Selling Rule: Sell from the highest first!");
+        return;
     }
 
-    function mtg(idx) {
-        const p = players[turn], pr = p.props.find(x => x.idx === idx);
-        p.money += music[idx].p / 2; pr.mortgaged = true;
-        updateTile(idx, pr);
-        sndCash.play(); updateHUD(); openManage();
+    p.money += music[idx].h / 2; pr.houses--;
+    updateTile(idx, pr);
+
+    // Glow
+    const tile = document.getElementById(`tile-${idx}`);
+    if (tile) {
+        tile.classList.add('glow-active');
+        setTimeout(() => tile.classList.remove('glow-active'), 1000);
     }
 
-    function unmtg(idx) {
-        const p = players[turn], pr = p.props.find(x => x.idx === idx);
-        const cost = Math.ceil((music[idx].p / 2) * 1.1);
-        p.money -= cost; pr.mortgaged = false;
-        if (p.money < 0) { fail(p); return; }
-        updateTile(idx, pr);
-        sndCash.play(); updateHUD(); openManage();
-    }
+    sndCash.play(); updateHUD(); openManage();
+}
 
-    function updateTile(idx, pr) {
-        const el = document.getElementById(`build-${idx}`);
-        if (!el) return;
-        if (pr.mortgaged) el.innerText = "🚫";
-        else el.innerText = pr.houses < 5 ? "🏠".repeat(pr.houses) : "🏨";
-    }
+function mtg(idx) {
+    const p = players[turn], pr = p.props.find(x => x.idx === idx);
+    p.money += music[idx].p / 2; pr.mortgaged = true;
+    updateTile(idx, pr);
+    sndCash.play(); updateHUD(); openManage();
+}
 
-    function sl(idx) {
-        sellIdx = idx;
-        document.getElementById('confirm-title').innerText = "Sell Property?";
-        document.getElementById('confirm-msg').innerText = `Selling ${music[idx].n} will return it to the bank for $${music[idx].p / 2}. Confirm?`;
-        document.getElementById('confirm-yes-btn').onclick = doSell;
-        showModal('modal-confirm');
-    }
+function unmtg(idx) {
+    const p = players[turn], pr = p.props.find(x => x.idx === idx);
+    const cost = Math.ceil((music[idx].p / 2) * 1.1);
+    p.money -= cost; pr.mortgaged = false;
+    if (p.money < 0) { fail(p); return; }
+    updateTile(idx, pr);
+    sndCash.play(); updateHUD(); openManage();
+}
 
-    function doSell() {
-        if (sellIdx === -1) return;
-        const p = players[turn];
-        p.money += music[sellIdx].p / 2;
-        p.props = p.props.filter(x => x.idx !== sellIdx);
-        document.getElementById(`owner-${sellIdx}`).style.background = 'none';
-        document.getElementById(`build-${sellIdx}`).innerText = '';
+function updateTile(idx, pr) {
+    const el = document.getElementById(`build-${idx}`);
+    if (!el) return;
+    if (pr.mortgaged) el.innerText = "🚫";
+    else el.innerText = pr.houses < 5 ? "🏠".repeat(pr.houses) : "🏨";
+}
 
-        closeModal('modal-confirm');
-        updateHUD();
-        openManage();
-    }
+function sl(idx) {
+    sellIdx = idx;
+    document.getElementById('confirm-title').innerText = "Sell Property?";
+    document.getElementById('confirm-msg').innerText = `Selling ${music[idx].n} will return it to the bank for $${music[idx].p / 2}. Confirm?`;
+    document.getElementById('confirm-yes-btn').onclick = doSell;
+    showModal('modal-confirm');
+}
 
-    function updateHUD() {
-        const row = document.getElementById('status-row'); row.innerHTML = "";
-        players.forEach((p, i) => {
-            const card = document.createElement('div'); card.className = `p-card ${turn === i ? 'active' : ''}`;
+function doSell() {
+    if (sellIdx === -1) return;
+    const p = players[turn];
+    p.money += music[sellIdx].p / 2;
+    p.props = p.props.filter(x => x.idx !== sellIdx);
+    document.getElementById(`owner-${sellIdx}`).style.background = 'none';
+    document.getElementById(`build-${sellIdx}`).innerText = '';
 
-            // Dynamic Neon Color
-            const color = i === 0 ? '#ff4081' : (i === 1 ? '#4caf50' : (i === 2 ? '#2196f3' : '#ffeb3b'));
+    closeModal('modal-confirm');
+    updateHUD();
+    openManage();
+}
 
-            // Remove solid backgrounds, use glows
-            if (turn === i) {
-                card.style.border = `2px solid ${color}`;
-                card.style.boxShadow = `0 0 15px ${color}`;
-                // card.style.background = 'rgba(255,255,255,0.1)'; // Optional highlight
-            } else {
-                card.style.border = '1px solid rgba(255,255,255,0.1)';
-                card.style.boxShadow = 'none';
-            }
+function updateHUD() {
+    const row = document.getElementById('status-row'); row.innerHTML = "";
+    players.forEach((p, i) => {
+        const card = document.createElement('div'); card.className = `p-card ${turn === i ? 'active' : ''}`;
 
-            card.innerHTML = `<div class="p-name" style="color:${color}">${p.token} ${p.name} ${p.jailCard ? '🎟️' : ''}</div><div class="p-money">$${p.money}</div>`;
-            row.appendChild(card);
-        });
+        // Dynamic Neon Color
+        const color = i === 0 ? '#ff4081' : (i === 1 ? '#4caf50' : (i === 2 ? '#2196f3' : '#ffeb3b'));
 
-        highlightActiveTile();
-    }
-
-    function highlightActiveTile() {
-        // Remove from all
-        document.querySelectorAll('.tile').forEach(t => t.classList.remove('current-turn-glow'));
-
-        // Add to current player's tile
-        const p = players[turn];
-        const tile = document.getElementById(`tile-${p.pos}`);
-        if (tile) {
-            tile.classList.add('current-turn-glow');
-            // Match glow color to player color? Optional, but cool.
-            // For now, white pulse is good for visibility.
-        }
-    }
-
-    function sync() {
-        players.forEach((p, i) => {
-            const t = document.getElementById(`tile-${p.pos}`); const tk = document.getElementById(`tk-${p.id}`);
-            tk.style.left = (t.offsetLeft + 4 + i * 4) + 'px'; tk.style.top = (t.offsetTop + 18 + i * 4) + 'px';
-        });
-    }
-
-    function log(m) { document.getElementById('log-box').innerHTML = `> ${m}<br>` + document.getElementById('log-box').innerHTML; }
-    function showModal(id) {
-        const el = document.getElementById(id);
-        if (el.classList.contains('modal-flex-container')) {
-            el.style.display = 'flex';
+        // Remove solid backgrounds, use glows
+        if (turn === i) {
+            card.style.border = `2px solid ${color}`;
+            card.style.boxShadow = `0 0 15px ${color}`;
+            // card.style.background = 'rgba(255,255,255,0.1)'; // Optional highlight
         } else {
-            el.style.display = 'block';
+            card.style.border = '1px solid rgba(255,255,255,0.1)';
+            card.style.boxShadow = 'none';
         }
+
+        card.innerHTML = `<div class="p-name" style="color:${color}">${p.token} ${p.name} ${p.jailCard ? '🎟️' : ''}</div><div class="p-money">$${p.money}</div>`;
+        row.appendChild(card);
+    });
+
+    highlightActiveTile();
+}
+
+function highlightActiveTile() {
+    // Remove from all
+    document.querySelectorAll('.tile').forEach(t => t.classList.remove('current-turn-glow'));
+
+    // Add to current player's tile
+    const p = players[turn];
+    const tile = document.getElementById(`tile-${p.pos}`);
+    if (tile) {
+        tile.classList.add('current-turn-glow');
+        // Match glow color to player color? Optional, but cool.
+        // For now, white pulse is good for visibility.
     }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().then(sync); else document.exitFullscreen().then(sync); }
+}
 
-    window.onload = () => {
-        addP();
+function sync() {
+    players.forEach((p, i) => {
+        const t = document.getElementById(`tile-${p.pos}`); const tk = document.getElementById(`tk-${p.id}`);
+        tk.style.left = (t.offsetLeft + 4 + i * 4) + 'px'; tk.style.top = (t.offsetTop + 18 + i * 4) + 'px';
+    });
+}
 
-        // Loading Flow
+function log(m) { document.getElementById('log-box').innerHTML = `> ${m}<br>` + document.getElementById('log-box').innerHTML; }
+function showModal(id) {
+    const el = document.getElementById(id);
+    if (el.classList.contains('modal-flex-container')) {
+        el.style.display = 'flex';
+    } else {
+        el.style.display = 'block';
+    }
+}
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function toggleFS() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().then(sync); else document.exitFullscreen().then(sync); }
+
+window.onload = () => {
+    addP(); // Prepare first input silently
+
+    // Simulate Loading
+    setTimeout(() => {
+        const load = document.getElementById('loading-screen');
+        const setup = document.getElementById('setup');
+
+        load.style.opacity = '0';
         setTimeout(() => {
-            const load = document.getElementById('loading-screen');
-            load.style.opacity = '0';
-            setTimeout(() => {
-                load.style.display = 'none';
+            load.style.display = 'none';
+            setup.style.display = 'flex'; // Reveal setup
+        }, 500); // Wait for opacity fade
+    }, 2500); // 2.5s load time
+};
 
-                // Show Language Selection instead of Setup
-                const lang = document.getElementById('lang-select');
-                if (lang) {
-                    lang.style.opacity = '1';
-                    lang.style.pointerEvents = 'auto';
-                } else {
-                    // Fallback if index.html is old
-                    document.getElementById('setup').style.display = 'flex';
-                }
-            }, 500);
-        }, 1500);
-    };
+function renderBuyCard(idx) {
+    const tile = music[idx];
+    const isRailUtil = tile.t === 'rail' || tile.t === 'util';
 
-    function renderBuyCard(idx) {
-        const tile = music[idx];
-        const isRailUtil = tile.t === 'rail' || tile.t === 'util';
-
-        let rentStats = "";
-        if (!tile.t || tile.t === 'property') {
-            rentStats = `
+    let rentStats = "";
+    if (!tile.t || tile.t === 'property') {
+        rentStats = `
             <div class="rent-row"><span>Rent:</span> <span>$${tile.r[0]}</span></div>
             <div class="rent-row"><span>1 House:</span> <span>$${tile.r[1]}</span></div>
             <div class="rent-row"><span>2 Houses:</span> <span>$${tile.r[2]}</span></div>
@@ -1264,22 +1168,22 @@ function updateAuctionUI() {
             <hr style="margin:5px 0; border:0; border-top:1px solid #ccc">
             <div class="rent-row"><span>House Cost:</span> <span>$${tile.h}</span></div>
         `;
-        } else if (tile.t === 'rail') {
-            rentStats = `
+    } else if (tile.t === 'rail') {
+        rentStats = `
             <div class="rent-row"><span>1 Stadium:</span> <span>$25</span></div>
             <div class="rent-row"><span>2 Stadiums:</span> <span>$50</span></div>
             <div class="rent-row"><span>3 Stadiums:</span> <span>$100</span></div>
             <div class="rent-row"><span>4 Stadiums:</span> <span>$200</span></div>
         `;
-        } else {
-            rentStats = `
+    } else {
+        rentStats = `
             <div style="text-align:center; margin:10px 0">If one utility is owned, rent is 4x dice.<br>If both are owned, it's 10x dice.</div>
         `;
-        }
+    }
 
-        const mortgageValue = music[idx].p / 2;
+    const mortgageValue = music[idx].p / 2;
 
-        return `
+    return `
     <div class="deed-card" style="width:260px; font-size:0.9rem; box-shadow: 0 10px 20px rgba(0,0,0,0.3)">
         <div class="deed-header" style="padding:15px; font-size:1.1rem; background:${tile.c || '#ccc'}; color:${tile.c === '#010101' ? 'white' : 'black'}">
             ${tile.n}
@@ -1294,89 +1198,89 @@ function updateAuctionUI() {
             </div>
         </div>
     </div>`;
-    }
+}
 
-    function analyzeBotTrade() {
-        const me = players[currentTrade.target]; // The bot
+function analyzeBotTrade() {
+    const me = players[currentTrade.target]; // The bot
 
-        // Helper para checar se completa um conjunto de cor
-        const completesSet = (player, propIdx) => {
-            const color = music[propIdx].c;
-            if (!color) return false; // Ignora utilitários/ferrovias
+    // Helper para checar se completa um conjunto de cor
+    const completesSet = (player, propIdx) => {
+        const color = music[propIdx].c;
+        if (!color) return false; // Ignora utilitários/ferrovias
 
-            const allColorProps = music.filter(m => m.c === color);
-            const myProps = player.props.filter(p => music[p.idx].c === color);
+        const allColorProps = music.filter(m => m.c === color);
+        const myProps = player.props.filter(p => music[p.idx].c === color);
 
-            // Se o player tem (Total - 1) e essa é a que falta
-            return myProps.length === (allColorProps.length - 1) && !myProps.find(p => p.idx === propIdx);
-        };
+        // Se o player tem (Total - 1) e essa é a que falta
+        return myProps.length === (allColorProps.length - 1) && !myProps.find(p => p.idx === propIdx);
+    };
 
-        // Helper para checar se dar a propriedade quebra um conjunto
-        const breaksSet = (player, propIdx) => {
-            const color = music[propIdx].c;
-            if (!color) return false;
+    // Helper para checar se dar a propriedade quebra um conjunto
+    const breaksSet = (player, propIdx) => {
+        const color = music[propIdx].c;
+        if (!color) return false;
 
-            const allColorProps = music.filter(m => m.c === color);
-            const myProps = player.props.filter(p => music[p.idx].c === color);
+        const allColorProps = music.filter(m => m.c === color);
+        const myProps = player.props.filter(p => music[p.idx].c === color);
 
-            // Se o player tem TODAS
-            return myProps.length === allColorProps.length;
-        };
+        // Se o player tem TODAS
+        return myProps.length === allColorProps.length;
+    };
 
-        // 1. Calcular Valor que o Bot DÁ
-        let valGive = currentTrade.getMoney;
-        currentTrade.getProps.forEach(idx => {
-            let pVal = music[idx].p;
-            // Se o Bot dá uma carta que quebra o set dele, cobra 2.5x mais caro
-            if (breaksSet(me, idx)) {
-                pVal *= 2.5;
-                log("🤖 Bot: I don't want to break my set!");
-            }
-            valGive += pVal;
-        });
+    // 1. Calcular Valor que o Bot DÁ
+    let valGive = currentTrade.getMoney;
+    currentTrade.getProps.forEach(idx => {
+        let pVal = music[idx].p;
+        // Se o Bot dá uma carta que quebra o set dele, cobra 2.5x mais caro
+        if (breaksSet(me, idx)) {
+            pVal *= 2.5;
+            log("🤖 Bot: I don't want to break my set!");
+        }
+        valGive += pVal;
+    });
 
-        // 2. Calcular Valor que o Bot RECEBE
-        let valGet = currentTrade.giveMoney;
-        currentTrade.giveProps.forEach(idx => {
-            let pVal = music[idx].p;
-            // Se o Bot recebe uma carta que completa o set dele, valoriza 2x
-            if (completesSet(me, idx)) {
-                pVal *= 2.0;
-                log("🤖 Bot: Wow! This completes my set!");
-            }
-            valGet += pVal;
-        });
+    // 2. Calcular Valor que o Bot RECEBE
+    let valGet = currentTrade.giveMoney;
+    currentTrade.giveProps.forEach(idx => {
+        let pVal = music[idx].p;
+        // Se o Bot recebe uma carta que completa o set dele, valoriza 2x
+        if (completesSet(me, idx)) {
+            pVal *= 2.0;
+            log("🤖 Bot: Wow! This completes my set!");
+        }
+        valGet += pVal;
+    });
 
-        // 3. Decisão
-        // "Fator Sardinha": Aceita se receber pelo menos 80% do valor que dá.
-        const threshold = 0.8;
-        const ratio = valGet / (valGive || 1);
+    // 3. Decisão
+    // "Fator Sardinha": Aceita se receber pelo menos 80% do valor que dá.
+    const threshold = 0.8;
+    const ratio = valGet / (valGive || 1);
 
-        log(`🤖 Analysis: I give (Calc. Val.) $${valGive}, I get (Calc. Val.) $${valGet}. Ratio: ${ratio.toFixed(2)}`);
+    log(`🤖 Analysis: I give (Calc. Val.) $${valGive}, I get (Calc. Val.) $${valGet}. Ratio: ${ratio.toFixed(2)}`);
 
-        if (valGet >= (valGive * threshold)) {
-            log("🤖 Good deal (or I'm just nice). Accepted!");
-            acceptTrade();
-        } else {
-            // Tenta Contra-Proposta (Pedir a diferença em dinheiro)
-            // O Bot quer pelo menos 100% do valor (Fair Value) na contra-proposta
-            const fairVal = valGive;
-            const deficit = Math.ceil(fairVal - valGet);
-            const partner = players[currentTrade.initiator];
+    if (valGet >= (valGive * threshold)) {
+        log("🤖 Good deal (or I'm just nice). Accepted!");
+        acceptTrade();
+    } else {
+        // Tenta Contra-Proposta (Pedir a diferença em dinheiro)
+        // O Bot quer pelo menos 100% do valor (Fair Value) na contra-proposta
+        const fairVal = valGive;
+        const deficit = Math.ceil(fairVal - valGet);
+        const partner = players[currentTrade.initiator];
 
-            if (deficit > 0 && partner.money >= (currentTrade.giveMoney + deficit)) {
-                // Pode fazer contra-proposta
-                log(`🤖 Refused. Trying counter-offer of +$${deficit}.`);
+        if (deficit > 0 && partner.money >= (currentTrade.giveMoney + deficit)) {
+            // Pode fazer contra-proposta
+            log(`🤖 Refused. Trying counter-offer of +$${deficit}.`);
 
-                // Atualiza o valor que o user tem que dar
-                currentTrade.giveMoney += deficit;
+            // Atualiza o valor que o user tem que dar
+            currentTrade.giveMoney += deficit;
 
-                // Re-renderiza UI
-                renderNegotiationUI();
+            // Re-renderiza UI
+            renderNegotiationUI();
 
-                // Injeta mensagem
-                const actions = document.getElementById('trade-actions');
-                actions.innerHTML = `
+            // Injeta mensagem
+            const actions = document.getElementById('trade-actions');
+            actions.innerHTML = `
                 <div style="width:100%; text-align:center; padding:10px; background:rgba(255,152,0,0.2); border-radius:8px; margin-bottom:10px">
                     <div style="color:#ffeb3b; font-weight:bold">🤖 Negotiation Rejected!</div>
                     <div style="color:#ccc; font-size:0.9rem">My counter-offer is: <br>Add <b>$${deficit}</b> and it's a deal.</div>
@@ -1385,73 +1289,25 @@ function updateAuctionUI() {
                 <button class="m3-btn" style="background:#4caf50" onclick="acceptTrade()">✅ Accept Counter-Offer</button>
             `;
 
-                // IMPORTANTE: Hack para permitir que o "Aceitar" funcione agora como o User aceitando a proposta do Bot
-                // Como o estado ainda é REVIEW e os botões chamam acceptTrade...
-                // acceptTrade() pega initiator e target.
-                // Quando User propôs: Initiator = User, Target = Bot.
-                // Se User clica "Aceitar" agora:
-                // p1 (Initiator/User) GIVES giveMoney
-                // p2 (Target/Bot) GIVES getMoney
-                // Isso está CORRETO. O User aceita pagar o novo giveMoney.
+            // IMPORTANTE: Hack para permitir que o "Aceitar" funcione agora como o User aceitando a proposta do Bot
+            // Como o estado ainda é REVIEW e os botões chamam acceptTrade...
+            // acceptTrade() pega initiator e target.
+            // Quando User propôs: Initiator = User, Target = Bot.
+            // Se User clica "Aceitar" agora:
+            // p1 (Initiator/User) GIVES giveMoney
+            // p2 (Target/Bot) GIVES getMoney
+            // Isso está CORRETO. O User aceita pagar o novo giveMoney.
 
-            } else {
-                // Não tem dinheiro ou diferença muito grande/complexa
-                log("🤖 Too much loss and you have no funds. Rejected.");
+        } else {
+            // Não tem dinheiro ou diferença muito grande/complexa
+            log("🤖 Too much loss and you have no funds. Rejected.");
 
-                // Mostrar motivo na UI antes de fechar?
-                const actions = document.getElementById('trade-actions');
-                actions.innerHTML = `
+            // Mostrar motivo na UI antes de fechar?
+            const actions = document.getElementById('trade-actions');
+            actions.innerHTML = `
                 <div style="color:#f44336; font-weight:bold; padding:10px">🤖 Rejected! Unfair offer.</div>
             `;
-                setTimeout(() => rejectTrade(), 2000);
-            }
+            setTimeout(() => rejectTrade(), 2000);
         }
     }
-
-    // Language Support Functions
-    function setLang(l) {
-        curLang = l;
-        document.getElementById('lang-select').style.opacity = 0;
-        setTimeout(() => document.getElementById('lang-select').style.display = 'none', 500);
-
-        document.getElementById('setup').style.display = 'flex'; // Show Setup
-
-        // Update Static strings
-        updateDataStrings();
-    }
-
-    function updateDataStrings() {
-        // Update Music Array (Special Names)
-        const L = LANGUAGES[curLang];
-
-        // Map special tiles manually or logic
-        // We know indices:
-        // 0: START, 4: TAX, 12: JAIL(Stolen), etc.
-        // Actually, better to just update the specific ones based on type or index
-
-        music[0].n = `${L.ui.start}<br><span style='font-size:0.5rem'>${curLang === 'de' ? 'SAMMLE $200' : 'COLLECT $200 FROM ROYALTIES'}</span>`;
-        music[4].n = `${L.ui.tax}<br><span style='font-size:0.5rem'>${L.ui.taxDesc}</span>`;
-        music[12].n = `${L.ui.jail}<br><span style='font-size:0.5rem'>${curLang === 'de' ? '3 Runden warten' : 'STAY IN JAIL FOR 3 TURNS'}</span>`;
-        music[24].n = L.ui.parking;
-
-        // Chances
-        music.forEach(m => {
-            if (m.t === 'card') m.n = L.ui.chance;
-            if (m.n.includes("Buyback")) m.n = L.ui.luxury;
-            if (m.n.includes("Taylor's Version")) m.n = L.ui.utility;
-            // Note: Song titles remain English as requested
-        });
-
-        // Update HTML Elements with data-i18n
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            el.innerText = t(key);
-        });
-
-        // Update inputs placeholder
-        document.querySelectorAll('input[placeholder]').forEach(el => {
-            el.placeholder = t('setup.namePlaceholder');
-        });
-    }
-
 }
