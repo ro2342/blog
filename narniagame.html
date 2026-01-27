@@ -3,28 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Narnia: Mystery Wardrobe</title>
+    <title>Narnia 3D: The Wardrobe Tactics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         :root {
             --gb-bg: #c0c0c0;
-            --screen-bg: #e0f8cf;
-            --screen-dark: #306230;
-            --screen-darker: #0f380f;
-            --btn-color: #5a0e2d;
-            --btn-shadow: #3a081d;
+            --screen-bg: #87CEEB; /* Céu azul claro */
+            --screen-dark: #2c3e50;
+            --btn-color: #8e44ad;
+            --btn-shadow: #5e2c73;
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* Remove flash azul no toque */
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background-color: #222;
+            background-color: #111;
             margin: 0;
-            height: 100dvh; /* Altura dinâmica real do celular */
+            height: 100dvh;
             width: 100vw;
             display: flex;
             justify-content: center;
@@ -34,182 +32,72 @@
             touch-action: none;
         }
 
-        /* O CONSOLE (Moldura Responsiva) */
         #console {
             background-color: var(--gb-bg);
-            width: 100%;
-            height: 100%;
-            max-width: 450px; /* Limite para não ficar gigante em tablet/PC */
-            max-height: 850px;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            border-radius: 0;
+            width: 100%; height: 100%;
+            max-width: 450px; max-height: 850px;
+            display: flex; flex-direction: column;
+            padding: 15px; position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.7);
         }
 
-        /* Arredondar bordas apenas se houver espaço (Desktop/Tablet) */
         @media (min-width: 450px) {
-            #console {
-                height: 95%;
-                border-radius: 30px;
-                border-bottom-right-radius: 60px;
-            }
+            #console { height: 95%; border-radius: 30px; border-bottom-right-radius: 60px; }
         }
 
-        /* TELA DO JOGO */
         #screen-container {
-            background-color: #555;
+            background-color: #34495e;
             padding: 10px 10px 25px 10px;
             border-radius: 10px 10px 30px 10px;
-            width: 100%;
-            flex-shrink: 0; /* Não deixa a tela encolher demais */
-            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5);
+            width: 100%; flex-shrink: 0;
+            box-shadow: inset 3px 3px 10px rgba(0,0,0,0.4);
         }
 
-        #screen {
-            background-color: var(--screen-bg);
+        /* O Canvas 3D substitui o grid HTML */
+        #canvas-container {
             width: 100%;
-            aspect-ratio: 9/7; /* Mantém a proporção exata do Grid */
-            border: 3px solid var(--screen-darker);
+            aspect-ratio: 4/3; /* Proporção mais quadrada para 3D */
+            background: var(--screen-bg);
+            border: 4px solid #2c3e50;
             position: relative;
-            image-rendering: pixelated;
+            overflow: hidden;
         }
-
-        /* GRID */
-        #game-grid {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            grid-template-rows: repeat(7, 1fr);
+        
+        #three-canvas {
             width: 100%;
             height: 100%;
+            display: block;
         }
 
-        .tile {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: clamp(12px, 4vw, 24px); /* Tamanho do emoji responsivo */
-            position: relative;
-        }
-
-        /* Terrenos */
-        .wood { background-color: #e0f8cf; color: #8bac0f; border: 1px solid rgba(15, 56, 15, 0.05); }
-        .snow { background-color: #f4fff4; color: #306230; opacity: 0.9; }
-        .wall { background-color: #0f380f; color: #e0f8cf; border: 1px solid #000; }
-        .ice  { background-color: #8bac0f; border: 1px solid #306230; }
-        .lamp { background-color: #306230; color: #fff; animation: glow 1s infinite alternate;}
-        @keyframes glow { from { opacity: 0.7; } to { opacity: 1; } }
-
-        .player {
-            position: absolute;
-            z-index: 10;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.2s;
-        }
-
-        /* UI INFO */
-        #ui-bar {
-            display: flex;
-            justify-content: space-between;
-            color: var(--screen-darker);
-            font-size: 10px; /* Fonte pequena fixa */
-            margin-bottom: 5px;
+        /* UI Overlays (Ficam por cima do 3D) */
+        #ui-bar, #dialog-box {
+            background: rgba(44, 62, 80, 0.9);
+            color: #ecf0f1;
+            padding: 5px; font-size: 10px;
             text-transform: uppercase;
         }
+        #ui-bar { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        #dialog-box { min-height: 40px; display: flex; align-items: center; border-top: 2px solid #bdc3c7; margin-top: -4px; z-index: 10;}
 
-        #dialog-box {
-            background: var(--screen-darker);
-            color: var(--screen-bg);
-            padding: 5px;
-            font-size: 10px; /* Fonte pequena fixa */
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            border-top: 2px solid var(--screen-bg);
-            margin-top: -2px; /* Gruda na tela */
-        }
-
-        /* ÁREA DE CONTROLES (Preenche o resto da tela) */
-        #controls-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-evenly; /* Espalha controles verticalmente */
-            align-items: center;
-            padding-top: 10px;
-            padding-bottom: 10px;
-        }
-
-        .controls-row {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 10px;
-        }
-
-        /* D-PAD */
-        .d-pad {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            transform: scale(0.9); /* Ajuste fino */
-        }
-        .d-btn {
-            position: absolute;
-            width: 46px;
-            height: 46px;
-            background: #111;
-            border: none;
-            box-shadow: 3px 3px 0px #000;
-            cursor: pointer;
-        }
+        /* CONTROLES (Mesmo CSS da versão anterior) */
+        #controls-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; padding: 10px; }
+        .controls-row { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
+        .d-pad { position: relative; width: 140px; height: 140px; transform: scale(0.9); }
+        .d-btn { position: absolute; width: 46px; height: 46px; background: #222; border: none; box-shadow: 3px 3px 0px #000; cursor: pointer; }
         .d-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px #000; }
-        
         .up { top: 0; left: 47px; border-radius: 4px 4px 0 0; }
         .down { bottom: 0; left: 47px; border-radius: 0 0 4px 4px; }
         .left { top: 47px; left: 0; border-radius: 4px 0 0 4px; }
         .right { top: 47px; right: 0; border-radius: 0 4px 4px 0; }
-        .center { top: 47px; left: 47px; background: #1a1a1a; pointer-events: none; width: 46px; height: 46px;}
-
-        /* BOTOES A/B */
-        .ab-btns {
-            position: relative;
-            width: 120px;
-            height: 80px;
-        }
-
-        .btn-round {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--btn-color);
-            position: absolute;
-            border: none;
-            box-shadow: 3px 3px 0 var(--btn-shadow);
-            color: rgba(255,255,255,0.2);
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .center { top: 47px; left: 47px; background: #333; pointer-events: none; width: 46px; height: 46px;}
+        .ab-btns { position: relative; width: 120px; height: 80px; }
+        .btn-round { width: 50px; height: 50px; border-radius: 50%; background: var(--btn-color); position: absolute; border: none; box-shadow: 3px 3px 0 var(--btn-shadow); color: rgba(255,255,255,0.3); font-family: inherit; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer;}
         .btn-round:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--btn-shadow); }
-
-        .btn-a { top: -10px; right: 0; background: #8b1d46; }
-        .btn-b { bottom: 0; left: 10px; background: #5a0e2d; }
-        
+        .btn-a { top: -10px; right: 0; background: #9b59b6; }
+        .btn-b { bottom: 0; left: 10px; background: #8e44ad; }
         .lbl { position: absolute; font-size: 10px; color: #444; font-weight: bold; }
         .lbl-a { top: 45px; right: 10px; }
         .lbl-b { bottom: -15px; left: 20px; }
-
     </style>
 </head>
 <body>
@@ -220,10 +108,10 @@
                 <span id="p-name">LÚCIA</span>
                 <span id="ap-count">AP: 3/3</span>
             </div>
-            <div id="screen">
-                <div id="game-grid"></div>
+            <div id="canvas-container">
+                <canvas id="three-canvas"></canvas>
             </div>
-            <div id="dialog-box">Carregando Nárnia...</div>
+            <div id="dialog-box">Iniciando em 3D...</div>
         </div>
 
         <div id="controls-area">
@@ -235,56 +123,191 @@
                     <button class="d-btn right" ontouchstart="input('right'); event.preventDefault()" onclick="input('right')"></button>
                     <button class="d-btn down" ontouchstart="input('down'); event.preventDefault()" onclick="input('down')"></button>
                 </div>
-
                 <div class="ab-btns">
                     <button class="btn-round btn-a" ontouchstart="input('interact'); event.preventDefault()" onclick="input('interact')">A</button>
                     <div class="lbl lbl-a">AÇÃO</div>
-                    
                     <button class="btn-round btn-b" ontouchstart="input('pass'); event.preventDefault()" onclick="input('pass')">B</button>
                     <div class="lbl lbl-b">PASSAR</div>
                 </div>
             </div>
-            
-            <div style="text-align: center; color: #888; font-size: 8px; margin-top: 10px;">NARNIA POCKET SYSTEM</div>
+            <div style="text-align: center; color: #555; font-size: 8px; margin-top: 10px;">NARNIA 3D SYSTEM</div>
         </div>
     </div>
 
 <script>
-    const COLS = 9;
-    const ROWS = 7;
-    
-    // 0:Madeira, 1:Neve, 2:Parede, 3:Gelo, 9:Lamp
-    const players = [
-        { name: "Lúcia", skin: "👧", x: 0, y: 3, ap: 3, maxAp: 3 },
-        { name: "Edmundo", skin: "👦", x: 0, y: 4, ap: 3, maxAp: 3 }
-    ];
-    
-    let turn = 0;
+    // --- LÓGICA DO JOGO (Dados) ---
+    const COLS = 9; const ROWS = 7;
+    // Tipos de Tile: 0:Madeira, 1:Neve, 2:Parede(Casaco), 3:Gelo, 9:Lampião
     let map = [];
-    let gameOver = false;
+    let turn = 0; let gameOver = false;
+    const players = [
+        { name: "Lúcia", color: 0xe74c3c, x: 0, y: 3, ap: 3, maxAp: 3, mesh: null }, // Vermelho
+        { name: "Edmundo", color: 0x3498db, x: 0, y: 4, ap: 3, maxAp: 3, mesh: null } // Azul
+    ];
 
-    const gridEl = document.getElementById('game-grid');
+    // --- THREE.JS SETUP ---
+    let scene, camera, renderer;
+    let worldGroup = new THREE.Group(); // Agrupa tudo do cenário
+    const TILE_SIZE = 1.5; // Tamanho de cada quadrado no mundo 3D
+    const canvas = document.getElementById('three-canvas');
+    const canvasContainer = document.getElementById('canvas-container');
+
+    function initThreeJS() {
+        scene = new THREE.Scene();
+        // scene.background = new THREE.Color(0x87CEEB); // Cor do céu (já definida no CSS)
+
+        // Câmera Isométrica (Orthographic para não ter distorção de perspectiva)
+        const aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+        const d = 8; // Zoom
+        camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 100);
+        camera.position.set(10, 10, 10); // Posição diagonal
+        camera.lookAt(scene.position); // Olhar para o centro (0,0,0)
+
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        // Habilitar sombras
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // Luzes
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 5);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        scene.add(worldGroup);
+        
+        // Centralizar o mapa no mundo
+        worldGroup.position.x = -(COLS * TILE_SIZE) / 2 + (TILE_SIZE/2);
+        worldGroup.position.z = -(ROWS * TILE_SIZE) / 2 + (TILE_SIZE/2);
+    }
+
+    // --- GERAÇÃO DO MUNDO 3D ---
+    // Materiais Reutilizáveis
+    const matWood = new THREE.MeshStandardMaterial({ color: 0x8e44ad }); 
+    const matSnow = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const matWall = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+    const matIce = new THREE.MeshStandardMaterial({ color: 0xaed6f1, transparent: true, opacity: 0.8 });
+    const matLampPost = new THREE.MeshStandardMaterial({ color: 0x222222 });
+    const matLampLight = new THREE.MeshBasicMaterial({ color: 0xf1c40f });
+
+    // Geometrias Reutilizáveis
+    const geoGround = new THREE.BoxGeometry(TILE_SIZE*0.95, 0.2, TILE_SIZE*0.95); // Chão ligeiramente menor para dar efeito de grid
+    const geoBlock = new THREE.BoxGeometry(TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+    function render3DWorld() {
+        // Limpa o mundo anterior (menos jogadores)
+        for(let i = worldGroup.children.length - 1; i >= 0; i--) {
+             if(!worldGroup.children[i].isPlayer) worldGroup.remove(worldGroup.children[i]);
+        }
+
+        for (let y = 0; y < ROWS; y++) {
+            for (let x = 0; x < COLS; x++) {
+                const type = map[y][x];
+                const posX = x * TILE_SIZE;
+                const posZ = y * TILE_SIZE;
+
+                // Base do Chão (Madeira ou Neve)
+                let groundMat = (type === 1 || type === 9 || x >= 6) ? matSnow : matWood;
+                const ground = new THREE.Mesh(geoGround, groundMat);
+                ground.position.set(posX, -0.1, posZ); // Ligeiramente abaixo de 0
+                ground.receiveShadow = true;
+                worldGroup.add(ground);
+
+                // Objetos acima do chão
+                if (type === 2) { // Parede/Casaco
+                    const wall = new THREE.Mesh(geoBlock, matWall);
+                    wall.position.set(posX, TILE_SIZE/2, posZ);
+                    wall.castShadow = true; wall.receiveShadow = true;
+                    worldGroup.add(wall);
+                } 
+                else if (type === 3) { // Gelo
+                    const ice = new THREE.Mesh(geoBlock, matIce);
+                    ice.position.set(posX, TILE_SIZE/2, posZ);
+                    ice.castShadow = true;
+                    ice.name = `ice_${x}_${y}`; // Nome para achar depois e destruir
+                    worldGroup.add(ice);
+                }
+                else if (type === 9) { // Lampião
+                    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, TILE_SIZE*1.5), matLampPost);
+                    post.position.set(posX, TILE_SIZE*0.75, posZ);
+                    post.castShadow = true;
+                    worldGroup.add(post);
+
+                    const lightMesh = new THREE.Mesh(new THREE.SphereGeometry(0.3), matLampLight);
+                    lightMesh.position.set(posX, TILE_SIZE*1.5, posZ);
+                    worldGroup.add(lightMesh);
+
+                    const actualLight = new THREE.PointLight(0xf1c40f, 1, 5);
+                    actualLight.position.set(posX, TILE_SIZE*1.5, posZ);
+                    worldGroup.add(actualLight);
+                }
+            }
+        }
+    }
+
+    function initPlayers3D() {
+        players.forEach((p, idx) => {
+            // Geometria diferente para cada um
+            let geo = idx === 0 ? new THREE.ConeGeometry(0.4, 1, 16) : new THREE.CylinderGeometry(0.4, 0.4, 1, 16);
+            const mat = new THREE.MeshStandardMaterial({ color: p.color });
+            p.mesh = new THREE.Mesh(geo, mat);
+            p.mesh.castShadow = true;
+            p.mesh.isPlayer = true; // Tag para não ser deletado
+            // Posição inicial
+            p.mesh.position.set(p.x * TILE_SIZE, 0.5, p.y * TILE_SIZE);
+            worldGroup.add(p.mesh);
+        });
+    }
+
+    // --- LOOP DE ANIMAÇÃO (O Coração do 3D) ---
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        // Movimento suave dos jogadores para a posição alvo
+        players.forEach(p => {
+            if(p.mesh) {
+                const targetX = p.x * TILE_SIZE;
+                const targetZ = p.y * TILE_SIZE;
+                // Lerp (Linear Interpolation) para suavizar movimento (move 15% da distância por frame)
+                p.mesh.position.x += (targetX - p.mesh.position.x) * 0.15;
+                p.mesh.position.z += (targetZ - p.mesh.position.z) * 0.15;
+
+                 // Efeito visual simples: Jogador do turno fica ligeiramente maior
+                 const targetScale = (players[turn] === p) ? 1.1 : 0.9;
+                 p.mesh.scale.setScalar(p.mesh.scale.x + (targetScale - p.mesh.scale.x) * 0.1);
+            }
+        });
+
+        renderer.render(scene, camera);
+    }
+
+    // --- LÓGICA DO JOGO (Adaptada da versão 2D) ---
     const dialogEl = document.getElementById('dialog-box');
     const pNameEl = document.getElementById('p-name');
     const apEl = document.getElementById('ap-count');
 
-    function init() {
-        generateMap();
-        renderMap();
+    function initGame() {
+        initThreeJS();
+        generateMapLogic();
+        render3DWorld();
+        initPlayers3D();
         updateUI();
-        typeText(`Turno de ${players[turn].name}.`);
+        typeText(`Turno de ${players[turn].name}. Use as setas!`);
+        animate(); // Começa o loop de renderização
     }
 
-    function generateMap() {
+    function generateMapLogic() {
         map = [];
         for (let y = 0; y < ROWS; y++) {
             let row = [];
             for (let x = 0; x < COLS; x++) {
-                let val = 0; 
-                let rand = Math.random();
+                let val = 0; let rand = Math.random();
                 if (x > 2 && x < 6) val = rand > 0.6 ? 2 : (rand > 0.4 ? 3 : 0);
                 if (x >= 6) val = rand > 0.5 ? 1 : 0;
-                if (x === 0 || x === 1) val = 0;
+                if (x <= 1) val = 0;
                 row.push(val);
             }
             map.push(row);
@@ -292,42 +315,14 @@
         map[Math.floor(ROWS/2)][COLS-1] = 9;
     }
 
-    function renderMap() {
-        gridEl.innerHTML = '';
-        for (let y = 0; y < ROWS; y++) {
-            for (let x = 0; x < COLS; x++) {
-                const cell = document.createElement('div');
-                cell.className = 'tile';
-                const type = map[y][x];
-                if (type === 0) cell.classList.add('wood');
-                else if (type === 1) { cell.classList.add('snow'); cell.innerHTML = '❄️'; }
-                else if (type === 2) { cell.classList.add('wall'); cell.innerHTML = '🧥'; }
-                else if (type === 3) { cell.classList.add('ice'); cell.innerHTML = '🧊'; }
-                else if (type === 9) { cell.classList.add('lamp'); cell.innerHTML = '🕯️'; }
-                gridEl.appendChild(cell);
-            }
-        }
-        players.forEach((p, index) => {
-            const pDiv = document.createElement('div');
-            pDiv.className = 'player';
-            pDiv.innerHTML = p.skin;
-            // Cálculo de posição para grid absoluto se necessário, mas aqui usaremos appendChild
-            const cellIndex = (p.y * COLS) + p.x;
-            const targetCell = gridEl.children[cellIndex];
-            if(targetCell) targetCell.appendChild(pDiv);
-            if (index !== turn) pDiv.style.opacity = "0.4";
-        });
-    }
-
+    // Inputs chamados pelos botões HTML
     function input(action) {
         if (gameOver) return;
         const p = players[turn];
         let dx = 0, dy = 0;
 
-        if (action === 'up') dy = -1;
-        if (action === 'down') dy = 1;
-        if (action === 'left') dx = -1;
-        if (action === 'right') dx = 1;
+        if (action === 'up') dy = -1; if (action === 'down') dy = 1;
+        if (action === 'left') dx = -1; if (action === 'right') dx = 1;
         if (action === 'pass') { switchTurn(); return; }
         if (action === 'interact') { tryInteract(p); return; }
 
@@ -335,21 +330,21 @@
     }
 
     function tryMove(p, dx, dy) {
-        const nx = p.x + dx;
-        const ny = p.y + dy;
+        const nx = p.x + dx; const ny = p.y + dy;
         if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return shake();
 
         const tile = map[ny][nx];
-        if (tile === 2 || tile === 3) { typeText("Bloqueado! (Botão A)"); return shake(); }
-
+        if (tile === 2 || tile === 3) { typeText("Bloqueado! Tente quebrar (A)."); return shake(); }
         const otherP = players[turn === 0 ? 1 : 0];
         if (nx === otherP.x && ny === otherP.y) { typeText("Ocupado!"); return shake(); }
 
         let cost = (tile === 1) ? 2 : 1;
         if (p.ap >= cost) {
+            // Atualiza apenas a lógica, a animação fará o resto visualmente
             p.x = nx; p.y = ny; p.ap -= cost;
-            renderMap(); updateUI();
-            if (tile === 9) { gameOver = true; typeText(`VITÓRIA DE ${p.name.toUpperCase()}!`); confetti(); return; }
+            updateUI();
+            if (tile === 9) { gameOver = true; typeText(`VITÓRIA DE ${p.name.toUpperCase()}!`); dialogEl.style.background="gold"; return; }
+            typeText(cost === 2 ? "Neve funda... (2 AP)" : "Movendo...");
         } else {
             typeText("Sem AP! Passe a vez (B)."); shake();
         }
@@ -362,18 +357,23 @@
             if (pos.x >= 0 && pos.x < COLS && pos.y >= 0 && pos.y < ROWS) {
                 if (map[pos.y][pos.x] === 3 && p.ap >= 1) {
                     map[pos.y][pos.x] = 0; p.ap -= 1;
+                    
+                    // Remover o objeto 3D do gelo
+                    const iceMesh = worldGroup.getObjectByName(`ice_${pos.x}_${pos.y}`);
+                    if(iceMesh) { worldGroup.remove(iceMesh); }
+                    
                     typeText("Quebrou o gelo!"); acted = true;
-                    renderMap(); updateUI(); break;
+                    updateUI(); break;
                 }
             }
         }
-        if (!acted) typeText("Nada para quebrar.");
+        if (!acted) typeText("Nada para quebrar aqui.");
     }
 
     function switchTurn() {
         turn = turn === 0 ? 1 : 0;
         players[turn].ap = players[turn].maxAp;
-        renderMap(); updateUI();
+        updateUI();
         typeText(`Vez de ${players[turn].name}!`);
     }
 
@@ -381,24 +381,30 @@
         const p = players[turn];
         pNameEl.innerText = p.name;
         apEl.innerText = `AP: ${p.ap}/${p.maxAp}`;
-        apEl.style.color = p.ap === 0 ? '#8b1d46' : '#0f380f';
+        apEl.style.color = p.ap === 0 ? '#e74c3c' : '#ecf0f1';
     }
 
     function typeText(txt) { dialogEl.innerText = txt; }
-    
     function shake() {
-        const s = document.getElementById('screen');
-        s.style.transform = "translateX(4px)";
-        setTimeout(()=>s.style.transform="translateX(-4px)",50);
-        setTimeout(()=>s.style.transform="translateX(0)",100);
-    }
-    
-    function confetti() {
-        dialogEl.style.background = "gold";
-        dialogEl.style.color = "black";
+        canvasContainer.style.transform = "translateX(4px)";
+        setTimeout(()=>canvasContainer.style.transform="translateX(-4px)",50);
+        setTimeout(()=>canvasContainer.style.transform="translateX(0)",100);
     }
 
-    init();
+    // Ajuste de tela ao girar o celular
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize(){
+        const aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+        const d = 8;
+        camera.left = -d * aspect; camera.right = d * aspect;
+        camera.top = d; camera.bottom = -d;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    }
+
+    // Iniciar
+    initGame();
+
 </script>
 </body>
 </html>
