@@ -3,457 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Narnia 3D: Fullscreen</title>
+    <title>Narnia Mobile Adventure</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-        :root {
-            --console-body: #c0c0c0;
-            --screen-bezel: #2c3e50;
-            --screen-bg: #87CEEB;
-            --btn-color: #8e44ad;
-            --btn-shadow: #5e2c73;
-            --dpad-color: #222;
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: #222; 
+            font-family: 'Courier New', sans-serif;
+            touch-action: none; /* Impede zoom e scroll no celular */
+            user-select: none;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            background-color: #111;
-            margin: 0;
-            height: 100dvh; /* Altura real do viewport mobile */
-            width: 100vw;
-            overflow: hidden;
-            font-family: 'Press Start 2P', cursive;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ÁREA SUPERIOR: A TELA DO JOGO (Cresce o máximo possível) */
-        #game-view {
-            flex-grow: 1; /* Ocupa todo o espaço sobrando */
-            background-color: var(--screen-bezel);
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            position: relative;
-            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3);
-        }
-
-        /* UI BAR (Topo da tela) */
-        #ui-bar {
-            background: rgba(0,0,0,0.3);
-            color: white;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            text-transform: uppercase;
-            z-index: 10;
-        }
-
-        /* CANVAS 3D */
-        #canvas-container {
-            flex-grow: 1;
-            width: 100%;
-            background: var(--screen-bg);
-            position: relative;
-            overflow: hidden;
-        }
+        /* --- UI DO JOGO --- */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         
-        #three-canvas { width: 100%; height: 100%; display: block; }
-
-        /* MENSAGEM FLUTUANTE */
-        #toast-msg {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 10px;
-            white-space: nowrap;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 20;
-            border: 1px solid white;
-        }
-        .show-toast { opacity: 1 !important; }
-
-        /* ÁREA INFERIOR: CONTROLES (Tamanho Fixo) */
-        #controls-area {
-            height: 220px; /* Altura fixa para controles */
-            background-color: var(--console-body);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            border-top: 4px solid #999;
-            flex-shrink: 0; /* Não encolhe */
+        .stat-box {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(0,0,0,0.5); padding: 8px; border-radius: 8px;
+            color: white; font-weight: bold; font-size: 14px;
+            border: 2px solid #5c4033;
         }
 
-        /* D-PAD */
-        .d-pad {
-            position: relative;
-            width: 140px;
-            height: 140px;
-        }
-        .d-btn {
-            position: absolute;
-            width: 48px;
-            height: 48px;
-            background: var(--dpad-color);
-            border: none;
-            box-shadow: 0 4px 0 #000;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .d-btn:active { transform: translateY(4px); box-shadow: none; }
-        
-        /* Posicionamento Cruz */
-        .up { top: 0; left: 46px; }
-        .down { bottom: 0; left: 46px; }
-        .left { top: 46px; left: 0; }
-        .right { top: 46px; right: 0; }
-        .center { 
-            top: 46px; left: 46px; 
-            width: 48px; height: 48px; 
-            background: var(--dpad-color); 
-            pointer-events: none;
-            box-shadow: none;
-            z-index: 1;
+        #dialog-box {
+            position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 250, 240, 0.95); color: #333;
+            padding: 15px; border-radius: 10px; border: 3px solid #8b5a2b;
+            width: 80%; max-width: 400px; text-align: center;
+            display: none; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            pointer-events: auto; /* Permite clicar para fechar */
         }
 
-        /* BOTÕES A/B */
-        .ab-btns {
-            position: relative;
-            width: 130px;
-            height: 140px;
+        /* --- CONTROLES DE TOQUE --- */
+        #controls-layer {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: auto;
         }
-        .btn-round {
-            width: 60px;
-            height: 60px;
+
+        /* JOYSTICK (Esquerda) */
+        #joystick-zone {
+            position: absolute; bottom: 20px; left: 20px;
+            width: 150px; height: 150px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            background: var(--btn-color);
-            position: absolute;
-            border: none;
-            box-shadow: 0 4px 0 var(--btn-shadow);
-            color: rgba(255,255,255,0.5);
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.2);
+            touch-action: none;
         }
-        .btn-round:active { transform: translateY(4px); box-shadow: none; }
-        
-        .btn-a { top: 10px; right: 0; background: #9b59b6; }
-        .btn-b { bottom: 10px; left: 10px; background: #8e44ad; }
-        
-        .lbl { position: absolute; font-size: 10px; color: #555; font-weight: bold; pointer-events: none;}
-        .lbl-a { top: 75px; right: 15px; }
-        .lbl-b { bottom: -5px; left: 25px; }
+
+        #joystick-knob {
+            position: absolute; top: 50%; left: 50%;
+            width: 60px; height: 60px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* BOTÕES DE AÇÃO (Direita) */
+        .action-btn {
+            position: absolute; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white; font-size: 24px;
+            display: flex; justify-content: center; align-items: center;
+            touch-action: none; cursor: pointer;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 5px rgba(0,0,0,0.4);
+        }
+        .action-btn:active { background: rgba(255, 255, 255, 0.5); transform: scale(0.95); }
+
+        #btn-attack {
+            bottom: 40px; right: 30px;
+            width: 80px; height: 80px;
+            background: rgba(231, 76, 60, 0.6); /* Vermelho */
+        }
+
+        #btn-interact {
+            bottom: 140px; right: 50px;
+            width: 60px; height: 60px;
+            background: rgba(52, 152, 219, 0.6); /* Azul */
+        }
+
+        /* TELA DE ROTAÇÃO (Para forçar landscape se quiser, mas aqui deixamos livre) */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #111; color: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 999;
+        }
+        button.start-btn {
+            padding: 15px 30px; font-size: 20px;
+            background: gold; border: none; border-radius: 5px; margin-top: 20px;
+        }
 
     </style>
 </head>
 <body>
 
-    <div id="game-view">
-        <div id="ui-bar">
-            <span id="p-name">LÚCIA</span>
-            <span id="ap-count">AP: 3/3</span>
-        </div>
-        
-        <div id="canvas-container">
-            <canvas id="three-canvas"></canvas>
-            <div id="toast-msg">Bem-vindo a Nárnia</div>
-        </div>
+    <div id="start-screen">
+        <h1>NARNIA 3D</h1>
+        <p>Aventura de Bolso</p>
+        <button class="start-btn" onclick="startGame()">TOCAR PARA INICIAR</button>
+        <p style="font-size: 12px; margin-top:20px; color:#888;">Melhor experiência: Celular Deitado</p>
     </div>
 
-    <div id="controls-area">
-        <div class="d-pad">
-            <button class="d-btn up" ontouchstart="input('up'); event.preventDefault()" onclick="input('up')"></button>
-            <button class="d-btn left" ontouchstart="input('left'); event.preventDefault()" onclick="input('left')"></button>
-            <div class="d-btn center"></div>
-            <button class="d-btn right" ontouchstart="input('right'); event.preventDefault()" onclick="input('right')"></button>
-            <button class="d-btn down" ontouchstart="input('down'); event.preventDefault()" onclick="input('down')"></button>
+    <div id="ui-layer">
+        <div class="stat-box">
+            ❤ HP: <span id="hp-display">100</span><br>
+            ⚔ Inimigos: <span id="score-display">0</span>
         </div>
+        <div id="dialog-box" onclick="this.style.display='none'"></div>
+    </div>
 
-        <div class="ab-btns">
-            <button class="btn-round btn-a" ontouchstart="input('interact'); event.preventDefault()" onclick="input('interact')">A</button>
-            <div class="lbl lbl-a">AÇÃO</div>
-            
-            <button class="btn-round btn-b" ontouchstart="input('pass'); event.preventDefault()" onclick="input('pass')">B</button>
-            <div class="lbl lbl-b">PASSAR</div>
+    <div id="controls-layer" style="display:none;">
+        <div id="joystick-zone">
+            <div id="joystick-knob"></div>
         </div>
+        
+        <div id="btn-interact" class="action-btn">💬</div>
+        <div id="btn-attack" class="action-btn" ontouchstart="triggerAttack(event)">⚔️</div>
     </div>
 
 <script>
-    // --- LÓGICA DO JOGO ---
-    const COLS = 9; const ROWS = 7;
-    let map = [];
-    let turn = 0; let gameOver = false;
-    const players = [
-        { name: "Lúcia", color: 0xe74c3c, x: 0, y: 3, ap: 3, maxAp: 3, mesh: null },
-        { name: "Edmundo", color: 0x3498db, x: 0, y: 4, ap: 3, maxAp: 3, mesh: null }
-    ];
+    // --- VARIÁVEIS GLOBAIS ---
+    let scene, camera, renderer, clock;
+    let player, swordMesh;
+    let input = { x: 0, y: 0, isAttacking: false };
+    let enemies = [], npcs = [], scenery = [];
+    let hp = 100, score = 0;
+    
+    // Joystick Variables
+    let joystickActive = false;
+    let joystickOrigin = { x: 0, y: 0 };
+    const joyZone = document.getElementById('joystick-zone');
+    const joyKnob = document.getElementById('joystick-knob');
 
-    // --- THREE.JS ---
-    let scene, camera, renderer;
-    let worldGroup = new THREE.Group();
-    const TILE_SIZE = 1.5;
-    const canvas = document.getElementById('three-canvas');
-    const container = document.getElementById('canvas-container');
-
-    // Materiais
-    const matWood = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
-    const matSnow = new THREE.MeshStandardMaterial({ color: 0xf0f8ff });
-    const matCoat = new THREE.MeshStandardMaterial({ color: 0x4a3728 });
-    const matIce = new THREE.MeshStandardMaterial({ color: 0xaed6f1, transparent: true, opacity: 0.7 });
-    const matLamp = new THREE.MeshStandardMaterial({ color: 0x111111 });
-
-    function initThreeJS() {
-        scene = new THREE.Scene();
-        
-        // Ajuste de Câmera para Tela Cheia (Zoom Dinâmico)
-        const aspect = container.clientWidth / container.clientHeight;
-        // Se a tela for muito estreita (celular em pé), aumentamos o "d" para caber mais lateralmente
-        let d = aspect < 1 ? 10 : 7; 
-        
-        camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 100);
-        camera.position.set(10, 10, 10);
-        camera.lookAt(scene.position);
-
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.setPixelRatio(window.devicePixelRatio); // Imagem mais nítida em Retina/OLED
-
-        // Luzes
-        const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambLight);
-        const dLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dLight.position.set(5, 20, 10);
-        dLight.castShadow = true;
-        dLight.shadow.mapSize.width = 1024;
-        dLight.shadow.mapSize.height = 1024;
-        scene.add(dLight);
-
-        scene.add(worldGroup);
-        // Centraliza o mapa
-        worldGroup.position.x = -(COLS * TILE_SIZE) / 2 + (TILE_SIZE/2);
-        worldGroup.position.z = -(ROWS * TILE_SIZE) / 2 + (TILE_SIZE/2);
-    }
-
-    function render3DWorld() {
-        for(let i = worldGroup.children.length - 1; i >= 0; i--) {
-             if(!worldGroup.children[i].isPlayer) worldGroup.remove(worldGroup.children[i]);
-        }
-
-        const geoGround = new THREE.BoxGeometry(TILE_SIZE*0.95, 0.2, TILE_SIZE*0.95);
-        const geoBlock = new THREE.BoxGeometry(TILE_SIZE*0.8, TILE_SIZE, TILE_SIZE*0.8);
-
-        for (let y = 0; y < ROWS; y++) {
-            for (let x = 0; x < COLS; x++) {
-                const type = map[y][x];
-                const px = x * TILE_SIZE;
-                const pz = y * TILE_SIZE;
-
-                // Chão
-                let gMat = (type === 1 || type === 9 || x >= 6) ? matSnow : matWood;
-                const ground = new THREE.Mesh(geoGround, gMat);
-                ground.position.set(px, -0.1, pz);
-                ground.receiveShadow = true;
-                worldGroup.add(ground);
-
-                // Objetos
-                if (type === 2) { 
-                    const coat = new THREE.Mesh(geoBlock, matCoat);
-                    coat.position.set(px, TILE_SIZE/2, pz);
-                    coat.castShadow = true; coat.name = `obj_${x}_${y}`;
-                    worldGroup.add(coat);
-                } 
-                else if (type === 3) {
-                    const ice = new THREE.Mesh(geoBlock, matIce);
-                    ice.position.set(px, TILE_SIZE/2, pz);
-                    ice.castShadow = true; ice.name = `obj_${x}_${y}`;
-                    worldGroup.add(ice);
-                }
-                else if (type === 9) {
-                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, TILE_SIZE*1.5), matLamp);
-                    pole.position.set(px, TILE_SIZE*0.75, pz);
-                    worldGroup.add(pole);
-                    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({color:0xffd700}));
-                    bulb.position.set(px, TILE_SIZE*1.5, pz);
-                    worldGroup.add(bulb);
-                    const light = new THREE.PointLight(0xffd700, 1.5, 6);
-                    light.position.set(px, TILE_SIZE*1.5, pz);
-                    worldGroup.add(light);
-                }
-            }
-        }
-    }
-
-    function initPlayers() {
-        players.forEach((p, i) => {
-            const geo = i===0 ? new THREE.ConeGeometry(0.4, 1, 16) : new THREE.CylinderGeometry(0.3, 0.3, 1, 16);
-            p.mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color: p.color}));
-            p.mesh.position.set(p.x * TILE_SIZE, 0.5, p.y * TILE_SIZE);
-            p.mesh.castShadow = true;
-            p.mesh.isPlayer = true;
-            worldGroup.add(p.mesh);
-        });
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        players.forEach(p => {
-            if(p.mesh) {
-                const tx = p.x * TILE_SIZE;
-                const tz = p.y * TILE_SIZE;
-                p.mesh.position.x += (tx - p.mesh.position.x) * 0.15;
-                p.mesh.position.z += (tz - p.mesh.position.z) * 0.15;
-                if(players[turn] === p) p.mesh.position.y = 0.5 + Math.sin(Date.now() * 0.005) * 0.1;
-                else p.mesh.position.y = 0.5;
-            }
-        });
-        renderer.render(scene, camera);
-    }
-
-    // --- INTERAÇÃO ---
-    const pNameEl = document.getElementById('p-name');
-    const apEl = document.getElementById('ap-count');
-    const toastEl = document.getElementById('toast-msg');
-    let toastTimer;
-
-    function showToast(msg) {
-        toastEl.innerText = msg;
-        toastEl.classList.add('show-toast');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toastEl.classList.remove('show-toast'), 2000);
-    }
-
-    function initGame() {
-        initThreeJS();
-        generateMap();
-        render3DWorld();
-        initPlayers();
-        updateUI();
-        showToast(`Turno de ${players[turn].name}`);
+    function startGame() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('controls-layer').style.display = 'block';
+        init3D();
+        setupControls();
         animate();
     }
 
-    function generateMap() {
-        map = [];
-        for (let y = 0; y < ROWS; y++) {
-            let row = [];
-            for (let x = 0; x < COLS; x++) {
-                let val = 0; let r = Math.random();
-                if (x > 2 && x < 6) val = r > 0.5 ? 2 : (r > 0.3 ? 3 : 0);
-                if (x >= 6) val = r > 0.6 ? 1 : 0;
-                if (x <= 1) val = 0;
-                row.push(val);
-            }
-            map.push(row);
-        }
-        map[Math.floor(ROWS/2)][COLS-1] = 9;
-    }
+    // --- CONFIGURAÇÃO 3D (THREE.JS) ---
+    function init3D() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 15, 50); // Neblina para performance e clima
 
-    function input(action) {
-        if (gameOver) return;
-        const p = players[turn];
-        let dx = 0, dy = 0;
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 12, 12); 
 
-        if (action === 'up') dy = -1; if (action === 'down') dy = 1;
-        if (action === 'left') dx = -1; if (action === 'right') dx = 1;
-        if (action === 'pass') { switchTurn(); return; }
-        if (action === 'interact') { tryInteract(p); return; }
-
-        if (dx !== 0 || dy !== 0) tryMove(p, dx, dy);
-    }
-
-    function tryMove(p, dx, dy) {
-        const nx = p.x + dx; const ny = p.y + dy;
-        if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return; // Limite silencioso
-
-        const target = map[ny][nx];
-        if (target === 2 || target === 3) { 
-            showToast("Bloqueado! Use 'A'."); return; 
-        }
+        renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
         
-        const other = players[turn === 0 ? 1 : 0];
-        if (nx === other.x && ny === other.y) { showToast("Ocupado!"); return; }
+        // Ajustar tela ao girar celular
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
 
-        let cost = (target === 1) ? 2 : 1;
-        if (p.ap >= cost) {
-            p.x = nx; p.y = ny; p.ap -= cost;
-            updateUI();
-            if (target === 9) { 
-                gameOver = true; 
-                showToast(`VITÓRIA DE ${p.name.toUpperCase()}!`); 
-                return; 
+        clock = new THREE.Clock();
+
+        // Luzes
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+        scene.add(hemiLight);
+        
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        createWorld();
+    }
+
+    // --- CRIAÇÃO DOS OBJETOS (ESTILO BRINQUEDO) ---
+    function createDoll(color, type) {
+        const group = new THREE.Group();
+        
+        // Material Simples (Melhor performance no celular)
+        const mat = new THREE.MeshLambertMaterial({ color: color });
+        const matSkin = new THREE.MeshLambertMaterial({ color: 0xffdbac });
+
+        // Corpo
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.5, 8), mat);
+        body.position.y = 0.75;
+        body.castShadow = true;
+        group.add(body);
+
+        // Cabeça
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 12), matSkin);
+        head.position.y = 1.8;
+        head.castShadow = true;
+        group.add(head);
+
+        if(type === 'enemy') {
+            // Capuz/Barba para inimigos
+            const hood = new THREE.Mesh(new THREE.ConeGeometry(0.6, 0.8, 8), mat);
+            hood.position.y = 2.2;
+            group.add(hood);
+        }
+
+        return group;
+    }
+
+    function createWorld() {
+        // Chão
+        const ground = new THREE.Mesh(
+            new THREE.PlaneGeometry(200, 200), 
+            new THREE.MeshLambertMaterial({ color: 0xe0f7fa }) // Neve azulada
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Jogador
+        player = createDoll(0x3498db, 'player'); // Azul
+        scene.add(player);
+
+        // Espada
+        const swordGeo = new THREE.BoxGeometry(0.1, 1.2, 0.1);
+        swordMesh = new THREE.Mesh(swordGeo, new THREE.MeshStandardMaterial({color:0xdddddd}));
+        swordMesh.position.set(0.6, 1, 0.5);
+        swordMesh.rotation.x = Math.PI / 2;
+        player.add(swordMesh);
+
+        // Inimigos (Anões)
+        for(let i=0; i<6; i++) spawnEnemy();
+
+        // Cenário (Árvores e Pedras)
+        for(let i=0; i<30; i++) {
+            const tree = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.5, 1, 6), new THREE.MeshLambertMaterial({color:0x5d4037}));
+            trunk.position.y = 0.5;
+            const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5, 3, 6), new THREE.MeshLambertMaterial({color:0x2e7d32}));
+            leaves.position.y = 2;
+            tree.add(trunk); tree.add(leaves);
+            
+            let x = (Math.random()-0.5)*80;
+            let z = (Math.random()-0.5)*80;
+            if(Math.abs(x) < 5 && Math.abs(z) < 5) x += 10; // Não nascer em cima do player
+            tree.position.set(x, 0, z);
+            tree.castShadow = true;
+            scene.add(tree);
+            scenery.push(tree);
+        }
+
+        // NPC (Fauno)
+        const faun = createDoll(0x8b5a2b, 'player');
+        faun.position.set(5, 0, -5);
+        faun.userData = { msg: "Sr. Tumnus: 'Cuidado! A Feiticeira sabe que você está aqui. Use a espada!'" };
+        scene.add(faun);
+        npcs.push(faun);
+
+        // Lampião
+        const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4), new THREE.MeshLambertMaterial({color:0x111}));
+        lamp.position.set(8, 2, -5);
+        scene.add(lamp);
+        const light = new THREE.PointLight(0xffd700, 1, 10);
+        light.position.set(8, 4, -5);
+        scene.add(light);
+    }
+
+    function spawnEnemy() {
+        const enemy = createDoll(0x555555, 'enemy'); // Cinza
+        let angle = Math.random() * Math.PI * 2;
+        let dist = 15 + Math.random() * 20;
+        enemy.position.set(Math.sin(angle)*dist, 0, Math.cos(angle)*dist);
+        enemy.userData = { hp: 3, lastAtk: 0 };
+        scene.add(enemy);
+        enemies.push(enemy);
+    }
+
+    // --- CONTROLES DE TOQUE (JOYSTICK) ---
+    function setupControls() {
+        // Joystick Logic
+        const maxRadius = 35; // Raio máximo do movimento do botão
+        
+        joyZone.addEventListener('touchstart', (e) => {
+            joystickActive = true;
+            const touch = e.changedTouches[0];
+            // Define o centro relativo ao toque inicial se quiser dinâmico, 
+            // mas aqui usaremos o centro fixo da div para simplicidade clássica
+            const rect = joyZone.getBoundingClientRect();
+            joystickOrigin = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+            updateJoystick(touch);
+        });
+
+        joyZone.addEventListener('touchmove', (e) => {
+            if(!joystickActive) return;
+            e.preventDefault(); // Evita scroll
+            const touch = e.changedTouches[0];
+            updateJoystick(touch);
+        });
+
+        const endJoystick = () => {
+            joystickActive = false;
+            input.x = 0; input.y = 0;
+            joyKnob.style.transform = `translate(-50%, -50%)`; // Reseta visual
+        };
+
+        joyZone.addEventListener('touchend', endJoystick);
+        joyZone.addEventListener('touchcancel', endJoystick);
+
+        // Botão Interagir
+        document.getElementById('btn-interact').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            checkInteraction();
+        });
+    }
+
+    function updateJoystick(touch) {
+        const dx = touch.clientX - joystickOrigin.x;
+        const dy = touch.clientY - joystickOrigin.y;
+        const distance = Math.min(Math.sqrt(dx*dx + dy*dy), 35); // 35 é o limite visual
+        const angle = Math.atan2(dy, dx);
+
+        // Input normalizado (-1 a 1)
+        input.x = (Math.cos(angle) * distance) / 35;
+        input.y = (Math.sin(angle) * distance) / 35;
+
+        // Visual
+        const knobX = Math.cos(angle) * distance;
+        const knobY = Math.sin(angle) * distance;
+        joyKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+    }
+
+    function triggerAttack(e) {
+        if(e) e.preventDefault();
+        if(input.isAttacking) return;
+
+        input.isAttacking = true;
+        
+        // Animação Espada
+        let frame = 0;
+        const swing = setInterval(() => {
+            frame++;
+            swordMesh.rotation.y -= 0.5;
+            if(frame > 5) {
+                clearInterval(swing);
+                swordMesh.rotation.y = 0; // Reset
+                input.isAttacking = false;
             }
-            if(cost === 2) showToast("Neve funda (-2 AP)");
-        } else {
-            showToast("Sem AP! Aperte B.");
+        }, 30);
+
+        // Lógica de Dano
+        enemies.forEach(en => {
+            if(player.position.distanceTo(en.position) < 2.5) {
+                // Checa se está virado pro inimigo
+                const pDir = new THREE.Vector3(0,0,1).applyQuaternion(player.quaternion);
+                const eDir = en.position.clone().sub(player.position).normalize();
+                if(pDir.dot(eDir) > 0.5) hitEnemy(en);
+            }
+        });
+    }
+
+    function hitEnemy(en) {
+        en.userData.hp--;
+        // Piscar vermelho
+        en.children.forEach(c => c.material.color.setHex(0xff0000));
+        setTimeout(() => en.children.forEach(c => c.material.color.setHex(0x555555)), 150);
+
+        if(en.userData.hp <= 0) {
+            scene.remove(en);
+            enemies = enemies.filter(e => e !== en);
+            score++;
+            document.getElementById('score-display').innerText = score;
+            spawnEnemy(); // Respawn infinito
         }
     }
 
-    function tryInteract(p) {
-        const adj = [{x:p.x+1,y:p.y}, {x:p.x-1,y:p.y}, {x:p.x,y:p.y+1}, {x:p.x,y:p.y-1}];
-        let acted = false;
-        for (let pos of adj) {
-            if (pos.x >= 0 && pos.x < COLS && pos.y >= 0 && pos.y < ROWS) {
-                const target = map[pos.y][pos.x];
-                if ((target === 2 || target === 3) && p.ap >= 1) {
-                    map[pos.y][pos.x] = 0; 
-                    p.ap -= 1;
-                    const obj3d = worldGroup.getObjectByName(`obj_${pos.x}_${pos.y}`);
-                    if(obj3d) worldGroup.remove(obj3d);
+    function checkInteraction() {
+        const box = document.getElementById('dialog-box');
+        let found = false;
+        npcs.forEach(npc => {
+            if(player.position.distanceTo(npc.position) < 3) {
+                box.innerText = npc.userData.msg;
+                box.style.display = 'block';
+                found = true;
+            }
+        });
+        if(!found) box.style.display = 'none';
+    }
+
+    // --- LOOP PRINCIPAL ---
+    function animate() {
+        requestAnimationFrame(animate);
+        const delta = clock.getDelta();
+
+        if(hp <= 0) return; // Game Over pause
+
+        // 1. Mover Jogador (Baseado no Joystick)
+        if (Math.abs(input.x) > 0.1 || Math.abs(input.y) > 0.1) {
+            const speed = 8 * delta;
+            
+            // Câmera é fixa relativa ao mundo, então Input Y é Z (Frente/Trás) e Input X é X (Esq/Dir)
+            // Mas precisamos inverter Y porque joystick pra cima é negativo no HTML
+            const moveVec = new THREE.Vector3(input.x, 0, input.y).normalize(); 
+            
+            player.position.add(moveVec.multiplyScalar(speed));
+            
+            // Girar boneco para direção do movimento
+            const angle = Math.atan2(moveVec.x, moveVec.z);
+            player.rotation.y = angle;
+        }
+
+        // 2. Câmera Segue Jogador (Suave)
+        const targetCamPos = player.position.clone().add(new THREE.Vector3(0, 10, 10)); // Câmera Isométrica
+        camera.position.lerp(targetCamPos, 0.1);
+        camera.lookAt(player.position);
+
+        // 3. IA Inimigos
+        enemies.forEach(en => {
+            const dist = en.position.distanceTo(player.position);
+            if(dist < 15 && dist > 1.2) {
+                en.lookAt(player.position);
+                en.translateZ(3 * delta); // Velocidade do inimigo
+            } else if (dist <= 1.2) {
+                // Ataque do Inimigo
+                if(clock.elapsedTime - en.userData.lastAtk > 1.0) {
+                    hp -= 5;
+                    document.getElementById('hp-display').innerText = hp;
+                    en.userData.lastAtk = clock.elapsedTime;
+                    player.children[0].material.color.setHex(0xff0000); // Player pisca
+                    setTimeout(()=>player.children[0].material.color.setHex(0x3498db), 200);
                     
-                    showToast(target===2 ? "Casaco empurrado!" : "Gelo quebrado!");
-                    updateUI();
-                    acted = true;
-                    break;
+                    if(hp <= 0) {
+                        document.getElementById('dialog-box').innerText = "GAME OVER";
+                        document.getElementById('dialog-box').style.display = 'block';
+                    }
                 }
             }
-        }
-        if (!acted) showToast(p.ap < 1 ? "Precisa de 1 AP." : "Nada perto.");
+        });
+
+        renderer.render(scene, camera);
     }
-
-    function switchTurn() {
-        turn = turn === 0 ? 1 : 0;
-        players[turn].ap = players[turn].maxAp;
-        updateUI();
-        showToast(`Vez de ${players[turn].name}!`);
-    }
-
-    function updateUI() {
-        const p = players[turn];
-        pNameEl.innerText = p.name;
-        apEl.innerText = `AP: ${p.ap}/${p.maxAp}`;
-        apEl.style.color = p.ap === 0 ? '#ff5555' : '#ffffff';
-    }
-
-    // Resize Inteligente
-    window.addEventListener('resize', () => {
-        if(!container || !camera || !renderer) return;
-        const aspect = container.clientWidth / container.clientHeight;
-        let d = aspect < 1 ? 10 : 7; // Recalcula zoom baseado na nova proporção
-        camera.left = -d * aspect; camera.right = d * aspect;
-        camera.top = d; camera.bottom = -d;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-    });
-
-    initGame();
 </script>
 </body>
 </html>
+
