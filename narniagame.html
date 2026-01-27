@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Narnia: A Jornada Narrativa</title>
+    <title>Narnia: Aventura Final</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         body { 
             margin: 0; overflow: hidden; background: #111; font-family: 'Courier New', sans-serif;
-            touch-action: none; user-select: none;
+            touch-action: none; user-select: none; -webkit-user-select: none;
         }
 
         /* UI SUPERIOR */
@@ -16,466 +16,425 @@
         
         .quest-box {
             position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 15px;
+            background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 15px;
             color: #ffd700; font-weight: bold; font-size: 14px; text-align: center;
-            border: 2px solid #8b5a2b; width: 80%;
+            border: 2px solid #8b5a2b; width: 85%;
             text-shadow: 1px 1px 0 #000;
         }
 
         .health-box {
             position: absolute; top: 60px; left: 20px;
-            color: #ff4444; font-weight: bold; font-size: 16px;
-            text-shadow: 1px 1px 0 black;
+            color: #ff4444; font-weight: bold; font-size: 18px;
+            text-shadow: 2px 2px 0 black;
+            background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;
         }
 
-        /* CAIXA DE DIÁLOGO (HISTÓRIA) */
+        /* MODAL DE HISTÓRIA */
         #story-modal {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 100;
+            background: rgba(0,0,0,0.9); z-index: 100;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             pointer-events: auto; padding: 20px; box-sizing: border-box;
         }
         #story-content {
-            background: #fdf5e6; color: #2c1b0e; padding: 20px;
-            border-radius: 5px; border: 4px solid #8b5a2b;
+            background: #fdf5e6; color: #2c1b0e; padding: 25px;
+            border-radius: 10px; border: 4px solid #8b5a2b;
             max-width: 500px; text-align: center;
-            box-shadow: 0 0 20px #ffd700;
+            box-shadow: 0 0 30px #ffd700;
         }
-        #story-title { font-size: 22px; margin-bottom: 10px; color: #800000; font-weight: bold; }
-        #story-text { font-size: 16px; margin-bottom: 20px; line-height: 1.5; }
         .btn-next {
-            background: #8b5a2b; color: white; border: none; padding: 12px 24px;
-            font-size: 18px; border-radius: 5px; cursor: pointer;
+            background: #27ae60; color: white; border: none; padding: 15px 30px;
+            font-size: 20px; border-radius: 50px; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 4px 0 #1e8449;
         }
+        .btn-next:active { transform: translateY(4px); box-shadow: none; }
 
-        /* CONTROLES MOBILE */
-        #controls-layer { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; z-index: 20; }
+        /* CONTROLES VISÍVEIS */
+        #controls-layer { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
+        
+        /* O Círculo do Joystick (Fundo) */
         #joystick-zone {
-            position: absolute; bottom: 30px; left: 30px; width: 140px; height: 140px;
-            background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);
-        }
-        #joystick-knob {
-            position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
-            background: rgba(255,255,255,0.5); border-radius: 50%; transform: translate(-50%, -50%);
-        }
-        #btn-attack {
-            position: absolute; bottom: 40px; right: 30px; width: 90px; height: 90px;
-            background: rgba(192, 57, 43, 0.6); border-radius: 50%; border: 3px solid white;
-            color: white; font-size: 30px; display: flex; justify-content: center; align-items: center;
+            position: absolute; bottom: 40px; left: 30px; 
+            width: 140px; height: 140px;
+            background: rgba(255, 255, 255, 0.2); /* Mais visível */
+            border-radius: 50%; 
+            border: 4px solid rgba(255, 255, 255, 0.5);
+            pointer-events: auto; /* Permite toque */
         }
         
+        /* O "Pino" do Joystick (Que mexe) */
+        #joystick-knob {
+            position: absolute; top: 50%; left: 50%; 
+            width: 60px; height: 60px;
+            background: rgba(255, 215, 0, 0.8); /* Dourado Narnia */
+            border-radius: 50%; 
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Botão de Ataque */
+        #btn-attack {
+            position: absolute; bottom: 50px; right: 30px; 
+            width: 90px; height: 90px;
+            background: rgba(231, 76, 60, 0.8); 
+            border-radius: 50%; 
+            border: 4px solid white;
+            color: white; font-size: 40px; 
+            display: flex; justify-content: center; align-items: center;
+            pointer-events: auto; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        #btn-attack:active { transform: scale(0.95); background: red; }
+
     </style>
 </head>
 <body>
 
     <div id="story-modal">
         <div id="story-content">
-            <div id="story-title">Capítulo 1</div>
-            <div id="story-text">Texto da história...</div>
-            <button class="btn-next" onclick="startGame()">Começar Aventura</button>
+            <h2 id="story-title" style="margin:0 0 10px 0;">Carregando...</h2>
+            <p id="story-text" style="font-size:16px; line-height:1.4;">...</p>
+            <p id="quest-preview" style="color:#d35400; font-weight:bold;"></p>
+            <button class="btn-next" onclick="startGame()">JOGAR AGORA</button>
         </div>
     </div>
 
     <div id="ui-layer">
-        <div class="quest-box" id="quest-text">Objetivo Atual</div>
-        <div class="health-box">❤ <span id="hp-display">100</span>%</div>
+        <div class="quest-box" id="quest-text">Objetivo</div>
+        <div class="health-box">❤ <span id="hp-display">100</span></div>
     </div>
 
     <div id="controls-layer">
         <div id="joystick-zone"><div id="joystick-knob"></div></div>
-        <div id="btn-attack" ontouchstart="triggerAttack(event)">⚔️</div>
+        <div id="btn-attack">⚔️</div>
     </div>
 
 <script>
-    // --- DADOS DAS FASES (A HISTÓRIA) ---
+    // --- CONFIGURAÇÃO DAS FASES ---
     const LEVELS = [
         {
-            id: 1,
-            title: "Capítulo 1: O Ermo do Lampião",
-            story: "Você atravessou o guarda-roupa e caiu na neve eterna de Nárnia. O Sr. Tumnus foi capturado. Encontre o Lampião e derrote os guardas para achar o caminho seguro.",
-            objective: "Derrote 3 Guardas e vá para a Luz Dourada.",
-            skyColor: 0x87CEEB,
-            groundColor: 0xe0f7fa, // Neve
-            enemiesToSpawn: 3,
-            hasLamp: true,
-            hasBoss: false
+            title: "Capítulo 1: O Inverno Eterno",
+            story: "Você encontrou Nárnia! Mas o Sr. Tumnus foi levado. A floresta está cheia de espiões.",
+            objective: "Derrote 3 Guardas para abrir o Portal.",
+            sky: 0x87CEEB, ground: 0xe0f7fa, enemies: 3, boss: false
         },
         {
-            id: 2,
-            title: "Capítulo 2: A Represa dos Castores",
-            story: "Você fugiu para a represa. O gelo está começando a derreter. A Polícia Secreta da Feiticeira (Lobos) cercou a área. Proteja o esconderijo!",
-            objective: "Sobreviva ao ataque dos Lobos (5 inimigos).",
-            skyColor: 0xb0e0e6,
-            groundColor: 0xcfecec, // Gelo sujo
-            enemiesToSpawn: 5,
-            hasLamp: false,
-            hasBoss: false
+            title: "Capítulo 2: Degelo na Represa",
+            story: "O gelo está a quebrar! Os lobos da Polícia Secreta cercaram a represa dos castores.",
+            objective: "Sobreviva a 5 Lobos da Feiticeira.",
+            sky: 0xb0e0e6, ground: 0xafeeee, enemies: 5, boss: false
         },
         {
-            id: 3,
-            title: "Capítulo 3: A Mesa de Pedra",
-            story: "A primavera chegou! Aslam montou seu acampamento na Mesa de Pedra. Mas o Capitão da Feiticeira veio para um duelo final.",
-            objective: "Derrote o Capitão Anão da Feiticeira!",
-            skyColor: 0x87CEFA,
-            groundColor: 0x7cfc00, // Grama (Primavera)
-            enemiesToSpawn: 0, // Boss manual
-            hasLamp: false,
-            hasBoss: true
+            title: "Capítulo 3: A Batalha Final",
+            story: "A Mesa de Pedra. O exército de Aslam aguarda. O Capitão da Feiticeira desafia-te.",
+            objective: "DERROTE O CAPITÃO ANÃO!",
+            sky: 0x87CEFA, ground: 0x7cfc00, enemies: 0, boss: true
         }
     ];
 
-    // --- VARIÁVEIS GLOBAIS ---
-    let currentLevelIndex = 0;
-    let scene, camera, renderer, clock;
-    let player, swordMesh, exitPortal;
-    let enemies = [], scenery = []; // Arrays para limpeza
-    let hp = 100;
-    let enemiesDefeated = 0;
-    let levelComplete = false;
-    let input = { x: 0, y: 0, attacking: false };
+    let scene, camera, renderer, clock, player, sword, portal;
+    let enemiesArr = [], sceneryArr = [];
+    let currentLevel = 0, hp = 100, kills = 0, levelDone = false;
+    let input = { x: 0, y: 0, attack: false };
 
-    // --- INICIALIZAÇÃO ---
-    function init3D() {
+    // --- INICIALIZAR ---
+    function init() {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 100);
-        camera.position.set(0, 14, 14);
+        camera.position.set(0, 16, 16); // Câmera bem alta
         
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
-
+        
         clock = new THREE.Clock();
-
+        
         // Luzes
-        const ambi = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambi);
-        const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-        sun.position.set(10, 20, 10);
-        sun.castShadow = true;
-        scene.add(sun);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+        dir.position.set(10, 20, 10);
+        dir.castShadow = true;
+        scene.add(dir);
 
+        // Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth/window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        setupJoystick();
-        loadLevel(0); // Carrega dados mas espera botão
+        setupControls(); // Configura Joystick e Botão
+        loadLevel(0);    // Carrega primeira fase
+        animate();       // Começa loop
     }
 
-    // --- SISTEMA DE FASES ---
-    function loadLevel(index) {
-        if(index >= LEVELS.length) {
-            alert("VOCÊ SALVOU NÁRNIA! Jogo Completo.");
-            location.reload();
-            return;
+    // --- CARREGAR FASE ---
+    function loadLevel(idx) {
+        if(idx >= LEVELS.length) {
+            alert("PARABÉNS! NÁRNIA ESTÁ LIVRE!");
+            location.reload(); return;
         }
+        currentLevel = idx;
+        const data = LEVELS[idx];
 
-        currentLevelIndex = index;
-        const data = LEVELS[index];
-
-        // 1. Mostrar História
-        const modal = document.getElementById('story-modal');
+        // UI
+        document.getElementById('story-modal').style.display = 'flex';
         document.getElementById('story-title').innerText = data.title;
         document.getElementById('story-text').innerText = data.story;
+        document.getElementById('quest-preview').innerText = "Missão: " + data.objective;
         document.getElementById('quest-text').innerText = data.objective;
-        modal.style.display = 'flex';
 
-        // 2. Limpar Cena Antiga
-        enemies.forEach(e => scene.remove(e));
-        scenery.forEach(s => scene.remove(s));
-        if(exitPortal) scene.remove(exitPortal);
-        if(player) scene.remove(player); // Recriar player no centro
-        enemies = []; scenery = []; levelComplete = false; enemiesDefeated = 0;
-        
-        // 3. Configurar Ambiente
-        scene.background = new THREE.Color(data.skyColor);
-        scene.fog = new THREE.Fog(data.skyColor, 15, 45);
+        // Reset
+        enemiesArr.forEach(e => scene.remove(e));
+        sceneryArr.forEach(s => scene.remove(s));
+        if(portal) scene.remove(portal);
+        if(player) scene.remove(player);
+        enemiesArr = []; sceneryArr = []; levelDone = false; kills = 0;
 
-        // Chão
-        const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshLambertMaterial({color: data.groundColor}));
-        ground.rotation.x = -Math.PI/2;
-        ground.receiveShadow = true;
-        scene.add(ground);
-        scenery.push(ground);
+        // Ambiente
+        scene.background = new THREE.Color(data.sky);
+        scene.fog = new THREE.Fog(data.sky, 20, 50);
 
-        // Paredes (Floresta Densa) - O "Limite" do mundo
-        createForestBoundary();
+        // Chão e Muros
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshLambertMaterial({color: data.ground}));
+        ground.rotation.x = -Math.PI/2; ground.receiveShadow = true;
+        scene.add(ground); sceneryArr.push(ground);
+        createForest();
 
         // Player
         createPlayer();
 
-        // Elementos da Fase
-        if(data.hasLamp) createLampPost();
-        
         // Inimigos
-        for(let i=0; i<data.enemiesToSpawn; i++) spawnEnemy(false);
-        if(data.hasBoss) spawnEnemy(true); // Spawn Boss
+        for(let i=0; i<data.enemies; i++) spawnEnemy(false);
+        if(data.boss) spawnEnemy(true);
     }
 
     function startGame() {
         document.getElementById('story-modal').style.display = 'none';
-        if(!renderer) {
-            init3D();
-            animate();
-        }
     }
 
-    // --- CRIAÇÃO DE OBJETOS ---
+    // --- CRIAÇÃO ---
     function createPlayer() {
-        const group = new THREE.Group();
-        // Corpo Azul Pevensie
-        const mat = new THREE.MeshLambertMaterial({color: 0x3498db}); 
-        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.4, 1.5, 8), mat);
-        body.position.y = 0.75;
-        body.castShadow = true;
-        group.add(body);
-        
+        const grp = new THREE.Group();
+        // Corpo
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.5), new THREE.MeshLambertMaterial({color: 0x3498db}));
+        body.position.y = 0.75; body.castShadow = true;
+        grp.add(body);
+        // Cabeça
         const head = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshLambertMaterial({color: 0xffdbac}));
         head.position.y = 1.7;
-        group.add(head);
-
+        grp.add(head);
         // Espada
-        const sword = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 0.1), new THREE.MeshStandardMaterial({color:0xffffff}));
-        sword.position.set(0.6, 1, 0.5);
-        sword.rotation.x = Math.PI/2;
-        group.add(sword);
-        swordMesh = sword;
-
-        group.position.set(0,0,0);
-        scene.add(group);
-        player = group;
+        sword = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.6, 0.1), new THREE.MeshStandardMaterial({color:0xffffff}));
+        sword.position.set(0.6, 1, 0.5); sword.rotation.x = Math.PI/2;
+        grp.add(sword);
+        
+        scene.add(grp);
+        player = grp;
     }
 
-    function spawnEnemy(isBoss) {
-        const group = new THREE.Group();
-        const color = isBoss ? 0x800000 : 0x555555; // Boss Vermelho, Grunt Cinza
-        const scale = isBoss ? 2 : 1;
-
+    function spawnEnemy(boss) {
+        const grp = new THREE.Group();
+        const color = boss ? 0xc0392b : 0x555555;
+        const scale = boss ? 2.5 : 1;
+        
         const mat = new THREE.MeshLambertMaterial({color: color});
-        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5*scale, 0.6*scale, 1.4*scale, 8), mat);
-        body.position.y = 0.7*scale;
-        group.add(body);
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5*scale, 0.6*scale, 1.5*scale), mat);
+        body.position.y = 0.75*scale; body.castShadow = true;
+        grp.add(body);
 
-        // Capuz ou Cabeça de Lobo
-        const head = new THREE.Mesh(new THREE.ConeGeometry(0.5*scale, 0.8*scale, 8), mat);
-        head.position.y = 1.8*scale;
-        group.add(head);
+        // Capuz
+        const hood = new THREE.Mesh(new THREE.ConeGeometry(0.6*scale, 0.8*scale), mat);
+        hood.position.y = 1.9*scale;
+        grp.add(hood);
 
-        // Posição Aleatória (Longe do centro)
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 10 + Math.random() * 15;
-        group.position.set(Math.sin(angle)*dist, 0, Math.cos(angle)*dist);
+        // Posição
+        const ang = Math.random()*6.28;
+        const dst = 10 + Math.random()*15;
+        grp.position.set(Math.sin(ang)*dst, 0, Math.cos(ang)*dst);
         
-        group.userData = { 
-            hp: isBoss ? 15 : 3, 
-            isBoss: isBoss,
-            speed: isBoss ? 1.5 : 2.5 
-        };
-        
-        scene.add(group);
-        enemies.push(group);
+        grp.userData = { hp: boss ? 20 : 3, boss: boss };
+        scene.add(grp); enemiesArr.push(grp);
     }
 
-    function createForestBoundary() {
-        // Cria um anel de árvores para o jogador não sair
+    function createForest() {
         for(let i=0; i<40; i++) {
-            const angle = (i / 40) * Math.PI * 2;
-            const radius = 35 + Math.random() * 5; // Raio de 35 a 40
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-
-            const tree = new THREE.Group();
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.8, 2), new THREE.MeshLambertMaterial({color:0x5c4033}));
+            const ang = (i/40)*6.28;
+            const r = 35 + Math.random()*5;
+            const grp = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, 2), new THREE.MeshLambertMaterial({color:0x5d4037}));
             trunk.position.y = 1;
-            const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5, 5, 8), new THREE.MeshLambertMaterial({color:0x006400}));
-            leaves.position.y = 4;
-            
-            tree.add(trunk); tree.add(leaves);
-            tree.position.set(x, 0, z);
-            scene.add(tree);
-            scenery.push(tree);
-        }
-    }
-
-    function createLampPost() {
-        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 5), new THREE.MeshLambertMaterial({color:0x111}));
-        post.position.set(5, 2.5, -5);
-        scene.add(post);
-        const light = new THREE.PointLight(0xffaa00, 1.5, 10);
-        light.position.set(5, 5, -5);
-        scene.add(light);
-        scenery.push(post);
-    }
-
-    function createPortal() {
-        // Cria a zona de saída
-        const geo = new THREE.CylinderGeometry(2, 2, 0.1, 16);
-        const mat = new THREE.MeshBasicMaterial({color: 0xffff00, transparent: true, opacity: 0.5});
-        exitPortal = new THREE.Mesh(geo, mat);
-        exitPortal.position.set(0, 0.1, -10); // Portal sempre aparece ao norte
-        scene.add(exitPortal);
-        
-        // Texto visual (Luz subindo)
-        const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 2, 10, 8, 1, true), new THREE.MeshBasicMaterial({color: 0xffff00, opacity: 0.2, transparent: true, side: THREE.DoubleSide}));
-        beam.position.y = 5;
-        exitPortal.add(beam);
-        
-        document.getElementById('quest-text').innerText = "PORTAL ABERTO! ENTRE NA LUZ!";
-        document.getElementById('quest-text').style.color = "#00ff00";
-    }
-
-    // --- GAMEPLAY LOGIC ---
-    function triggerAttack(e) {
-        if(e) e.preventDefault();
-        if(input.attacking) return;
-        input.attacking = true;
-
-        // Animação Espada
-        let f = 0;
-        const interval = setInterval(() => {
-            f++;
-            swordMesh.rotation.y -= 0.5;
-            if(f>5) {
-                clearInterval(interval);
-                swordMesh.rotation.y = Math.PI/2;
-                input.attacking = false;
-            }
-        }, 20);
-
-        // Hitbox
-        enemies.forEach(en => {
-            if(player.position.distanceTo(en.position) < 3.5) {
-                // Verificar direção
-                const pDir = new THREE.Vector3(0,0,1).applyQuaternion(player.quaternion);
-                const eDir = en.position.clone().sub(player.position).normalize();
-                if(pDir.dot(eDir) > 0.3) {
-                    en.userData.hp--;
-                    // Flash
-                    en.children.forEach(c => c.material.color.setHex(0xff0000));
-                    setTimeout(() => {
-                         if(enemies.includes(en)) en.children.forEach(c => c.material.color.setHex(en.userData.isBoss?0x800000:0x555555));
-                    }, 150);
-
-                    if(en.userData.hp <= 0) {
-                        scene.remove(en);
-                        enemies = enemies.filter(e => e !== en);
-                        enemiesDefeated++;
-                        checkLevelProgress();
-                    }
-                }
-            }
-        });
-    }
-
-    function checkLevelProgress() {
-        const data = LEVELS[currentLevelIndex];
-        // Condição de Vitória da Fase
-        if(!levelComplete) {
-            if(data.hasBoss) {
-                 if(enemies.length === 0) spawnPortal(); // Matou o Boss
-            } else {
-                 if(enemiesDefeated >= data.enemiesToSpawn) spawnPortal(); // Matou os minions
-            }
+            const leaf = new THREE.Mesh(new THREE.ConeGeometry(3, 6), new THREE.MeshLambertMaterial({color:0x2e7d32}));
+            leaf.position.y = 4;
+            grp.add(trunk); grp.add(leaf);
+            grp.position.set(Math.cos(ang)*r, 0, Math.sin(ang)*r);
+            scene.add(grp); sceneryArr.push(grp);
         }
     }
 
     function spawnPortal() {
-        levelComplete = true;
-        createPortal();
+        levelDone = true;
+        const geo = new THREE.CylinderGeometry(2, 2, 0.2, 16);
+        const mat = new THREE.MeshBasicMaterial({color: 0xffff00, opacity:0.6, transparent:true});
+        portal = new THREE.Mesh(geo, mat);
+        portal.position.set(0, 0.1, -10);
+        
+        // Luz
+        const beam = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 20, 8, 1, true), new THREE.MeshBasicMaterial({color: 0xffff00, opacity:0.2, transparent:true, side:THREE.DoubleSide}));
+        beam.position.y = 10;
+        portal.add(beam);
+        
+        scene.add(portal);
+        document.getElementById('quest-text').innerText = "ENTRE NA LUZ PARA AVANÇAR!";
+        document.getElementById('quest-text').style.color = "#00ff00";
     }
 
-    // --- LOOP ---
-    function animate() {
-        requestAnimationFrame(animate);
-        if(!player) return; // Esperando load
+    // --- CONTROLES (JOYSTICK + RATO + TOQUE) ---
+    function setupControls() {
+        const zone = document.getElementById('joystick-zone');
+        const knob = document.getElementById('joystick-knob');
+        const atkBtn = document.getElementById('btn-attack');
+        
+        let startX, startY;
+        let active = false;
 
-        const dt = clock.getDelta();
-
-        // 1. Movimento Player
-        if(Math.abs(input.x) > 0.1 || Math.abs(input.y) > 0.1) {
-            const speed = 6 * dt;
-            const move = new THREE.Vector3(input.x, 0, input.y).normalize();
-            player.position.add(move.multiplyScalar(speed));
+        // Funções para lidar com o movimento
+        const handleStart = (x, y) => {
+            active = true;
+            startX = x; startY = y;
+        };
+        const handleMove = (x, y) => {
+            if(!active) return;
+            const dx = x - startX;
+            const dy = y - startY;
+            const dist = Math.min(Math.sqrt(dx*dx+dy*dy), 35); // Raio limite
+            const ang = Math.atan2(dy, dx);
             
-            // Colisão com Limites (Raio 33)
-            if(player.position.length() > 33) {
-                player.position.setLength(33);
-            }
+            const kx = Math.cos(ang)*dist;
+            const ky = Math.sin(ang)*dist;
+            
+            knob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
+            input.x = kx / 35; 
+            input.y = ky / 35;
+        };
+        const handleEnd = () => {
+            active = false;
+            input.x = 0; input.y = 0;
+            knob.style.transform = `translate(-50%, -50%)`;
+        };
 
-            player.rotation.y = Math.atan2(move.x, move.z);
-        }
+        // EVENTOS TOQUE
+        zone.addEventListener('touchstart', e => { e.preventDefault(); handleStart(e.touches[0].clientX, e.touches[0].clientY); });
+        zone.addEventListener('touchmove', e => { e.preventDefault(); handleMove(e.touches[0].clientX, e.touches[0].clientY); });
+        zone.addEventListener('touchend', handleEnd);
 
-        // 2. Câmera
-        const camTarget = player.position.clone().add(new THREE.Vector3(0, 12, 10));
-        camera.position.lerp(camTarget, 0.1);
-        camera.lookAt(player.position);
+        // EVENTOS RATO (Para PC)
+        zone.addEventListener('mousedown', e => { e.preventDefault(); handleStart(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', e => { if(active) handleMove(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', handleEnd);
 
-        // 3. Inimigos
-        enemies.forEach(en => {
-            const dist = en.position.distanceTo(player.position);
-            if(dist < 15 && dist > 1.2) {
-                en.lookAt(player.position);
-                en.translateZ(en.userData.speed * dt);
-            }
-            if(dist < 1.3) {
-                // Dano no player
-                if(Math.random() < 0.05) { // Chance de dano por frame (simples)
-                    hp -= 1;
-                    document.getElementById('hp-display').innerText = Math.floor(hp);
-                    if(hp <= 0) {
-                        alert("Game Over");
-                        location.reload();
+        // ATAQUE
+        const doAttack = (e) => {
+            if(e) e.preventDefault();
+            if(input.attack) return;
+            input.attack = true;
+            
+            // Animação Espada
+            let f = 0;
+            const anim = setInterval(() => {
+                f++; sword.rotation.y -= 0.6;
+                if(f>4) { clearInterval(anim); sword.rotation.y = Math.PI/2; input.attack = false; }
+            }, 30);
+
+            // Dano
+            enemiesArr.forEach(en => {
+                if(player.position.distanceTo(en.position) < 3.5) {
+                    // Direção
+                    const dir = new THREE.Vector3(0,0,1).applyQuaternion(player.quaternion);
+                    const toEn = en.position.clone().sub(player.position).normalize();
+                    if(dir.dot(toEn) > 0.4) {
+                        en.userData.hp--;
+                        en.children.forEach(c => c.material.color.setHex(0xff0000));
+                        setTimeout(() => { 
+                            if(enemiesArr.includes(en)) en.children.forEach(c => c.material.color.setHex(en.userData.boss?0xc0392b:0x555555)); 
+                        }, 100);
+
+                        if(en.userData.hp <= 0) {
+                            scene.remove(en);
+                            enemiesArr = enemiesArr.filter(x => x!==en);
+                            kills++;
+                            checkProgress();
+                        }
                     }
                 }
-            }
-        });
+            });
+        };
 
-        // 4. Portal Check
-        if(levelComplete && exitPortal) {
-            exitPortal.rotation.y += dt;
-            if(player.position.distanceTo(exitPortal.position) < 2) {
-                loadLevel(currentLevelIndex + 1);
+        atkBtn.addEventListener('touchstart', doAttack);
+        atkBtn.addEventListener('mousedown', doAttack);
+        // Tecla Espaço também ataca
+        window.addEventListener('keydown', e => { if(e.code==='Space') doAttack(); });
+    }
+
+    function checkProgress() {
+        const data = LEVELS[currentLevel];
+        if(!levelDone) {
+            if(data.boss) { if(enemiesArr.length===0) spawnPortal(); }
+            else { if(kills >= data.enemies) spawnPortal(); }
+        }
+    }
+
+    // --- LOOP PRINCIPAL ---
+    function animate() {
+        requestAnimationFrame(animate);
+        const dt = clock.getDelta();
+
+        if(player) {
+            // Mover Player
+            if(Math.abs(input.x)>0.1 || Math.abs(input.y)>0.1) {
+                const spd = 6 * dt;
+                const vec = new THREE.Vector3(input.x, 0, input.y).normalize();
+                player.position.add(vec.multiplyScalar(spd));
+                // Girar
+                player.rotation.y = Math.atan2(vec.x, vec.z);
+                // Limite Mapa
+                if(player.position.length()>33) player.position.setLength(33);
+            }
+
+            // Câmera segue
+            const camPos = player.position.clone().add(new THREE.Vector3(0, 14, 12));
+            camera.position.lerp(camPos, 0.1);
+            camera.lookAt(player.position);
+
+            // Mover Inimigos
+            enemiesArr.forEach(en => {
+                const dist = en.position.distanceTo(player.position);
+                if(dist < 15 && dist > 1.3) {
+                    en.lookAt(player.position);
+                    en.translateZ(2.5 * dt);
+                }
+                if(dist < 1.3) {
+                    if(Math.random()<0.03) {
+                        hp -= 2;
+                        document.getElementById('hp-display').innerText = hp;
+                        if(hp<=0) { alert("GAME OVER"); location.reload(); }
+                    }
+                }
+            });
+
+            // Portal
+            if(levelDone && portal) {
+                portal.rotation.y += dt;
+                if(player.position.distanceTo(portal.position) < 2) {
+                    loadLevel(currentLevel+1);
+                }
             }
         }
-        
         renderer.render(scene, camera);
     }
 
-    // --- CONTROLES JOYSTICK ---
-    function setupJoystick() {
-        const zone = document.getElementById('joystick-zone');
-        const knob = document.getElementById('joystick-knob');
-        let startX, startY;
-
-        zone.addEventListener('touchstart', e => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        });
-
-        zone.addEventListener('touchmove', e => {
-            e.preventDefault();
-            const x = e.touches[0].clientX - startX;
-            const y = e.touches[0].clientY - startY;
-            const dist = Math.min(Math.sqrt(x*x+y*y), 35);
-            const angle = Math.atan2(y, x);
-            
-            const kx = Math.cos(angle)*dist;
-            const ky = Math.sin(angle)*dist;
-            
-            knob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
-            
-            input.x = kx / 35;
-            input.y = ky / 35;
-        });
-
-        zone.addEventListener('touchend', () => {
-            knob.style.transform = `translate(-50%, -50%)`;
-            input.x = 0; input.y = 0;
-        });
-    }
+    init();
 
 </script>
 </body>
