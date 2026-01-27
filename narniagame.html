@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrida ao Guarda-Roupa</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --accent: #d4af37; /* Dourado Narnia */
+            --wood: #5d4037;
+            --coat: #2c2c2c;
+            --snow: #e3f2fd;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        h1 { margin-bottom: 10px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* O Tabuleiro */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 4px;
+            background: linear-gradient(90deg, 
+                var(--wood) 0%, 
+                var(--wood) 20%, 
+                var(--coat) 25%, 
+                var(--coat) 60%, 
+                var(--snow) 75%, 
+                var(--snow) 100%);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            max-width: 95vw;
+        }
+
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        .obstacle { background-color: rgba(0,0,0,0.6); border: 1px solid #555; }
+        .lamp { background-color: rgba(255, 255, 224, 0.4); box-shadow: 0 0 10px white; }
+
+        /* Controles */
+        #controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            padding: 0 20px;
+        }
+
+        .status-bar {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            border-left: 4px solid var(--accent);
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-group { display: flex; gap: 10px; justify-content: center; }
+
+        button {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        button:active { transform: scale(0.95); }
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .risk-low { border-bottom: 3px solid #4caf50; }
+        .risk-med { border-bottom: 3px solid #ff9800; }
+        .risk-high { border-bottom: 3px solid #f44336; }
+
+        .move-btn { font-size: 1.2rem; max-width: 60px; }
+
+        /* Personagens */
+        .player {
+            position: absolute;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .lucia { filter: drop-shadow(0 0 2px gold); }
+        .edmundo { filter: drop-shadow(0 0 2px cyan); }
+
+    </style>
+</head>
+<body>
+
+    <h1>Corrida ao Guarda-Roupa</h1>
+
+    <div id="status" class="status-bar">Turno de Lúcia</div>
+
+    <div id="game-board">
+        </div>
+
+    <div id="controls">
+        <div class="btn-group">
+            <button class="move-btn" onclick="moveVertical(-1)">⬆️</button>
+            <button class="move-btn" onclick="moveVertical(1)">⬇️</button>
+        </div>
+        <div class="btn-group">
+            <button class="risk-low" onclick="moveHorizontal(1, 1.0)">
+                <div>Esgueirar</div>
+                <small style="font-size:0.7em; opacity:0.7">1 casa (100%)</small>
+            </button>
+            <button class="risk-med" onclick="moveHorizontal(2, 0.75)">
+                <div>Andar</div>
+                <small style="font-size:0.7em; opacity:0.7">2 casas (75%)</small>
+            </button>
+            <button class="risk-high" onclick="moveHorizontal(3, 0.40)">
+                <div>Correr</div>
+                <small style="font-size:0.7em; opacity:0.7">3 casas (40%)</small>
+            </button>
+        </div>
+    </div>
+
+<script>
+    // Configurações
+    const COLS = 12;
+    const ROWS = 4;
+    const OBSTACLE_COUNT = 8; // Número de casacos bloqueando o caminho
+    
+    // Estado do Jogo
+    let currentPlayer = 0; // 0 = Lúcia, 1 = Edmundo
+    let gameOver = false;
+    
+    const players = [
+        { name: "Lúcia", icon: "🦁", r: 1, c: 0, class: "lucia" },
+        { name: "Edmundo", icon: "❄️", r: 2, c: 0, class: "edmundo" }
+    ];
+
+    // Mapa (0 = livre, 1 = obstáculo)
+    let grid = [];
+
+    function initGame() {
+        const board = document.getElementById('game-board');
+        board.innerHTML = '';
+        grid = [];
+
+        // Gerar Grid Vazio
+        for (let r = 0; r < ROWS; r++) {
+            let row = [];
+            for (let c = 0; c < COLS; c++) {
+                row.push(0);
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.id = `cell-${r}-${c}`;
+                
+                // Adiciona o Lampião no final
+                if (c === COLS - 1) {
+                    cell.innerHTML = '🕯️';
+                    cell.classList.add('lamp');
+                }
+                
+                board.appendChild(cell);
+            }
+            grid.push(row);
+        }
+
+        // Gerar Obstáculos (Casacos) - Evita início e fim
+        for (let i = 0; i < OBSTACLE_COUNT; i++) {
+            let r = Math.floor(Math.random() * ROWS);
+            let c = Math.floor(Math.random() * (COLS - 4)) + 2; // Entre col 2 e 8 (zona do guarda-roupa)
+            if (grid[r][c] === 0) {
+                grid[r][c] = 1;
+                document.getElementById(`cell-${r}-${c}`).innerHTML = '🧥';
+                document.getElementById(`cell-${r}-${c}`).classList.add('obstacle');
+            }
+        }
+
+        renderPlayers();
+        updateStatus(`Início! Turno de ${players[currentPlayer].name}`);
+    }
+
+    function renderPlayers() {
+        // Remove renderizações anteriores
+        document.querySelectorAll('.player-token').forEach(el => el.remove());
+
+        players.forEach(p => {
+            const cell = document.getElementById(`cell-${p.r}-${p.c}`);
+            const token = document.createElement('span');
+            token.innerText = p.icon;
+            token.classList.add('player-token', 'player', p.class);
+            cell.appendChild(token);
+        });
+    }
+
+    function moveVertical(dir) {
+        if (gameOver) return;
+        
+        let p = players[currentPlayer];
+        let newR = p.r + dir;
+
+        // Limites e Colisões
+        if (newR >= 0 && newR < ROWS) {
+            if (grid[newR][p.c] === 1) {
+                updateStatus("Caminho bloqueado por um casaco!");
+                shakeScreen();
+            } else {
+                p.r = newR;
+                renderPlayers();
+                // Mover verticalmente não gasta o turno principal (opcional, aqui deixei gastar para ser tático)
+                // Se preferir que não gaste turno, comente a linha abaixo:
+                endTurn(); 
+            }
+        }
+    }
+
+    function moveHorizontal(steps, chance) {
+        if (gameOver) return;
+
+        let p = players[currentPlayer];
+        let roll = Math.random();
+
+        if (roll > chance) {
+            // Falha
+            let msg = "";
+            if (steps === 3) { // Se estava correndo e falhou, recua
+                let newC = Math.max(0, p.c - 1);
+                if (grid[p.r][newC] !== 1) p.c = newC;
+                msg = "CRACK! Você tropeçou e fez barulho! (Recuou 1 casa)";
+            } else {
+                msg = "Você hesitou e não saiu do lugar.";
+            }
+            updateStatus(msg);
+            shakeScreen();
+        } else {
+            // Sucesso - Tenta andar casa por casa para checar colisões
+            let movesMade = 0;
+            for (let i = 1; i <= steps; i++) {
+                let targetC = p.c + 1;
+                if (targetC >= COLS) { // Vitória
+                    p.c = targetC - 1; // Fica na última
+                    gameOver = true;
+                    updateStatus(`🎉 ${p.name} chegou ao Lampião e venceu!`);
+                    renderPlayers();
+                    return;
+                }
+                
+                if (grid[p.r][targetC] === 1) {
+                    updateStatus(`Bateu num casaco após andar ${movesMade} casas.`);
+                    break;
+                }
+                
+                p.c = targetC;
+                movesMade++;
+            }
+            if (!gameOver) updateStatus(`${p.name} avançou ${movesMade} casas.`);
+        }
+
+        renderPlayers();
+        if (!gameOver) endTurn();
+    }
+
+    function endTurn() {
+        currentPlayer = currentPlayer === 0 ? 1 : 0;
+        setTimeout(() => {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = `Turno de ${players[currentPlayer].name}`;
+            statusDiv.style.borderLeftColor = currentPlayer === 0 ? 'gold' : 'cyan';
+        }, 800);
+    }
+
+    function updateStatus(msg) {
+        document.getElementById('status').innerText = msg;
+    }
+
+    function shakeScreen() {
+        const board = document.getElementById('game-board');
+        board.style.transform = 'translateX(5px)';
+        setTimeout(() => board.style.transform = 'translateX(-5px)', 50);
+        setTimeout(() => board.style.transform = 'translateX(0)', 100);
+    }
+
+    // Inicializa
+    initGame();
+
+</script>
+</body>
+</html>
+
