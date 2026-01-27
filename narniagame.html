@@ -3,657 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Narnia: The Restoration</title>
+    <title>Narnia: A Bússola Mágica</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         /* --- ESTILO GERAL --- */
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; -webkit-user-select: none; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; user-select: none; }
         
-        /* UI HUD */
+        /* HUD */
         #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
         
-        .bar-container {
-            position: absolute; top: 20px; left: 20px;
-            width: 200px; height: 20px; background: rgba(0,0,0,0.5);
+        /* Barra de Vida e Contador */
+        .top-bar {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 10px; align-items: center;
+        }
+        .hp-container {
+            width: 150px; height: 15px; background: rgba(0,0,0,0.6);
             border: 2px solid #fff; border-radius: 10px; overflow: hidden;
         }
-        #hp-bar { width: 100%; height: 100%; background: linear-gradient(90deg, #ff4e50, #f9d423); transition: width 0.2s; }
-        .hp-text { position: absolute; top: 22px; left: 230px; color: white; font-weight: bold; font-size: 18px; text-shadow: 1px 1px 2px black; }
-
-        .quest-panel {
-            position: absolute; top: 20px; right: 20px;
-            background: rgba(0, 0, 0, 0.6); color: #ffd700;
-            padding: 10px 15px; border-radius: 8px; border-left: 4px solid #ffd700;
-            max-width: 300px; text-align: right;
-        }
-        #quest-title { font-size: 12px; text-transform: uppercase; color: #aaa; }
-        #quest-desc { font-size: 16px; font-weight: bold; }
-
-        /* DANOS FLUTUANTES */
-        .floating-dmg {
-            position: absolute; color: #fff; font-weight: bold; font-size: 20px;
-            text-shadow: 2px 2px 0 #000; pointer-events: none;
-            animation: floatUp 1s forwards;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+        #hp-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #ff4e50, #f9d423); transition: width 0.2s; }
+        
+        .enemy-counter {
+            background: rgba(0,0,0,0.6); color: #fff; padding: 5px 15px;
+            border-radius: 15px; border: 1px solid #aaa; font-weight: bold; font-size: 14px;
         }
 
-        /* TELAS DE MENU/DIÁLOGO */
-        #overlay-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(12, 20, 31, 0.95); z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            pointer-events: auto; transition: opacity 0.5s;
+        /* Painel de Missão */
+        .quest-alert {
+            position: absolute; top: 50px; width: 100%; text-align: center;
+            color: #ffd700; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            font-size: 18px; font-weight: bold; opacity: 0; transition: opacity 0.5s;
         }
-        .panel {
-            background: #1a2639; border: 2px solid #c2b280; padding: 30px;
-            text-align: center; max-width: 500px; border-radius: 4px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
-        h1 { color: #c2b280; margin: 0 0 10px 0; font-size: 28px; letter-spacing: 2px; }
-        p { color: #d0d0d0; line-height: 1.6; margin-bottom: 20px; }
-        button {
-            background: #c2b280; color: #1a2639; border: none; padding: 15px 40px;
-            font-size: 18px; font-weight: bold; cursor: pointer; text-transform: uppercase;
-            transition: transform 0.1s;
-        }
-        button:active { transform: scale(0.95); }
 
-        /* CONTROLES MOBILE */
-        #mobile-controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+        /* Joystick e Botões */
+        #controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
         #joystick-area {
             position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px;
-            background: rgba(255, 255, 255, 0.1); border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15); border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.3); pointer-events: auto;
         }
         #joystick-stick {
             position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
-            background: rgba(255, 255, 255, 0.8); border-radius: 50%;
+            background: rgba(255, 215, 0, 0.8); border-radius: 50%;
             transform: translate(-50%, -50%); box-shadow: 0 0 10px black;
         }
-        #btn-action {
+        #btn-atk {
             position: absolute; bottom: 50px; right: 40px; width: 90px; height: 90px;
             background: rgba(200, 50, 50, 0.8); border-radius: 50%; border: 4px solid white;
             color: white; font-size: 40px; display: flex; justify-content: center; align-items: center;
             pointer-events: auto; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
-        #btn-action:active { background: #ff0000; transform: scale(0.95); }
+        #btn-atk:active { transform: scale(0.95); background: #ff0000; }
+
+        /* Tela Inicial */
+        #start-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 15, 20, 0.95); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.5s; pointer-events: auto;
+        }
+        h1 { color: #ffd700; margin-bottom: 10px; font-size: 32px; text-transform: uppercase; letter-spacing: 3px; }
+        p { color: #ccc; margin-bottom: 30px; }
+        button {
+            padding: 15px 40px; font-size: 20px; background: #ffd700; border: none;
+            color: #000; font-weight: bold; cursor: pointer; border-radius: 5px;
+        }
     </style>
 </head>
 <body>
 
     <div id="hud">
-        <div class="bar-container"><div id="hp-bar"></div></div>
-        <div class="hp-text">HP</div>
-        <div class="quest-panel">
-            <div id="quest-title">Objetivo Atual</div>
-            <div id="quest-desc">Carregando...</div>
+        <div class="top-bar">
+            <div class="hp-container"><div id="hp-fill"></div></div>
+            <div class="enemy-counter" id="enemy-count">Inimigos: --</div>
         </div>
-        <div id="damage-container"></div>
+        <div class="quest-alert" id="quest-msg">OBJETIVO ATUALIZADO</div>
     </div>
 
-    <div id="overlay-screen">
-        <div class="panel">
-            <h1 id="screen-title">NÁRNIA RPG</h1>
-            <p id="screen-desc">Use o Joystick para mover e o Botão para atacar.</p>
-            <button onclick="Game.startLevel()">JOGAR</button>
-        </div>
+    <div id="start-screen">
+        <h1>Nárnia RPG</h1>
+        <p>Siga a Seta Dourada para encontrar inimigos.</p>
+        <button onclick="Game.startFirstLevel()">INICIAR AVENTURA</button>
     </div>
 
-    <div id="mobile-controls">
+    <div id="controls">
         <div id="joystick-area"><div id="joystick-stick"></div></div>
-        <div id="btn-action">⚔️</div>
+        <div id="btn-atk">⚔️</div>
     </div>
 
 <script>
-/**
- * GERADOR DE TEXTURAS (PROCEDURAL)
- * Cria texturas na memória para evitar fundo branco e downloads externos.
- */
-const TextureFactory = {
-    createCanvas(colorA, colorB, noiseScale = 1) {
-        const size = 512;
-        const canvas = document.createElement('canvas');
-        canvas.width = size; canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        
-        // Fundo base
-        ctx.fillStyle = colorA;
-        ctx.fillRect(0,0,size,size);
+/* --- ENGINE GRÁFICA SIMPLIFICADA (THREE.JS) --- */
 
-        // Ruído/Detalhes
-        for(let i=0; i<4000 * noiseScale; i++) {
-            const x = Math.random() * size;
-            const y = Math.random() * size;
-            const w = Math.random() * 3 + 1;
-            ctx.fillStyle = Math.random() > 0.5 ? colorB : colorA;
-            ctx.globalAlpha = 0.3;
-            ctx.fillRect(x,y,w,w);
-        }
-        
-        // Grid sutil para noção de movimento
-        ctx.globalAlpha = 0.1;
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for(let i=0; i<=size; i+=64) {
-            ctx.moveTo(i,0); ctx.lineTo(i,size);
-            ctx.moveTo(0,i); ctx.lineTo(size,i);
-        }
-        ctx.stroke();
-
-        const tex = new THREE.CanvasTexture(canvas);
-        tex.wrapS = THREE.RepeatWrapping;
-        tex.wrapT = THREE.RepeatWrapping;
-        return tex;
-    },
-    
-    getSnow() { return this.createCanvas('#e3f2fd', '#90caf9'); },
-    getGrass() { return this.createCanvas('#558b2f', '#33691e'); },
-    getStone() { return this.createCanvas('#757575', '#424242'); },
-    getDirt()  { return this.createCanvas('#5d4037', '#3e2723'); }
+const Colors = {
+    sky: 0x87CEEB,
+    ground: 0xe0f7fa,
+    player: 0x3498db,
+    enemy: 0x555555,
+    boss: 0x8e44ad,
+    gold: 0xffd700
 };
 
-/**
- * SISTEMA DE PARTÍCULAS
- */
-class ParticleSystem {
-    constructor(scene) {
-        this.particles = [];
-        this.scene = scene;
-        this.geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-        this.material = new THREE.MeshBasicMaterial({color: 0xffffff});
-    }
-
-    emit(pos, count, color = 0xffffff, speed = 0.2) {
-        for(let i=0; i<count; i++) {
-            const mesh = new THREE.Mesh(this.geometry, new THREE.MeshBasicMaterial({color: color}));
-            mesh.position.copy(pos);
-            // Espalhar um pouco
-            mesh.position.x += (Math.random()-0.5);
-            mesh.position.y += (Math.random()-0.5) + 1;
-            mesh.position.z += (Math.random()-0.5);
-            
-            const velocity = new THREE.Vector3(
-                (Math.random()-0.5) * speed,
-                Math.random() * speed,
-                (Math.random()-0.5) * speed
-            );
-            
-            this.scene.add(mesh);
-            this.particles.push({ mesh, velocity, life: 1.0 });
-        }
-    }
-
-    update(dt) {
-        for(let i = this.particles.length-1; i>=0; i--) {
-            const p = this.particles[i];
-            p.life -= dt * 2; // Morre em 0.5s
-            p.mesh.position.add(p.velocity);
-            p.mesh.rotation.x += dt;
-            p.mesh.scale.setScalar(p.life);
-
-            if(p.life <= 0) {
-                this.scene.remove(p.mesh);
-                this.particles.splice(i, 1);
-            }
-        }
-    }
-}
-
-/**
- * CLASSE DO JOGADOR
- */
-class Player {
-    constructor(scene) {
-        this.mesh = new THREE.Group();
-        this.hp = 100;
-        this.maxHp = 100;
-        
-        // Corpo visualmente detalhado
-        const matBody = new THREE.MeshStandardMaterial({color: 0x3498db});
-        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.3, 1.2), matBody);
-        body.position.y = 0.6; body.castShadow = true;
-        this.mesh.add(body);
-
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.4), new THREE.MeshStandardMaterial({color: 0xffdbac}));
-        head.position.y = 1.4; head.castShadow = true;
-        this.mesh.add(head);
-
-        // Espada
-        this.sword = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 0.1), new THREE.MeshStandardMaterial({color: 0xffffff, metalness: 0.8, roughness: 0.2}));
-        this.sword.position.set(0.5, 0.8, 0.4);
-        this.sword.rotation.x = Math.PI/2;
-        this.mesh.add(this.sword);
-
-        scene.add(this.mesh);
-        this.attacking = false;
-    }
-
-    move(input, dt) {
-        if (Math.abs(input.x) > 0.1 || Math.abs(input.y) > 0.1) {
-            const speed = 6;
-            const dir = new THREE.Vector3(input.x, 0, input.y).normalize();
-            this.mesh.position.add(dir.multiplyScalar(speed * dt));
-            
-            // Rotação suave
-            const targetRot = Math.atan2(dir.x, dir.z);
-            let rotDiff = targetRot - this.mesh.rotation.y;
-            // Normalizar ângulo
-            while (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
-            while (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
-            this.mesh.rotation.y += rotDiff * 10 * dt;
-        }
-    }
-
-    attack() {
-        if(this.attacking) return;
-        this.attacking = true;
-        
-        // Animação da Espada (via código)
-        let frame = 0;
-        const anim = setInterval(() => {
-            frame++;
-            this.sword.rotation.y -= 0.6; // Swing
-            if(frame > 5) {
-                clearInterval(anim);
-                this.sword.rotation.y = 0; // Reset
-                this.attacking = false;
-            }
-        }, 30);
-
-        return true; // Attack triggered
-    }
-
-    takeDamage(amount) {
-        this.hp -= amount;
-        const pct = (this.hp / this.maxHp) * 100;
-        document.getElementById('hp-bar').style.width = pct + '%';
-        
-        // Piscar vermelho
-        this.mesh.children.forEach(c => {
-            if(c.material) {
-                const old = c.material.color.getHex();
-                c.material.color.setHex(0xff0000);
-                setTimeout(() => c.material.color.setHex(old), 100);
-            }
-        });
-
-        if(this.hp <= 0) Game.gameOver();
-    }
-}
-
-/**
- * CLASSE DE INIMIGO
- */
-class Enemy {
-    constructor(scene, x, z, isBoss) {
-        this.scene = scene;
-        this.mesh = new THREE.Group();
-        this.isBoss = isBoss;
-        this.hp = isBoss ? 50 : 15;
-        this.dead = false;
-        
-        const color = isBoss ? 0x8e44ad : 0x555555;
-        const scale = isBoss ? 1.8 : 1;
-
-        // Modelo
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.8*scale, 1.2*scale, 0.5*scale), new THREE.MeshStandardMaterial({color: color}));
-        body.position.y = 0.6*scale; body.castShadow = true;
-        this.mesh.add(body);
-
-        // Barra de Vida
-        const bgBar = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.15), new THREE.MeshBasicMaterial({color:0x000000}));
-        bgBar.position.y = 2.2 * scale;
-        this.mesh.add(bgBar);
-        
-        this.hpBar = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.15), new THREE.MeshBasicMaterial({color:0xff0000}));
-        this.hpBar.position.y = 2.2 * scale;
-        this.hpBar.position.z = 0.01; // Z-fight fix
-        this.mesh.add(this.hpBar);
-
-        this.mesh.position.set(x, 0, z);
-        scene.add(this.mesh);
-    }
-
-    update(player, dt) {
-        if(this.dead) return;
-        
-        // AI Simples: Persegue se perto
-        const dist = this.mesh.position.distanceTo(player.mesh.position);
-        
-        if (dist < 15 && dist > 1.5) {
-            this.mesh.lookAt(player.mesh.position);
-            this.mesh.translateZ((this.isBoss ? 3 : 2) * dt);
-        }
-
-        // Ataque
-        if (dist < 1.6) {
-            // Chance de ataque aleatória para não ser instantâneo
-            if(Math.random() < 0.02) {
-                player.takeDamage(this.isBoss ? 10 : 5);
-                Game.showDamage(player.mesh.position, this.isBoss ? 10 : 5, 'red');
-            }
-        }
-        
-        // Atualiza billboard da barra de vida (olhar pra camera)
-        this.hpBar.rotation.copy(Game.camera.rotation);
-        // O fundo da barra tbm
-        this.mesh.children[1].rotation.copy(Game.camera.rotation);
-    }
-
-    takeHit(dmg) {
-        this.hp -= dmg;
-        Game.showDamage(this.mesh.position, dmg, 'white');
-        
-        // Knockback (Empurrão)
-        this.mesh.translateZ(-1.0);
-        
-        // Partículas
-        Game.particles.emit(this.mesh.position, 5, 0xff0000);
-
-        // Atualiza barra
-        const startScale = this.isBoss ? 1.2 : 1.2; // Largura original da geometria
-        const pct = Math.max(0, this.hp / (this.isBoss?50:15));
-        this.hpBar.scale.x = pct;
-
-        if (this.hp <= 0) {
-            this.dead = true;
-            this.scene.remove(this.mesh);
-            return true; // Morreu
-        }
-        return false;
-    }
-}
-
-/**
- * GERENCIADOR DO JOGO (ENGINE)
- */
-const Game = {
-    scene: null, camera: null, renderer: null,
-    player: null, enemies: [], particles: null,
-    level: 0,
-    
-    init() {
-        // Config Three.js
+class Game {
+    static init() {
+        // Cena
         this.scene = new THREE.Scene();
-        
-        this.camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 200);
+        this.scene.background = new THREE.Color(Colors.sky);
+        this.scene.fog = new THREE.Fog(Colors.sky, 15, 50);
+
+        // Câmera
+        this.camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 100);
         this.camera.position.set(0, 15, 12);
 
+        // Renderizador
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(this.renderer.domElement);
 
         // Luzes
-        const amb = new THREE.AmbientLight(0xffffff, 0.4);
+        const amb = new THREE.AmbientLight(0xffffff, 0.6);
         this.scene.add(amb);
         const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-        sun.position.set(20, 30, 10);
+        sun.position.set(10, 20, 10);
         sun.castShadow = true;
-        sun.shadow.mapSize.width = 1024;
-        sun.shadow.mapSize.height = 1024;
         this.scene.add(sun);
 
-        this.particles = new ParticleSystem(this.scene);
-        this.player = new Player(this.scene);
-        
-        this.setupInputs();
-        
         // Loop
-        const clock = new THREE.Clock();
-        const loop = () => {
-            requestAnimationFrame(loop);
-            const dt = clock.getDelta();
-            this.update(dt);
-            this.renderer.render(this.scene, this.camera);
-        };
-        loop();
-
+        this.clock = new THREE.Clock();
+        this.update();
+        
         // Resize
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth/window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
-    },
 
-    levels: [
-        {
-            name: "Floresta Congelada",
-            bg: 0x87CEEB, fog: 0xd6eaf8,
-            ground: 'snow',
-            enemies: 4, boss: false,
-            desc: "O Inverno dura 100 anos. Derrote os guardas."
-        },
-        {
-            name: "O Degelo",
-            bg: 0x76d7c4, fog: 0xa3e4d7,
-            ground: 'dirt',
-            enemies: 6, boss: false,
-            desc: "A neve derrete. Inimigos estão agitados."
-        },
-        {
-            name: "A Mesa de Pedra",
-            bg: 0x2ecc71, fog: 0xabebc6,
-            ground: 'grass',
-            enemies: 1, boss: true,
-            desc: "Derrote o Comandante da Feiticeira!"
-        }
-    ],
+        this.setupInputs();
+    }
 
-    startLevel() {
-        document.getElementById('overlay-screen').style.opacity = 0;
-        setTimeout(() => document.getElementById('overlay-screen').style.display = 'none', 500);
+    static startFirstLevel() {
+        document.getElementById('start-screen').style.opacity = 0;
+        setTimeout(()=>document.getElementById('start-screen').style.display='none', 500);
         
-        if (this.level >= this.levels.length) {
-            alert("VOCÊ SALVOU NÁRNIA!");
+        this.levelIndex = 0;
+        this.loadLevel(0);
+    }
+
+    static loadLevel(idx) {
+        if(idx >= LEVELS.length) {
+            alert("VOCÊ ZEROU O JOGO!");
             location.reload();
             return;
         }
-
-        const data = this.levels[this.level];
         
-        // Setup Visual da Fase
-        this.scene.background = new THREE.Color(data.bg);
-        this.scene.fog = new THREE.Fog(data.fog, 20, 60);
+        // Limpeza
+        if(this.player) this.scene.remove(this.player.mesh);
+        if(this.portal) this.scene.remove(this.portal);
+        if(this.enemies) this.enemies.forEach(e => this.scene.remove(e.mesh));
+        if(this.scenery) this.scenery.forEach(s => this.scene.remove(s));
         
-        // UI
-        document.getElementById('quest-desc').innerText = data.desc;
-
-        // Chão (Troca textura)
-        if(this.groundMesh) this.scene.remove(this.groundMesh);
-        let tex;
-        if(data.ground === 'snow') tex = TextureFactory.getSnow();
-        else if(data.ground === 'grass') tex = TextureFactory.getGrass();
-        else tex = TextureFactory.getDirt();
-        
-        tex.repeat.set(20, 20); // Repetir textura para o chão não ficar esticado
-        
-        const matGround = new THREE.MeshStandardMaterial({ map: tex, roughness: 1 });
-        this.groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), matGround);
-        this.groundMesh.rotation.x = -Math.PI/2;
-        this.groundMesh.receiveShadow = true;
-        this.scene.add(this.groundMesh);
-
-        // Limpar e criar Inimigos
-        this.enemies.forEach(e => this.scene.remove(e.mesh));
+        // Setup Dados
+        const data = LEVELS[idx];
         this.enemies = [];
+        this.scenery = [];
+        this.portal = null;
+        this.levelDone = false;
         
-        // Props (Cenário)
-        this.generateEnvironment(data.ground);
+        // Ambiente
+        this.scene.background = new THREE.Color(data.sky);
+        this.scene.fog = new THREE.Fog(data.sky, 20, 50);
+        this.createGround(data.groundColor);
+        this.createForest();
 
-        // Player Reset
-        this.player.mesh.position.set(0,0,0);
-        
-        // Spawn Inimigos
-        for(let i=0; i<(data.boss?1:data.enemies); i++) {
-            const angle = Math.random() * 6.28;
-            const dist = 10 + Math.random() * 15;
-            const ex = Math.sin(angle)*dist;
-            const ez = Math.cos(angle)*dist;
-            this.enemies.push(new Enemy(this.scene, ex, ez, data.boss));
+        // Player e Inimigos
+        this.player = new Player(this.scene);
+        for(let i=0; i<data.enemyCount; i++) {
+            this.enemies.push(new Enemy(this.scene, false));
         }
-    },
+        if(data.boss) this.enemies.push(new Enemy(this.scene, true));
 
-    generateEnvironment(type) {
-        // Remover cenário antigo se tivesse array (simplificado aqui para performance)
-        for(let i=0; i<30; i++) {
+        // HUD
+        this.updateEnemyCount();
+        this.showMsg(data.title);
+    }
+
+    static createGround(color) {
+        // Chão simples mas eficiente
+        const geo = new THREE.PlaneGeometry(100, 100);
+        const mat = new THREE.MeshLambertMaterial({color: color});
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.rotation.x = -Math.PI/2;
+        mesh.receiveShadow = true;
+        this.scene.add(mesh);
+        this.scenery.push(mesh);
+    }
+
+    static createForest() {
+        for(let i=0; i<40; i++) {
+            const ang = (i/40)*6.28;
+            const r = 35 + Math.random()*5; // Parede invisível visual
             const tree = new THREE.Group();
-            const trunkColor = 0x4e342e;
-            const leafColor = type === 'snow' ? 0xffffff : 0x2e7d32;
-
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 2), new THREE.MeshStandardMaterial({color: trunkColor}));
+            
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 2), new THREE.MeshLambertMaterial({color:0x5d4037}));
             trunk.position.y = 1;
             tree.add(trunk);
             
-            const leaves = new THREE.Mesh(new THREE.ConeGeometry(2, 5), new THREE.MeshStandardMaterial({color: leafColor}));
-            leaves.position.y = 4;
-            tree.add(leaves);
+            const leaf = new THREE.Mesh(new THREE.ConeGeometry(2, 5), new THREE.MeshLambertMaterial({color:0x2e7d32}));
+            leaf.position.y = 4;
+            tree.add(leaf);
 
-            const x = (Math.random()-0.5) * 80;
-            const z = (Math.random()-0.5) * 80;
-            // Evitar centro
-            if(Math.abs(x) > 5 || Math.abs(z) > 5) {
-                tree.position.set(x, 0, z);
-                tree.castShadow = true;
-                this.scene.add(tree);
-                // (Em um jogo real, guardaríamos referência para limpar depois)
-            }
+            tree.position.set(Math.cos(ang)*r, 0, Math.sin(ang)*r);
+            this.scene.add(tree);
+            this.scenery.push(tree);
         }
-    },
+    }
 
-    update(dt) {
+    static spawnPortal() {
+        this.levelDone = true;
+        this.showMsg("PORTAL ABERTO! ENTRE NA LUZ!");
+        
+        const group = new THREE.Group();
+        
+        // Base
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.1), new THREE.MeshBasicMaterial({color: 0xffff00}));
+        group.add(base);
+        
+        // Luz
+        const beam = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 20, 8, 1, true), new THREE.MeshBasicMaterial({color: 0xffff00, opacity: 0.3, transparent: true, side: THREE.DoubleSide}));
+        beam.position.y = 10;
+        group.add(beam);
+
+        group.position.set(0, 0.1, -15); // Sempre ao Norte
+        this.scene.add(group);
+        this.portal = group;
+    }
+
+    static update() {
+        requestAnimationFrame(() => this.update());
+        const dt = this.clock.getDelta();
+
         if(!this.player) return;
 
         // Player Move
-        this.player.move(this.inputState, dt);
+        this.player.update(this.input, dt);
 
-        // Camera Follow (Com atraso/Lerp)
-        const targetPos = this.player.mesh.position.clone().add(new THREE.Vector3(0, 14, 10));
-        this.camera.position.lerp(targetPos, 0.1);
+        // Camera Follow
+        const camTarget = this.player.mesh.position.clone().add(new THREE.Vector3(0, 14, 10));
+        this.camera.position.lerp(camTarget, 0.1);
         this.camera.lookAt(this.player.mesh.position);
 
-        // Inimigos
-        for (let i = this.enemies.length - 1; i >= 0; i--) {
-            const e = this.enemies[i];
-            e.update(this.player, dt);
+        // Bússola (Seta)
+        let target = null;
+        if(this.levelDone && this.portal) {
+            target = this.portal.position;
+        } else if(this.enemies.length > 0) {
+            // Achar inimigo mais perto
+            let minDist = 9999;
+            this.enemies.forEach(e => {
+                const d = this.player.mesh.position.distanceTo(e.mesh.position);
+                if(d < minDist) { minDist = d; target = e.mesh.position; }
+            });
+        }
+        
+        if(target) {
+            this.player.arrow.visible = true;
+            this.player.arrow.lookAt(target.x, this.player.mesh.position.y, target.z);
+        } else {
+            this.player.arrow.visible = false;
+        }
+
+        // Inimigos Logic
+        this.enemies.forEach(e => e.update(this.player, dt));
+
+        // Portal Check
+        if(this.levelDone && this.portal) {
+            if(this.player.mesh.position.distanceTo(this.portal.position) < 2) {
+                this.levelIndex++;
+                this.loadLevel(this.levelIndex);
+            }
+        }
+    }
+
+    static updateEnemyCount() {
+        document.getElementById('enemy-count').innerText = `Inimigos: ${this.enemies.length}`;
+        if(this.enemies.length === 0 && !this.levelDone) {
+            this.spawnPortal();
+        }
+    }
+
+    static showMsg(text) {
+        const el = document.getElementById('quest-msg');
+        el.innerText = text;
+        el.style.opacity = 1;
+        setTimeout(() => el.style.opacity = 0, 4000);
+    }
+
+    // --- INPUTS ---
+    static setupInputs() {
+        this.input = { x: 0, y: 0, atk: false };
+        
+        // Joystick
+        const joy = document.getElementById('joystick-area');
+        const stick = document.getElementById('joystick-stick');
+        let startX, startY;
+
+        const move = (cx, cy) => {
+            const dx = cx - startX, dy = cy - startY;
+            const dist = Math.min(Math.sqrt(dx*dx+dy*dy), 40);
+            const ang = Math.atan2(dy, dx);
+            const kx = Math.cos(ang)*dist, ky = Math.sin(ang)*dist;
+            stick.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
+            this.input.x = kx/40; this.input.y = ky/40;
+        };
+
+        const end = () => {
+            stick.style.transform = `translate(-50%, -50%)`;
+            this.input.x = 0; this.input.y = 0;
+        };
+
+        joy.addEventListener('touchstart', e=>{e.preventDefault(); startX=e.touches[0].clientX; startY=e.touches[0].clientY;});
+        joy.addEventListener('touchmove', e=>{e.preventDefault(); move(e.touches[0].clientX, e.touches[0].clientY);});
+        joy.addEventListener('touchend', end);
+        
+        // Mouse Support
+        joy.addEventListener('mousedown', e=>{e.preventDefault(); startX=e.clientX; startY=e.clientY; this.mouseDown=true;});
+        window.addEventListener('mousemove', e=>{if(this.mouseDown) move(e.clientX, e.clientY);});
+        window.addEventListener('mouseup', ()=>{if(this.mouseDown){this.mouseDown=false; end();}});
+
+        // Attack Btn
+        const btn = document.getElementById('btn-atk');
+        const atk = (e) => {
+            if(e) e.preventDefault();
+            this.player.attack(this.enemies);
+        };
+        btn.addEventListener('touchstart', atk);
+        btn.addEventListener('mousedown', atk);
+        window.addEventListener('keydown', e=>{if(e.code==='Space') atk();});
+    }
+}
+
+class Player {
+    constructor(scene) {
+        this.mesh = new THREE.Group();
+        
+        // Visual
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.4), new THREE.MeshLambertMaterial({color: Colors.player}));
+        body.position.y = 0.7; body.castShadow = true;
+        this.mesh.add(body);
+        
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.4), new THREE.MeshLambertMaterial({color: 0xffdbac}));
+        head.position.y = 1.6;
+        this.mesh.add(head);
+
+        // Espada
+        this.sword = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 0.1), new THREE.MeshStandardMaterial({color: 0xffffff}));
+        this.sword.position.set(0.5, 0.8, 0.4);
+        this.sword.rotation.x = Math.PI/2;
+        this.mesh.add(this.sword);
+
+        // SETA (BÚSSOLA)
+        this.arrow = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1, 8), new THREE.MeshBasicMaterial({color: Colors.gold}));
+        this.arrow.rotation.x = -Math.PI/2; // Deitada
+        this.arrow.position.y = 0.1; // No chão
+        this.arrow.position.z = 1.5; // Na frente do player
+        // Hack: A seta precisa ser filha direta da cena ou ter um pivot independente para girar livremente
+        // Mas para simplificar, vamos colocar um "Pivot" dentro do player
+        this.arrowPivot = new THREE.Group();
+        this.arrowPivot.add(this.arrow);
+        this.mesh.add(this.arrowPivot);
+        // Na verdade, a seta deve girar independentemente do player. Vamos ajustar no update.
+        this.arrow.visible = false;
+
+        scene.add(this.mesh);
+        this.hp = 100;
+        this.isAttacking = false;
+    }
+
+    update(input, dt) {
+        if(Math.abs(input.x) > 0.1 || Math.abs(input.y) > 0.1) {
+            const dir = new THREE.Vector3(input.x, 0, input.y).normalize();
+            this.mesh.position.add(dir.multiplyScalar(6 * dt));
+            this.mesh.rotation.y = Math.atan2(dir.x, dir.z);
             
-            // Colisão Espada Player -> Inimigo
-            if(this.player.attacking) {
-                const dist = this.player.mesh.position.distanceTo(e.mesh.position);
-                if(dist < 3) {
-                    // Verificar direção (ângulo)
-                    const pDir = new THREE.Vector3(0,0,1).applyQuaternion(this.player.mesh.quaternion);
-                    const eDir = e.mesh.position.clone().sub(this.player.mesh.position).normalize();
-                    if(pDir.dot(eDir) > 0.4) {
-                        const dead = e.takeHit(1 + Math.floor(Math.random()*3)); // Dano 1-4
-                        if(dead) {
-                            this.enemies.splice(i, 1);
-                            this.checkWin();
-                        }
+            // Limite Mapa
+            if(this.mesh.position.length() > 33) this.mesh.position.setLength(33);
+        }
+    }
+
+    attack(enemies) {
+        if(this.isAttacking) return;
+        this.isAttacking = true;
+        
+        // Anim Sword
+        let f=0;
+        const iv = setInterval(()=>{
+            f++; this.sword.rotation.y -= 0.6;
+            if(f>5) { clearInterval(iv); this.sword.rotation.y = Math.PI/2; this.isAttacking = false; }
+        }, 30);
+
+        // Hit Detection
+        enemies.forEach((e, i) => {
+            const dist = this.mesh.position.distanceTo(e.mesh.position);
+            if(dist < 3) {
+                // Angle check
+                const pDir = new THREE.Vector3(0,0,1).applyQuaternion(this.mesh.quaternion);
+                const eDir = e.mesh.position.clone().sub(this.mesh.position).normalize();
+                if(pDir.dot(eDir) > 0.3) {
+                    if(e.takeDamage()) {
+                        // Morreu
+                        Game.scene.remove(e.mesh);
+                        Game.enemies.splice(i, 1);
+                        Game.updateEnemyCount();
                     }
                 }
             }
-        }
-
-        this.particles.update(dt);
-    },
-
-    checkWin() {
-        if(this.enemies.length === 0) {
-            this.showDamage(this.player.mesh.position, "VITÓRIA!", "gold");
-            setTimeout(() => {
-                this.level++;
-                this.startLevel();
-            }, 2000);
-        }
-    },
-
-    gameOver() {
-        alert("GAME OVER!");
-        location.reload();
-    },
-
-    showDamage(pos, text, color) {
-        const div = document.createElement('div');
-        div.className = 'floating-dmg';
-        div.style.color = color;
-        div.innerText = text;
-        
-        // Projetar posição 3D para 2D na tela
-        const vec = pos.clone();
-        vec.y += 2;
-        vec.project(this.camera);
-        
-        const x = (vec.x * .5 + .5) * window.innerWidth;
-        const y = (-(vec.y * .5) + .5) * window.innerHeight;
-        
-        div.style.left = x + 'px';
-        div.style.top = y + 'px';
-        
-        document.getElementById('damage-container').appendChild(div);
-        setTimeout(() => div.remove(), 1000);
-    },
-
-    inputState: { x: 0, y: 0 },
-    setupInputs() {
-        // JOYSTICK
-        const joyArea = document.getElementById('joystick-area');
-        const joyStick = document.getElementById('joystick-stick');
-        let startX, startY;
-
-        const handleMove = (cX, cY) => {
-            const dx = cX - startX;
-            const dy = cY - startY;
-            const dist = Math.min(Math.sqrt(dx*dx+dy*dy), 60);
-            const ang = Math.atan2(dy, dx);
-            const kx = Math.cos(ang)*dist;
-            const ky = Math.sin(ang)*dist;
-            joyStick.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
-            this.inputState.x = kx / 60;
-            this.inputState.y = ky / 60;
-        };
-
-        const resetJoy = () => {
-            joyStick.style.transform = `translate(-50%, -50%)`;
-            this.inputState.x = 0; this.inputState.y = 0;
-        };
-
-        joyArea.addEventListener('touchstart', e => { e.preventDefault(); startX=e.touches[0].clientX; startY=e.touches[0].clientY; });
-        joyArea.addEventListener('touchmove', e => { e.preventDefault(); handleMove(e.touches[0].clientX, e.touches[0].clientY); });
-        joyArea.addEventListener('touchend', resetJoy);
-        
-        // Mouse pc
-        let mouseDown = false;
-        joyArea.addEventListener('mousedown', e => { mouseDown=true; startX=e.clientX; startY=e.clientY; });
-        window.addEventListener('mousemove', e => { if(mouseDown) handleMove(e.clientX, e.clientY); });
-        window.addEventListener('mouseup', () => { mouseDown=false; resetJoy(); });
-
-        // ATAQUE
-        const btn = document.getElementById('btn-action');
-        const atk = (e) => { if(e) e.preventDefault(); this.player.attack(); };
-        btn.addEventListener('touchstart', atk);
-        btn.addEventListener('mousedown', atk);
-        window.addEventListener('keydown', e => {
-            if(e.key === ' ') this.player.attack();
-            if(e.key === 'w') this.inputState.y = -1;
-            if(e.key === 's') this.inputState.y = 1;
-            if(e.key === 'a') this.inputState.x = -1;
-            if(e.key === 'd') this.inputState.x = 1;
-        });
-        window.addEventListener('keyup', e => {
-            if(['w','s'].includes(e.key)) this.inputState.y = 0;
-            if(['a','d'].includes(e.key)) this.inputState.x = 0;
         });
     }
-};
+}
 
-// Iniciar
+class Enemy {
+    constructor(scene, isBoss) {
+        this.mesh = new THREE.Group();
+        this.isBoss = isBoss;
+        this.hp = isBoss ? 20 : 3;
+        
+        const scale = isBoss ? 2 : 1;
+        const col = isBoss ? Colors.boss : Colors.enemy;
+
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5*scale, 0.6*scale, 1.4*scale), new THREE.MeshLambertMaterial({color: col}));
+        body.position.y = 0.7*scale; body.castShadow = true;
+        this.mesh.add(body);
+        
+        const hood = new THREE.Mesh(new THREE.ConeGeometry(0.6*scale, 0.8*scale), new THREE.MeshLambertMaterial({color: col}));
+        hood.position.y = 1.8*scale;
+        this.mesh.add(hood);
+
+        // Random Pos
+        const ang = Math.random()*6.28;
+        const dst = 10 + Math.random()*15;
+        this.mesh.position.set(Math.sin(ang)*dst, 0, Math.cos(ang)*dst);
+        
+        scene.add(this.mesh);
+    }
+
+    update(player, dt) {
+        const dist = this.mesh.position.distanceTo(player.mesh.position);
+        if(dist < 15 && dist > 1.5) {
+            this.mesh.lookAt(player.mesh.position);
+            this.mesh.translateZ((this.isBoss?3:2)*dt);
+        }
+        // Dano simples no player
+        if(dist < 1.5 && Math.random() < 0.02) {
+            player.hp -= 5;
+            document.getElementById('hp-fill').style.width = player.hp + '%';
+            if(player.hp <= 0) { alert("Game Over"); location.reload(); }
+        }
+    }
+
+    takeDamage() {
+        this.hp--;
+        // Flash Red
+        this.mesh.children.forEach(c => c.material.color.setHex(0xff0000));
+        setTimeout(() => {
+            const col = this.isBoss ? Colors.boss : Colors.enemy;
+            this.mesh.children.forEach(c => c.material.color.setHex(col));
+        }, 100);
+        
+        return this.hp <= 0;
+    }
+}
+
+const LEVELS = [
+    { title: "Floresta de Neve", groundColor: 0xe0f7fa, sky: 0x87CEEB, enemyCount: 3, boss: false },
+    { title: "Rio Congelado", groundColor: 0xaed6f1, sky: 0xb0e0e6, enemyCount: 5, boss: false },
+    { title: "Acampamento Final", groundColor: 0x7cfc00, sky: 0x87CEFA, enemyCount: 0, boss: true }
+];
+
 Game.init();
 
 </script>
