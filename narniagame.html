@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Narnia 3D: The Wardrobe Tactics</title>
+    <title>Narnia 3D: Fullscreen</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         :root {
-            --gb-bg: #c0c0c0;
-            --screen-bg: #87CEEB; /* Céu azul claro */
-            --screen-dark: #2c3e50;
+            --console-body: #c0c0c0;
+            --screen-bezel: #2c3e50;
+            --screen-bg: #87CEEB;
             --btn-color: #8e44ad;
             --btn-shadow: #5e2c73;
+            --dpad-color: #222;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -22,291 +23,341 @@
         body {
             background-color: #111;
             margin: 0;
-            height: 100dvh;
+            height: 100dvh; /* Altura real do viewport mobile */
             width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Press Start 2P', cursive;
             overflow: hidden;
-            touch-action: none;
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            flex-direction: column;
         }
 
-        #console {
-            background-color: var(--gb-bg);
-            width: 100%; height: 100%;
-            max-width: 450px; max-height: 850px;
-            display: flex; flex-direction: column;
-            padding: 15px; position: relative;
-            box-shadow: 0 0 30px rgba(0,0,0,0.7);
+        /* ÁREA SUPERIOR: A TELA DO JOGO (Cresce o máximo possível) */
+        #game-view {
+            flex-grow: 1; /* Ocupa todo o espaço sobrando */
+            background-color: var(--screen-bezel);
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            position: relative;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.3);
         }
 
-        @media (min-width: 450px) {
-            #console { height: 95%; border-radius: 30px; border-bottom-right-radius: 60px; }
+        /* UI BAR (Topo da tela) */
+        #ui-bar {
+            background: rgba(0,0,0,0.3);
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            text-transform: uppercase;
+            z-index: 10;
         }
 
-        #screen-container {
-            background-color: #34495e;
-            padding: 10px 10px 25px 10px;
-            border-radius: 10px 10px 30px 10px;
-            width: 100%; flex-shrink: 0;
-            box-shadow: inset 3px 3px 10px rgba(0,0,0,0.4);
-        }
-
-        /* O Canvas 3D substitui o grid HTML */
+        /* CANVAS 3D */
         #canvas-container {
+            flex-grow: 1;
             width: 100%;
-            aspect-ratio: 4/3; /* Proporção mais quadrada para 3D */
             background: var(--screen-bg);
-            border: 4px solid #2c3e50;
             position: relative;
             overflow: hidden;
         }
         
-        #three-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
+        #three-canvas { width: 100%; height: 100%; display: block; }
+
+        /* MENSAGEM FLUTUANTE */
+        #toast-msg {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 10px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 20;
+            border: 1px solid white;
+        }
+        .show-toast { opacity: 1 !important; }
+
+        /* ÁREA INFERIOR: CONTROLES (Tamanho Fixo) */
+        #controls-area {
+            height: 220px; /* Altura fixa para controles */
+            background-color: var(--console-body);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-top: 4px solid #999;
+            flex-shrink: 0; /* Não encolhe */
         }
 
-        /* UI Overlays (Ficam por cima do 3D) */
-        #ui-bar, #dialog-box {
-            background: rgba(44, 62, 80, 0.9);
-            color: #ecf0f1;
-            padding: 5px; font-size: 10px;
-            text-transform: uppercase;
+        /* D-PAD */
+        .d-pad {
+            position: relative;
+            width: 140px;
+            height: 140px;
         }
-        #ui-bar { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        #dialog-box { min-height: 40px; display: flex; align-items: center; border-top: 2px solid #bdc3c7; margin-top: -4px; z-index: 10;}
+        .d-btn {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            background: var(--dpad-color);
+            border: none;
+            box-shadow: 0 4px 0 #000;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .d-btn:active { transform: translateY(4px); box-shadow: none; }
+        
+        /* Posicionamento Cruz */
+        .up { top: 0; left: 46px; }
+        .down { bottom: 0; left: 46px; }
+        .left { top: 46px; left: 0; }
+        .right { top: 46px; right: 0; }
+        .center { 
+            top: 46px; left: 46px; 
+            width: 48px; height: 48px; 
+            background: var(--dpad-color); 
+            pointer-events: none;
+            box-shadow: none;
+            z-index: 1;
+        }
 
-        /* CONTROLES (Mesmo CSS da versão anterior) */
-        #controls-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; padding: 10px; }
-        .controls-row { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
-        .d-pad { position: relative; width: 140px; height: 140px; transform: scale(0.9); }
-        .d-btn { position: absolute; width: 46px; height: 46px; background: #222; border: none; box-shadow: 3px 3px 0px #000; cursor: pointer; }
-        .d-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px #000; }
-        .up { top: 0; left: 47px; border-radius: 4px 4px 0 0; }
-        .down { bottom: 0; left: 47px; border-radius: 0 0 4px 4px; }
-        .left { top: 47px; left: 0; border-radius: 4px 0 0 4px; }
-        .right { top: 47px; right: 0; border-radius: 0 4px 4px 0; }
-        .center { top: 47px; left: 47px; background: #333; pointer-events: none; width: 46px; height: 46px;}
-        .ab-btns { position: relative; width: 120px; height: 80px; }
-        .btn-round { width: 50px; height: 50px; border-radius: 50%; background: var(--btn-color); position: absolute; border: none; box-shadow: 3px 3px 0 var(--btn-shadow); color: rgba(255,255,255,0.3); font-family: inherit; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer;}
-        .btn-round:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--btn-shadow); }
-        .btn-a { top: -10px; right: 0; background: #9b59b6; }
-        .btn-b { bottom: 0; left: 10px; background: #8e44ad; }
-        .lbl { position: absolute; font-size: 10px; color: #444; font-weight: bold; }
-        .lbl-a { top: 45px; right: 10px; }
-        .lbl-b { bottom: -15px; left: 20px; }
+        /* BOTÕES A/B */
+        .ab-btns {
+            position: relative;
+            width: 130px;
+            height: 140px;
+        }
+        .btn-round {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--btn-color);
+            position: absolute;
+            border: none;
+            box-shadow: 0 4px 0 var(--btn-shadow);
+            color: rgba(255,255,255,0.5);
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .btn-round:active { transform: translateY(4px); box-shadow: none; }
+        
+        .btn-a { top: 10px; right: 0; background: #9b59b6; }
+        .btn-b { bottom: 10px; left: 10px; background: #8e44ad; }
+        
+        .lbl { position: absolute; font-size: 10px; color: #555; font-weight: bold; pointer-events: none;}
+        .lbl-a { top: 75px; right: 15px; }
+        .lbl-b { bottom: -5px; left: 25px; }
+
     </style>
 </head>
 <body>
 
-    <div id="console">
-        <div id="screen-container">
-            <div id="ui-bar">
-                <span id="p-name">LÚCIA</span>
-                <span id="ap-count">AP: 3/3</span>
-            </div>
-            <div id="canvas-container">
-                <canvas id="three-canvas"></canvas>
-            </div>
-            <div id="dialog-box">Iniciando em 3D...</div>
+    <div id="game-view">
+        <div id="ui-bar">
+            <span id="p-name">LÚCIA</span>
+            <span id="ap-count">AP: 3/3</span>
+        </div>
+        
+        <div id="canvas-container">
+            <canvas id="three-canvas"></canvas>
+            <div id="toast-msg">Bem-vindo a Nárnia</div>
+        </div>
+    </div>
+
+    <div id="controls-area">
+        <div class="d-pad">
+            <button class="d-btn up" ontouchstart="input('up'); event.preventDefault()" onclick="input('up')"></button>
+            <button class="d-btn left" ontouchstart="input('left'); event.preventDefault()" onclick="input('left')"></button>
+            <div class="d-btn center"></div>
+            <button class="d-btn right" ontouchstart="input('right'); event.preventDefault()" onclick="input('right')"></button>
+            <button class="d-btn down" ontouchstart="input('down'); event.preventDefault()" onclick="input('down')"></button>
         </div>
 
-        <div id="controls-area">
-            <div class="controls-row">
-                <div class="d-pad">
-                    <button class="d-btn up" ontouchstart="input('up'); event.preventDefault()" onclick="input('up')"></button>
-                    <button class="d-btn left" ontouchstart="input('left'); event.preventDefault()" onclick="input('left')"></button>
-                    <div class="d-btn center"></div>
-                    <button class="d-btn right" ontouchstart="input('right'); event.preventDefault()" onclick="input('right')"></button>
-                    <button class="d-btn down" ontouchstart="input('down'); event.preventDefault()" onclick="input('down')"></button>
-                </div>
-                <div class="ab-btns">
-                    <button class="btn-round btn-a" ontouchstart="input('interact'); event.preventDefault()" onclick="input('interact')">A</button>
-                    <div class="lbl lbl-a">AÇÃO</div>
-                    <button class="btn-round btn-b" ontouchstart="input('pass'); event.preventDefault()" onclick="input('pass')">B</button>
-                    <div class="lbl lbl-b">PASSAR</div>
-                </div>
-            </div>
-            <div style="text-align: center; color: #555; font-size: 8px; margin-top: 10px;">NARNIA 3D SYSTEM</div>
+        <div class="ab-btns">
+            <button class="btn-round btn-a" ontouchstart="input('interact'); event.preventDefault()" onclick="input('interact')">A</button>
+            <div class="lbl lbl-a">AÇÃO</div>
+            
+            <button class="btn-round btn-b" ontouchstart="input('pass'); event.preventDefault()" onclick="input('pass')">B</button>
+            <div class="lbl lbl-b">PASSAR</div>
         </div>
     </div>
 
 <script>
-    // --- LÓGICA DO JOGO (Dados) ---
+    // --- LÓGICA DO JOGO ---
     const COLS = 9; const ROWS = 7;
-    // Tipos de Tile: 0:Madeira, 1:Neve, 2:Parede(Casaco), 3:Gelo, 9:Lampião
     let map = [];
     let turn = 0; let gameOver = false;
     const players = [
-        { name: "Lúcia", color: 0xe74c3c, x: 0, y: 3, ap: 3, maxAp: 3, mesh: null }, // Vermelho
-        { name: "Edmundo", color: 0x3498db, x: 0, y: 4, ap: 3, maxAp: 3, mesh: null } // Azul
+        { name: "Lúcia", color: 0xe74c3c, x: 0, y: 3, ap: 3, maxAp: 3, mesh: null },
+        { name: "Edmundo", color: 0x3498db, x: 0, y: 4, ap: 3, maxAp: 3, mesh: null }
     ];
 
-    // --- THREE.JS SETUP ---
+    // --- THREE.JS ---
     let scene, camera, renderer;
-    let worldGroup = new THREE.Group(); // Agrupa tudo do cenário
-    const TILE_SIZE = 1.5; // Tamanho de cada quadrado no mundo 3D
+    let worldGroup = new THREE.Group();
+    const TILE_SIZE = 1.5;
     const canvas = document.getElementById('three-canvas');
-    const canvasContainer = document.getElementById('canvas-container');
+    const container = document.getElementById('canvas-container');
+
+    // Materiais
+    const matWood = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
+    const matSnow = new THREE.MeshStandardMaterial({ color: 0xf0f8ff });
+    const matCoat = new THREE.MeshStandardMaterial({ color: 0x4a3728 });
+    const matIce = new THREE.MeshStandardMaterial({ color: 0xaed6f1, transparent: true, opacity: 0.7 });
+    const matLamp = new THREE.MeshStandardMaterial({ color: 0x111111 });
 
     function initThreeJS() {
         scene = new THREE.Scene();
-        // scene.background = new THREE.Color(0x87CEEB); // Cor do céu (já definida no CSS)
-
-        // Câmera Isométrica (Orthographic para não ter distorção de perspectiva)
-        const aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
-        const d = 8; // Zoom
+        
+        // Ajuste de Câmera para Tela Cheia (Zoom Dinâmico)
+        const aspect = container.clientWidth / container.clientHeight;
+        // Se a tela for muito estreita (celular em pé), aumentamos o "d" para caber mais lateralmente
+        let d = aspect < 1 ? 10 : 7; 
+        
         camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 100);
-        camera.position.set(10, 10, 10); // Posição diagonal
-        camera.lookAt(scene.position); // Olhar para o centro (0,0,0)
+        camera.position.set(10, 10, 10);
+        camera.lookAt(scene.position);
 
         renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-        // Habilitar sombras
+        renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(window.devicePixelRatio); // Imagem mais nítida em Retina/OLED
 
         // Luzes
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-        scene.add(ambientLight);
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(10, 20, 5);
-        dirLight.castShadow = true;
-        scene.add(dirLight);
+        const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambLight);
+        const dLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dLight.position.set(5, 20, 10);
+        dLight.castShadow = true;
+        dLight.shadow.mapSize.width = 1024;
+        dLight.shadow.mapSize.height = 1024;
+        scene.add(dLight);
 
         scene.add(worldGroup);
-        
-        // Centralizar o mapa no mundo
+        // Centraliza o mapa
         worldGroup.position.x = -(COLS * TILE_SIZE) / 2 + (TILE_SIZE/2);
         worldGroup.position.z = -(ROWS * TILE_SIZE) / 2 + (TILE_SIZE/2);
     }
 
-    // --- GERAÇÃO DO MUNDO 3D ---
-    // Materiais Reutilizáveis
-    const matWood = new THREE.MeshStandardMaterial({ color: 0x8e44ad }); 
-    const matSnow = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const matWall = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
-    const matIce = new THREE.MeshStandardMaterial({ color: 0xaed6f1, transparent: true, opacity: 0.8 });
-    const matLampPost = new THREE.MeshStandardMaterial({ color: 0x222222 });
-    const matLampLight = new THREE.MeshBasicMaterial({ color: 0xf1c40f });
-
-    // Geometrias Reutilizáveis
-    const geoGround = new THREE.BoxGeometry(TILE_SIZE*0.95, 0.2, TILE_SIZE*0.95); // Chão ligeiramente menor para dar efeito de grid
-    const geoBlock = new THREE.BoxGeometry(TILE_SIZE, TILE_SIZE, TILE_SIZE);
-
     function render3DWorld() {
-        // Limpa o mundo anterior (menos jogadores)
         for(let i = worldGroup.children.length - 1; i >= 0; i--) {
              if(!worldGroup.children[i].isPlayer) worldGroup.remove(worldGroup.children[i]);
         }
 
+        const geoGround = new THREE.BoxGeometry(TILE_SIZE*0.95, 0.2, TILE_SIZE*0.95);
+        const geoBlock = new THREE.BoxGeometry(TILE_SIZE*0.8, TILE_SIZE, TILE_SIZE*0.8);
+
         for (let y = 0; y < ROWS; y++) {
             for (let x = 0; x < COLS; x++) {
                 const type = map[y][x];
-                const posX = x * TILE_SIZE;
-                const posZ = y * TILE_SIZE;
+                const px = x * TILE_SIZE;
+                const pz = y * TILE_SIZE;
 
-                // Base do Chão (Madeira ou Neve)
-                let groundMat = (type === 1 || type === 9 || x >= 6) ? matSnow : matWood;
-                const ground = new THREE.Mesh(geoGround, groundMat);
-                ground.position.set(posX, -0.1, posZ); // Ligeiramente abaixo de 0
+                // Chão
+                let gMat = (type === 1 || type === 9 || x >= 6) ? matSnow : matWood;
+                const ground = new THREE.Mesh(geoGround, gMat);
+                ground.position.set(px, -0.1, pz);
                 ground.receiveShadow = true;
                 worldGroup.add(ground);
 
-                // Objetos acima do chão
-                if (type === 2) { // Parede/Casaco
-                    const wall = new THREE.Mesh(geoBlock, matWall);
-                    wall.position.set(posX, TILE_SIZE/2, posZ);
-                    wall.castShadow = true; wall.receiveShadow = true;
-                    worldGroup.add(wall);
+                // Objetos
+                if (type === 2) { 
+                    const coat = new THREE.Mesh(geoBlock, matCoat);
+                    coat.position.set(px, TILE_SIZE/2, pz);
+                    coat.castShadow = true; coat.name = `obj_${x}_${y}`;
+                    worldGroup.add(coat);
                 } 
-                else if (type === 3) { // Gelo
+                else if (type === 3) {
                     const ice = new THREE.Mesh(geoBlock, matIce);
-                    ice.position.set(posX, TILE_SIZE/2, posZ);
-                    ice.castShadow = true;
-                    ice.name = `ice_${x}_${y}`; // Nome para achar depois e destruir
+                    ice.position.set(px, TILE_SIZE/2, pz);
+                    ice.castShadow = true; ice.name = `obj_${x}_${y}`;
                     worldGroup.add(ice);
                 }
-                else if (type === 9) { // Lampião
-                    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, TILE_SIZE*1.5), matLampPost);
-                    post.position.set(posX, TILE_SIZE*0.75, posZ);
-                    post.castShadow = true;
-                    worldGroup.add(post);
-
-                    const lightMesh = new THREE.Mesh(new THREE.SphereGeometry(0.3), matLampLight);
-                    lightMesh.position.set(posX, TILE_SIZE*1.5, posZ);
-                    worldGroup.add(lightMesh);
-
-                    const actualLight = new THREE.PointLight(0xf1c40f, 1, 5);
-                    actualLight.position.set(posX, TILE_SIZE*1.5, posZ);
-                    worldGroup.add(actualLight);
+                else if (type === 9) {
+                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, TILE_SIZE*1.5), matLamp);
+                    pole.position.set(px, TILE_SIZE*0.75, pz);
+                    worldGroup.add(pole);
+                    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.3), new THREE.MeshBasicMaterial({color:0xffd700}));
+                    bulb.position.set(px, TILE_SIZE*1.5, pz);
+                    worldGroup.add(bulb);
+                    const light = new THREE.PointLight(0xffd700, 1.5, 6);
+                    light.position.set(px, TILE_SIZE*1.5, pz);
+                    worldGroup.add(light);
                 }
             }
         }
     }
 
-    function initPlayers3D() {
-        players.forEach((p, idx) => {
-            // Geometria diferente para cada um
-            let geo = idx === 0 ? new THREE.ConeGeometry(0.4, 1, 16) : new THREE.CylinderGeometry(0.4, 0.4, 1, 16);
-            const mat = new THREE.MeshStandardMaterial({ color: p.color });
-            p.mesh = new THREE.Mesh(geo, mat);
-            p.mesh.castShadow = true;
-            p.mesh.isPlayer = true; // Tag para não ser deletado
-            // Posição inicial
+    function initPlayers() {
+        players.forEach((p, i) => {
+            const geo = i===0 ? new THREE.ConeGeometry(0.4, 1, 16) : new THREE.CylinderGeometry(0.3, 0.3, 1, 16);
+            p.mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color: p.color}));
             p.mesh.position.set(p.x * TILE_SIZE, 0.5, p.y * TILE_SIZE);
+            p.mesh.castShadow = true;
+            p.mesh.isPlayer = true;
             worldGroup.add(p.mesh);
         });
     }
 
-    // --- LOOP DE ANIMAÇÃO (O Coração do 3D) ---
     function animate() {
         requestAnimationFrame(animate);
-        
-        // Movimento suave dos jogadores para a posição alvo
         players.forEach(p => {
             if(p.mesh) {
-                const targetX = p.x * TILE_SIZE;
-                const targetZ = p.y * TILE_SIZE;
-                // Lerp (Linear Interpolation) para suavizar movimento (move 15% da distância por frame)
-                p.mesh.position.x += (targetX - p.mesh.position.x) * 0.15;
-                p.mesh.position.z += (targetZ - p.mesh.position.z) * 0.15;
-
-                 // Efeito visual simples: Jogador do turno fica ligeiramente maior
-                 const targetScale = (players[turn] === p) ? 1.1 : 0.9;
-                 p.mesh.scale.setScalar(p.mesh.scale.x + (targetScale - p.mesh.scale.x) * 0.1);
+                const tx = p.x * TILE_SIZE;
+                const tz = p.y * TILE_SIZE;
+                p.mesh.position.x += (tx - p.mesh.position.x) * 0.15;
+                p.mesh.position.z += (tz - p.mesh.position.z) * 0.15;
+                if(players[turn] === p) p.mesh.position.y = 0.5 + Math.sin(Date.now() * 0.005) * 0.1;
+                else p.mesh.position.y = 0.5;
             }
         });
-
         renderer.render(scene, camera);
     }
 
-    // --- LÓGICA DO JOGO (Adaptada da versão 2D) ---
-    const dialogEl = document.getElementById('dialog-box');
+    // --- INTERAÇÃO ---
     const pNameEl = document.getElementById('p-name');
     const apEl = document.getElementById('ap-count');
+    const toastEl = document.getElementById('toast-msg');
+    let toastTimer;
+
+    function showToast(msg) {
+        toastEl.innerText = msg;
+        toastEl.classList.add('show-toast');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show-toast'), 2000);
+    }
 
     function initGame() {
         initThreeJS();
-        generateMapLogic();
+        generateMap();
         render3DWorld();
-        initPlayers3D();
+        initPlayers();
         updateUI();
-        typeText(`Turno de ${players[turn].name}. Use as setas!`);
-        animate(); // Começa o loop de renderização
+        showToast(`Turno de ${players[turn].name}`);
+        animate();
     }
 
-    function generateMapLogic() {
+    function generateMap() {
         map = [];
         for (let y = 0; y < ROWS; y++) {
             let row = [];
             for (let x = 0; x < COLS; x++) {
-                let val = 0; let rand = Math.random();
-                if (x > 2 && x < 6) val = rand > 0.6 ? 2 : (rand > 0.4 ? 3 : 0);
-                if (x >= 6) val = rand > 0.5 ? 1 : 0;
+                let val = 0; let r = Math.random();
+                if (x > 2 && x < 6) val = r > 0.5 ? 2 : (r > 0.3 ? 3 : 0);
+                if (x >= 6) val = r > 0.6 ? 1 : 0;
                 if (x <= 1) val = 0;
                 row.push(val);
             }
@@ -315,7 +366,6 @@
         map[Math.floor(ROWS/2)][COLS-1] = 9;
     }
 
-    // Inputs chamados pelos botões HTML
     function input(action) {
         if (gameOver) return;
         const p = players[turn];
@@ -331,22 +381,28 @@
 
     function tryMove(p, dx, dy) {
         const nx = p.x + dx; const ny = p.y + dy;
-        if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return shake();
+        if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) return; // Limite silencioso
 
-        const tile = map[ny][nx];
-        if (tile === 2 || tile === 3) { typeText("Bloqueado! Tente quebrar (A)."); return shake(); }
-        const otherP = players[turn === 0 ? 1 : 0];
-        if (nx === otherP.x && ny === otherP.y) { typeText("Ocupado!"); return shake(); }
+        const target = map[ny][nx];
+        if (target === 2 || target === 3) { 
+            showToast("Bloqueado! Use 'A'."); return; 
+        }
+        
+        const other = players[turn === 0 ? 1 : 0];
+        if (nx === other.x && ny === other.y) { showToast("Ocupado!"); return; }
 
-        let cost = (tile === 1) ? 2 : 1;
+        let cost = (target === 1) ? 2 : 1;
         if (p.ap >= cost) {
-            // Atualiza apenas a lógica, a animação fará o resto visualmente
             p.x = nx; p.y = ny; p.ap -= cost;
             updateUI();
-            if (tile === 9) { gameOver = true; typeText(`VITÓRIA DE ${p.name.toUpperCase()}!`); dialogEl.style.background="gold"; return; }
-            typeText(cost === 2 ? "Neve funda... (2 AP)" : "Movendo...");
+            if (target === 9) { 
+                gameOver = true; 
+                showToast(`VITÓRIA DE ${p.name.toUpperCase()}!`); 
+                return; 
+            }
+            if(cost === 2) showToast("Neve funda (-2 AP)");
         } else {
-            typeText("Sem AP! Passe a vez (B)."); shake();
+            showToast("Sem AP! Aperte B.");
         }
     }
 
@@ -355,56 +411,49 @@
         let acted = false;
         for (let pos of adj) {
             if (pos.x >= 0 && pos.x < COLS && pos.y >= 0 && pos.y < ROWS) {
-                if (map[pos.y][pos.x] === 3 && p.ap >= 1) {
-                    map[pos.y][pos.x] = 0; p.ap -= 1;
+                const target = map[pos.y][pos.x];
+                if ((target === 2 || target === 3) && p.ap >= 1) {
+                    map[pos.y][pos.x] = 0; 
+                    p.ap -= 1;
+                    const obj3d = worldGroup.getObjectByName(`obj_${pos.x}_${pos.y}`);
+                    if(obj3d) worldGroup.remove(obj3d);
                     
-                    // Remover o objeto 3D do gelo
-                    const iceMesh = worldGroup.getObjectByName(`ice_${pos.x}_${pos.y}`);
-                    if(iceMesh) { worldGroup.remove(iceMesh); }
-                    
-                    typeText("Quebrou o gelo!"); acted = true;
-                    updateUI(); break;
+                    showToast(target===2 ? "Casaco empurrado!" : "Gelo quebrado!");
+                    updateUI();
+                    acted = true;
+                    break;
                 }
             }
         }
-        if (!acted) typeText("Nada para quebrar aqui.");
+        if (!acted) showToast(p.ap < 1 ? "Precisa de 1 AP." : "Nada perto.");
     }
 
     function switchTurn() {
         turn = turn === 0 ? 1 : 0;
         players[turn].ap = players[turn].maxAp;
         updateUI();
-        typeText(`Vez de ${players[turn].name}!`);
+        showToast(`Vez de ${players[turn].name}!`);
     }
 
     function updateUI() {
         const p = players[turn];
         pNameEl.innerText = p.name;
         apEl.innerText = `AP: ${p.ap}/${p.maxAp}`;
-        apEl.style.color = p.ap === 0 ? '#e74c3c' : '#ecf0f1';
+        apEl.style.color = p.ap === 0 ? '#ff5555' : '#ffffff';
     }
 
-    function typeText(txt) { dialogEl.innerText = txt; }
-    function shake() {
-        canvasContainer.style.transform = "translateX(4px)";
-        setTimeout(()=>canvasContainer.style.transform="translateX(-4px)",50);
-        setTimeout(()=>canvasContainer.style.transform="translateX(0)",100);
-    }
-
-    // Ajuste de tela ao girar o celular
-    window.addEventListener('resize', onWindowResize, false);
-    function onWindowResize(){
-        const aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
-        const d = 8;
+    // Resize Inteligente
+    window.addEventListener('resize', () => {
+        if(!container || !camera || !renderer) return;
+        const aspect = container.clientWidth / container.clientHeight;
+        let d = aspect < 1 ? 10 : 7; // Recalcula zoom baseado na nova proporção
         camera.left = -d * aspect; camera.right = d * aspect;
         camera.top = d; camera.bottom = -d;
         camera.updateProjectionMatrix();
-        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    }
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
 
-    // Iniciar
     initGame();
-
 </script>
 </body>
 </html>
