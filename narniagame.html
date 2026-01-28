@@ -14,6 +14,7 @@
         body {
             overflow: hidden;
             font-family: 'Cinzel', serif;
+            background: #000;
         }
         
         #root {
@@ -21,7 +22,6 @@
             height: 100vh;
         }
         
-        /* Loading screen */
         #loading {
             position: fixed;
             top: 0;
@@ -66,36 +66,36 @@
     </div>
     <div id="root"></div>
 
-    <!-- React and dependencies from CDN -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/@react-three/fiber@8.15.12/dist/index.umd.js"></script>
-    <script src="https://unpkg.com/@react-three/drei@9.92.7/dist/index.umd.js"></script>
-    <script src="https://unpkg.com/zustand@4.4.7/esm/index.mjs" type="module"></script>
-    
-    <script type="text/babel" data-type="module">
-        import { create } from 'https://unpkg.com/zustand@4.4.7/esm/index.mjs';
-        
-        const { Canvas, useFrame, useThree } = window.ReactThreeFiber;
-        const { 
-            PerspectiveCamera, 
-            useKeyboardControls, 
-            KeyboardControls,
-            Text,
-            Sky
-        } = window.DreiExports;
-        
-        // Hide loading screen
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-            }, 2000);
-        });
+    <!-- Import map for ES modules -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom": "https://esm.sh/react-dom@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "three": "https://esm.sh/three@0.160.0",
+            "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.15.0",
+            "@react-three/drei": "https://esm.sh/@react-three/drei@9.92.0",
+            "zustand": "https://esm.sh/zustand@4.4.7"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import React, { useRef, useState, useEffect, useMemo } from 'react';
+        import ReactDOM from 'react-dom/client';
+        import { Canvas, useFrame, useThree } from '@react-three/fiber';
+        import { PerspectiveCamera, Text } from '@react-three/drei';
+        import { create } from 'zustand';
+        import * as THREE from 'three';
+
+        // Remove loading screen
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+        }, 2000);
 
         // ==================== ZUSTAND STORE ====================
-        const useGameStore = create((set, get) => ({
+        const useGameStore = create((set) => ({
             currentLevel: 0,
             inventory: [],
             playerHealth: 100,
@@ -105,17 +105,8 @@
             dialogueIndex: 0,
             gameState: 'MENU',
             playerPosition: [0, 0, 0],
-            enemies: [],
             
             setLevel: (level) => set({ currentLevel: level }),
-            addItem: (item) => set((state) => ({ inventory: [...state.inventory, item] })),
-            takeDamage: (amount) => set((state) => {
-                const newHealth = Math.max(0, state.playerHealth - amount);
-                if (newHealth === 0) {
-                    return { playerHealth: 0, gameState: 'GAMEOVER' };
-                }
-                return { playerHealth: newHealth };
-            }),
             openDialogue: (dialogue) => set({ 
                 isDialogueOpen: true, 
                 currentDialogue: dialogue,
@@ -131,10 +122,6 @@
             setGameState: (state) => set({ gameState: state }),
             setPlayerPosition: (pos) => set({ playerPosition: pos }),
             updateDialogueText: (text, index) => set({ dialogueText: text, dialogueIndex: index }),
-            addEnemy: (enemy) => set((state) => ({ enemies: [...state.enemies, enemy] })),
-            removeEnemy: (id) => set((state) => ({ 
-                enemies: state.enemies.filter(e => e.id !== id) 
-            })),
             resetGame: () => set({
                 currentLevel: 0,
                 inventory: [],
@@ -144,8 +131,7 @@
                 dialogueText: '',
                 dialogueIndex: 0,
                 gameState: 'MENU',
-                playerPosition: [0, 0, 0],
-                enemies: []
+                playerPosition: [0, 0, 0]
             })
         }));
 
@@ -161,35 +147,35 @@
                     "The White Witch has made it always winter.",
                     "You must be careful, her spies are everywhere!"
                 ]
-            },
-            beaver: {
-                id: 'beaver',
-                name: 'Mr. Beaver',
-                lines: [
-                    "Quick! Before the wolves spot you!",
-                    "The White Witch's Secret Police are everywhere.",
-                    "But there's hope - Aslan is on the move!",
-                    "When he appears, everything will change."
-                ]
-            },
-            aslan: {
-                id: 'aslan',
-                name: 'Aslan',
-                lines: [
-                    "Welcome, child. Do not be afraid.",
-                    "The long winter is ending. Spring is coming.",
-                    "You have been brave. Your journey has begun.",
-                    "Go forth with courage. Narnia needs you."
-                ]
             }
         };
 
+        // ==================== KEYBOARD CONTROLLER ====================
+        function useKeyboard() {
+            const [keys, setKeys] = useState({});
+            
+            useEffect(() => {
+                const handleKeyDown = (e) => setKeys(prev => ({ ...prev, [e.key.toLowerCase()]: true }));
+                const handleKeyUp = (e) => setKeys(prev => ({ ...prev, [e.key.toLowerCase()]: false }));
+                
+                window.addEventListener('keydown', handleKeyDown);
+                window.addEventListener('keyup', handleKeyUp);
+                
+                return () => {
+                    window.removeEventListener('keydown', handleKeyDown);
+                    window.removeEventListener('keyup', handleKeyUp);
+                };
+            }, []);
+            
+            return keys;
+        }
+
         // ==================== PLAYER ====================
-        const Player = ({ position, onPositionChange }) => {
-            const meshRef = React.useRef();
-            const velocity = React.useRef([0, 0, 0]);
-            const { currentLevel, isDialogueOpen, gameState } = useGameStore();
-            const [, get] = useKeyboardControls();
+        function Player({ position, onPositionChange }) {
+            const meshRef = useRef();
+            const velocity = useRef([0, 0, 0]);
+            const { isDialogueOpen, gameState } = useGameStore();
+            const keys = useKeyboard();
             
             const speed = 0.08;
             const friction = 0.85;
@@ -197,12 +183,10 @@
             useFrame(() => {
                 if (!meshRef.current || gameState !== 'PLAYING' || isDialogueOpen) return;
                 
-                const { forward, backward, left, right } = get();
-                
-                if (forward) velocity.current[2] -= speed;
-                if (backward) velocity.current[2] += speed;
-                if (left) velocity.current[0] -= speed;
-                if (right) velocity.current[0] += speed;
+                if (keys['w'] || keys['arrowup']) velocity.current[2] -= speed;
+                if (keys['s'] || keys['arrowdown']) velocity.current[2] += speed;
+                if (keys['a'] || keys['arrowleft']) velocity.current[0] -= speed;
+                if (keys['d'] || keys['arrowright']) velocity.current[0] += speed;
                 
                 velocity.current[0] *= friction;
                 velocity.current[2] *= friction;
@@ -226,30 +210,28 @@
                 ]);
             });
             
-            return React.createElement('group', { ref: meshRef, position: position },
-                React.createElement('mesh', { castShadow: true, position: [0, 0.5, 0] },
-                    React.createElement('capsuleGeometry', { args: [0.3, 0.6, 8, 16] }),
-                    React.createElement('meshStandardMaterial', { color: "#8B4513" })
-                ),
-                React.createElement('mesh', { position: [0, 0.5, 0.4], castShadow: true },
-                    React.createElement('sphereGeometry', { args: [0.15, 16, 16] }),
-                    React.createElement('meshStandardMaterial', { 
-                        color: "#FFA500", 
-                        emissive: "#FF8C00", 
-                        emissiveIntensity: 0.5 
-                    })
-                ),
-                React.createElement('mesh', { position: [0, 1.2, 0], castShadow: true },
-                    React.createElement('sphereGeometry', { args: [0.25, 16, 16] }),
-                    React.createElement('meshStandardMaterial', { color: "#FFE4C4" })
-                )
+            return (
+                <group ref={meshRef} position={position}>
+                    <mesh castShadow position={[0, 0.5, 0]}>
+                        <capsuleGeometry args={[0.3, 0.6, 8, 16]} />
+                        <meshStandardMaterial color="#8B4513" />
+                    </mesh>
+                    <mesh position={[0, 0.5, 0.4]} castShadow>
+                        <sphereGeometry args={[0.15, 16, 16]} />
+                        <meshStandardMaterial color="#FFA500" emissive="#FF8C00" emissiveIntensity={0.5} />
+                    </mesh>
+                    <mesh position={[0, 1.2, 0]} castShadow>
+                        <sphereGeometry args={[0.25, 16, 16]} />
+                        <meshStandardMaterial color="#FFE4C4" />
+                    </mesh>
+                </group>
             );
-        };
+        }
 
         // ==================== CAMERA CONTROLLER ====================
-        const CameraController = ({ target }) => {
+        function CameraController({ target }) {
             const { camera } = useThree();
-            const offset = React.useRef(new THREE.Vector3(0, 5, 8));
+            const offset = useRef(new THREE.Vector3(0, 5, 8));
             
             useFrame(() => {
                 const targetPos = new THREE.Vector3(target[0], target[1], target[2]);
@@ -261,13 +243,13 @@
             });
             
             return null;
-        };
+        }
 
         // ==================== SNOW PARTICLES ====================
-        const SnowParticles = ({ count = 1000 }) => {
-            const points = React.useRef();
+        function SnowParticles({ count = 1000 }) {
+            const points = useRef();
             
-            const particles = React.useMemo(() => {
+            const particles = useMemo(() => {
                 const positions = new Float32Array(count * 3);
                 const velocities = [];
                 
@@ -296,60 +278,54 @@
                 points.current.geometry.attributes.position.needsUpdate = true;
             });
             
-            return React.createElement('points', { ref: points },
-                React.createElement('bufferGeometry', null,
-                    React.createElement('bufferAttribute', {
-                        attach: "attributes-position",
-                        count: count,
-                        array: particles.positions,
-                        itemSize: 3
-                    })
-                ),
-                React.createElement('pointsMaterial', {
-                    size: 0.1,
-                    color: "#FFFFFF",
-                    transparent: true,
-                    opacity: 0.8,
-                    sizeAttenuation: true
-                })
+            return (
+                <points ref={points}>
+                    <bufferGeometry>
+                        <bufferAttribute
+                            attach="attributes-position"
+                            count={count}
+                            array={particles.positions}
+                            itemSize={3}
+                        />
+                    </bufferGeometry>
+                    <pointsMaterial
+                        size={0.1}
+                        color="#FFFFFF"
+                        transparent
+                        opacity={0.8}
+                        sizeAttenuation
+                    />
+                </points>
             );
-        };
+        }
 
         // ==================== LAMP POST ====================
-        const LampPost = ({ position }) => {
-            return React.createElement('group', { position: position },
-                React.createElement('mesh', { castShadow: true },
-                    React.createElement('cylinderGeometry', { args: [0.15, 0.15, 4, 8] }),
-                    React.createElement('meshStandardMaterial', { 
-                        color: "#2C2C2C", 
-                        metalness: 0.8, 
-                        roughness: 0.2 
-                    })
-                ),
-                React.createElement('mesh', { position: [0, 2.5, 0], castShadow: true },
-                    React.createElement('sphereGeometry', { args: [0.4, 16, 16] }),
-                    React.createElement('meshStandardMaterial', { 
-                        color: "#FFD700",
-                        emissive: "#FFD700",
-                        emissiveIntensity: 2,
-                        toneMapped: false
-                    })
-                ),
-                React.createElement('pointLight', { 
-                    position: [0, 2.5, 0], 
-                    color: "#FFD700", 
-                    intensity: 10, 
-                    distance: 15, 
-                    castShadow: true 
-                })
+        function LampPost({ position }) {
+            return (
+                <group position={position}>
+                    <mesh castShadow>
+                        <cylinderGeometry args={[0.15, 0.15, 4, 8]} />
+                        <meshStandardMaterial color="#2C2C2C" metalness={0.8} roughness={0.2} />
+                    </mesh>
+                    <mesh position={[0, 2.5, 0]} castShadow>
+                        <sphereGeometry args={[0.4, 16, 16]} />
+                        <meshStandardMaterial 
+                            color="#FFD700"
+                            emissive="#FFD700"
+                            emissiveIntensity={2}
+                            toneMapped={false}
+                        />
+                    </mesh>
+                    <pointLight position={[0, 2.5, 0]} color="#FFD700" intensity={10} distance={15} castShadow />
+                </group>
             );
-        };
+        }
 
         // ==================== NPC ====================
-        const NPC = ({ position, npcId, playerPosition, name = "NPC" }) => {
-            const meshRef = React.useRef();
+        function NPC({ position, npcId, playerPosition, name = "NPC" }) {
+            const meshRef = useRef();
             const { openDialogue, isDialogueOpen, currentDialogue } = useGameStore();
-            const [isNearby, setIsNearby] = React.useState(false);
+            const [isNearby, setIsNearby] = useState(false);
             
             useFrame(() => {
                 if (!meshRef.current) return;
@@ -360,7 +336,7 @@
                 setIsNearby(dist < 2.5);
             });
             
-            React.useEffect(() => {
+            useEffect(() => {
                 const handleKeyPress = (e) => {
                     if (e.key === 'e' || e.key === 'E') {
                         if (isNearby && !isDialogueOpen && DIALOGUE_DATA[npcId]) {
@@ -372,41 +348,57 @@
                 return () => window.removeEventListener('keydown', handleKeyPress);
             }, [isNearby, isDialogueOpen, npcId, openDialogue]);
             
-            const isTalking = currentDialogue?.id === npcId;
-            
-            return React.createElement('group', { ref: meshRef, position: position },
-                React.createElement('mesh', { castShadow: true, position: [0, 1, 0] },
-                    React.createElement('capsuleGeometry', { args: [0.3, 0.8, 8, 16] }),
-                    React.createElement('meshStandardMaterial', { color: "#8B7355" })
-                ),
-                React.createElement('mesh', { castShadow: true, position: [0, 1.8, 0] },
-                    React.createElement('sphereGeometry', { args: [0.3, 16, 16] }),
-                    React.createElement('meshStandardMaterial', { color: "#D2B48C" })
-                ),
-                isNearby && !isDialogueOpen && React.createElement(Text, {
-                    position: [0, 2.5, 0],
-                    fontSize: 0.3,
-                    color: "#FFD700",
-                    anchorX: "center",
-                    anchorY: "middle",
-                    outlineWidth: 0.05,
-                    outlineColor: "#000000"
-                }, "Press E"),
-                isNearby && React.createElement(Text, {
-                    position: [0, 2.8, 0],
-                    fontSize: 0.2,
-                    color: "#FFFFFF",
-                    anchorX: "center",
-                    anchorY: "middle",
-                    outlineWidth: 0.03,
-                    outlineColor: "#000000"
-                }, name)
+            return (
+                <group ref={meshRef} position={position}>
+                    <mesh castShadow position={[0, 1, 0]}>
+                        <capsuleGeometry args={[0.3, 0.8, 8, 16]} />
+                        <meshStandardMaterial color="#8B7355" />
+                    </mesh>
+                    <mesh castShadow position={[0, 1.8, 0]}>
+                        <sphereGeometry args={[0.3, 16, 16]} />
+                        <meshStandardMaterial color="#D2B48C" />
+                    </mesh>
+                    <mesh castShadow position={[-0.15, 2.1, 0]} rotation={[0, 0, Math.PI / 6]}>
+                        <cylinderGeometry args={[0.05, 0.02, 0.4, 8]} />
+                        <meshStandardMaterial color="#8B4513" />
+                    </mesh>
+                    <mesh castShadow position={[0.15, 2.1, 0]} rotation={[0, 0, -Math.PI / 6]}>
+                        <cylinderGeometry args={[0.05, 0.02, 0.4, 8]} />
+                        <meshStandardMaterial color="#8B4513" />
+                    </mesh>
+                    {isNearby && !isDialogueOpen && (
+                        <Text
+                            position={[0, 2.5, 0]}
+                            fontSize={0.3}
+                            color="#FFD700"
+                            anchorX="center"
+                            anchorY="middle"
+                            outlineWidth={0.05}
+                            outlineColor="#000000"
+                        >
+                            Press E
+                        </Text>
+                    )}
+                    {isNearby && (
+                        <Text
+                            position={[0, 2.8, 0]}
+                            fontSize={0.2}
+                            color="#FFFFFF"
+                            anchorX="center"
+                            anchorY="middle"
+                            outlineWidth={0.03}
+                            outlineColor="#000000"
+                        >
+                            {name}
+                        </Text>
+                    )}
+                </group>
             );
-        };
+        }
 
         // ==================== WARDROBE ====================
-        const Wardrobe = ({ position, playerPosition }) => {
-            const [isNearby, setIsNearby] = React.useState(false);
+        function Wardrobe({ position, playerPosition }) {
+            const [isNearby, setIsNearby] = useState(false);
             const { setLevel, setGameState } = useGameStore();
             
             useFrame(() => {
@@ -417,7 +409,7 @@
                 setIsNearby(dist < 1.5);
             });
             
-            React.useEffect(() => {
+            useEffect(() => {
                 const handleKeyPress = (e) => {
                     if (e.key === 'e' || e.key === 'E') {
                         if (isNearby) {
@@ -433,124 +425,121 @@
                 return () => window.removeEventListener('keydown', handleKeyPress);
             }, [isNearby, setLevel, setGameState]);
             
-            return React.createElement('group', { position: position },
-                React.createElement('mesh', { castShadow: true, receiveShadow: true },
-                    React.createElement('boxGeometry', { args: [2, 3, 1] }),
-                    React.createElement('meshStandardMaterial', { color: "#3E2723", roughness: 0.8 })
-                ),
-                isNearby && React.createElement(Text, {
-                    position: [0, 2, 0.6],
-                    fontSize: 0.3,
-                    color: "#87CEEB",
-                    anchorX: "center",
-                    anchorY: "middle",
-                    outlineWidth: 0.05,
-                    outlineColor: "#000000"
-                }, "Press E to Enter")
+            return (
+                <group position={position}>
+                    <mesh castShadow receiveShadow>
+                        <boxGeometry args={[2, 3, 1]} />
+                        <meshStandardMaterial color="#3E2723" roughness={0.8} />
+                    </mesh>
+                    <mesh position={[-0.5, 0, 0.51]} castShadow>
+                        <boxGeometry args={[0.9, 2.8, 0.1]} />
+                        <meshStandardMaterial color="#4E342E" roughness={0.7} />
+                    </mesh>
+                    <mesh position={[0.5, 0, 0.51]} castShadow>
+                        <boxGeometry args={[0.9, 2.8, 0.1]} />
+                        <meshStandardMaterial color="#4E342E" roughness={0.7} />
+                    </mesh>
+                    {isNearby && (
+                        <>
+                            <pointLight position={[0, 0, 0.7]} color="#87CEEB" intensity={2} distance={3} />
+                            <Text
+                                position={[0, 2, 0.6]}
+                                fontSize={0.3}
+                                color="#87CEEB"
+                                anchorX="center"
+                                anchorY="middle"
+                                outlineWidth={0.05}
+                                outlineColor="#000000"
+                            >
+                                Press E to Enter
+                            </Text>
+                        </>
+                    )}
+                </group>
             );
-        };
+        }
 
         // ==================== LEVELS ====================
-        const Level0_Wardrobe = ({ playerPosition }) => {
-            return React.createElement(React.Fragment, null,
-                React.createElement('mesh', { 
-                    receiveShadow: true, 
-                    rotation: [-Math.PI / 2, 0, 0], 
-                    position: [0, 0, 0] 
-                },
-                    React.createElement('planeGeometry', { args: [15, 15] }),
-                    React.createElement('meshStandardMaterial', { color: "#8B4513" })
-                ),
-                React.createElement(Wardrobe, { position: [0, 1.5, -5], playerPosition: playerPosition }),
-                React.createElement('ambientLight', { intensity: 0.4 }),
-                React.createElement('pointLight', { position: [0, 5, 0], intensity: 1 })
+        function Level0_Wardrobe({ playerPosition }) {
+            return (
+                <>
+                    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+                        <planeGeometry args={[15, 15]} />
+                        <meshStandardMaterial color="#8B4513" />
+                    </mesh>
+                    <mesh position={[0, 3, -7.5]}>
+                        <boxGeometry args={[15, 6, 0.5]} />
+                        <meshStandardMaterial color="#D2B48C" />
+                    </mesh>
+                    <Wardrobe position={[0, 1.5, -5]} playerPosition={playerPosition} />
+                    <ambientLight intensity={0.4} />
+                    <pointLight position={[0, 5, 0]} intensity={1} />
+                </>
             );
-        };
+        }
 
-        const Level1_LanternWaste = ({ playerPosition }) => {
-            return React.createElement(React.Fragment, null,
-                React.createElement('mesh', { 
-                    receiveShadow: true, 
-                    rotation: [-Math.PI / 2, 0, 0], 
-                    position: [0, 0, 0] 
-                },
-                    React.createElement('planeGeometry', { args: [50, 50] }),
-                    React.createElement('meshStandardMaterial', { color: "#E8E8E8", roughness: 0.9 })
-                ),
-                React.createElement(SnowParticles, { count: 1000 }),
-                React.createElement(LampPost, { position: [0, 2, -8] }),
-                React.createElement(NPC, { 
-                    position: [-2, 0, -10], 
-                    npcId: "tumnus", 
-                    playerPosition: playerPosition, 
-                    name: "Mr. Tumnus" 
-                }),
-                React.createElement(Sky, { sunPosition: [0, -1, 0] }),
-                React.createElement('ambientLight', { intensity: 0.2 }),
-                React.createElement('directionalLight', { 
-                    position: [5, 10, 5], 
-                    intensity: 0.3, 
-                    castShadow: true 
-                })
+        function Level1_LanternWaste({ playerPosition }) {
+            return (
+                <>
+                    <color attach="background" args={["#0a1929"]} />
+                    <fog attach="fog" args={["#0a1929", 10, 50]} />
+                    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+                        <planeGeometry args={[50, 50]} />
+                        <meshStandardMaterial color="#E8E8E8" roughness={0.9} />
+                    </mesh>
+                    <SnowParticles count={1000} />
+                    <LampPost position={[0, 2, -8]} />
+                    <NPC position={[-2, 0, -10]} npcId="tumnus" playerPosition={playerPosition} name="Mr. Tumnus" />
+                    <ambientLight intensity={0.2} />
+                    <directionalLight position={[5, 10, 5]} intensity={0.3} castShadow />
+                </>
             );
-        };
+        }
 
-        const Level2_Journey = ({ playerPosition }) => {
-            return React.createElement(React.Fragment, null,
-                React.createElement('mesh', { 
-                    receiveShadow: true, 
-                    rotation: [-Math.PI / 2, 0, 0], 
-                    position: [0, 0, 0] 
-                },
-                    React.createElement('planeGeometry', { args: [60, 60] }),
-                    React.createElement('meshStandardMaterial', { color: "#F0F0F0", roughness: 0.9 })
-                ),
-                React.createElement(SnowParticles, { count: 800 }),
-                React.createElement(Sky, { sunPosition: [100, 20, 100] }),
-                React.createElement('ambientLight', { intensity: 0.5 }),
-                React.createElement('directionalLight', { 
-                    position: [10, 10, 5], 
-                    intensity: 0.8, 
-                    castShadow: true 
-                })
+        function Level2_Journey({ playerPosition }) {
+            return (
+                <>
+                    <color attach="background" args={["#87CEEB"]} />
+                    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+                        <planeGeometry args={[60, 60]} />
+                        <meshStandardMaterial color="#F0F0F0" roughness={0.9} />
+                    </mesh>
+                    <SnowParticles count={800} />
+                    <ambientLight intensity={0.5} />
+                    <directionalLight position={[10, 10, 5]} intensity={0.8} castShadow />
+                </>
             );
-        };
+        }
 
-        const Level3_StoneTable = ({ playerPosition }) => {
-            return React.createElement(React.Fragment, null,
-                React.createElement('mesh', { 
-                    receiveShadow: true, 
-                    rotation: [-Math.PI / 2, 0, 0], 
-                    position: [0, 0, 0] 
-                },
-                    React.createElement('planeGeometry', { args: [60, 60] }),
-                    React.createElement('meshStandardMaterial', { color: "#90EE90", roughness: 0.9 })
-                ),
-                React.createElement(Sky, { sunPosition: [100, 50, 100], turbidity: 8, rayleigh: 2 }),
-                React.createElement('ambientLight', { intensity: 0.6 }),
-                React.createElement('directionalLight', { 
-                    position: [10, 10, 5], 
-                    intensity: 1, 
-                    castShadow: true 
-                })
+        function Level3_StoneTable({ playerPosition }) {
+            return (
+                <>
+                    <color attach="background" args={["#87CEEB"]} />
+                    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+                        <planeGeometry args={[60, 60]} />
+                        <meshStandardMaterial color="#90EE90" roughness={0.9} />
+                    </mesh>
+                    <ambientLight intensity={0.6} />
+                    <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+                </>
             );
-        };
+        }
 
         // ==================== LEVEL MANAGER ====================
-        const LevelManager = ({ playerPosition }) => {
+        function LevelManager({ playerPosition }) {
             const { currentLevel } = useGameStore();
             
             switch (currentLevel) {
-                case 0: return React.createElement(Level0_Wardrobe, { playerPosition });
-                case 1: return React.createElement(Level1_LanternWaste, { playerPosition });
-                case 2: return React.createElement(Level2_Journey, { playerPosition });
-                case 3: return React.createElement(Level3_StoneTable, { playerPosition });
-                default: return React.createElement(Level1_LanternWaste, { playerPosition });
+                case 0: return <Level0_Wardrobe playerPosition={playerPosition} />;
+                case 1: return <Level1_LanternWaste playerPosition={playerPosition} />;
+                case 2: return <Level2_Journey playerPosition={playerPosition} />;
+                case 3: return <Level3_StoneTable playerPosition={playerPosition} />;
+                default: return <Level1_LanternWaste playerPosition={playerPosition} />;
             }
-        };
+        }
 
         // ==================== UI COMPONENTS ====================
-        const DialogueUI = () => {
+        function DialogueUI() {
             const { 
                 isDialogueOpen, 
                 currentDialogue, 
@@ -560,7 +549,7 @@
                 updateDialogueText 
             } = useGameStore();
             
-            React.useEffect(() => {
+            useEffect(() => {
                 if (!isDialogueOpen || !currentDialogue) return;
                 
                 const currentLine = currentDialogue.lines[dialogueIndex];
@@ -592,8 +581,8 @@
             
             if (!isDialogueOpen || !currentDialogue) return null;
             
-            return React.createElement('div', {
-                style: {
+            return (
+                <div style={{
                     position: 'fixed',
                     bottom: '0',
                     left: '0',
@@ -604,47 +593,49 @@
                     fontFamily: '"Cinzel", serif',
                     zIndex: 1000,
                     borderTop: '3px solid #FFD700'
-                }
-            },
-                React.createElement('div', {
-                    style: { 
+                }}>
+                    <div style={{ 
                         fontSize: '20px', 
                         color: '#FFD700', 
                         marginBottom: '10px',
                         textShadow: '0 0 10px rgba(255,215,0,0.5)'
-                    }
-                }, currentDialogue.name),
-                React.createElement('div', {
-                    style: { 
+                    }}>
+                        {currentDialogue.name}
+                    </div>
+                    <div style={{ 
                         fontSize: '18px', 
                         minHeight: '60px',
                         lineHeight: '1.6',
                         marginBottom: '15px'
-                    }
-                }, dialogueText),
-                React.createElement('button', {
-                    onClick: handleNext,
-                    style: {
-                        background: '#FFD700',
-                        border: 'none',
-                        padding: '12px 30px',
-                        fontSize: '16px',
-                        cursor: 'pointer',
-                        fontFamily: '"Cinzel", serif',
-                        color: '#000',
-                        borderRadius: '5px',
-                        fontWeight: 'bold'
-                    }
-                }, dialogueIndex < currentDialogue.lines.length - 1 ? 'Next' : 'Close')
+                    }}>
+                        {dialogueText}
+                    </div>
+                    <button
+                        onClick={handleNext}
+                        style={{
+                            background: '#FFD700',
+                            border: 'none',
+                            padding: '12px 30px',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            fontFamily: '"Cinzel", serif',
+                            color: '#000',
+                            borderRadius: '5px',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        {dialogueIndex < currentDialogue.lines.length - 1 ? 'Next' : 'Close'}
+                    </button>
+                </div>
             );
-        };
+        }
 
-        const HUD = () => {
+        function HUD() {
             const { playerHealth, currentLevel } = useGameStore();
             const levelNames = ['The Wardrobe', 'Lantern Waste', 'The Journey', 'Stone Table'];
             
-            return React.createElement('div', {
-                style: {
+            return (
+                <div style={{
                     position: 'fixed',
                     top: '20px',
                     left: '20px',
@@ -652,49 +643,43 @@
                     fontFamily: '"Cinzel", serif',
                     zIndex: 999,
                     textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
-                }
-            },
-                React.createElement('div', {
-                    style: { 
+                }}>
+                    <div style={{ 
                         fontSize: '24px', 
                         marginBottom: '15px',
                         color: '#FFD700'
-                    }
-                }, levelNames[currentLevel]),
-                React.createElement('div', {
-                    style: { 
+                    }}>
+                        {levelNames[currentLevel]}
+                    </div>
+                    <div style={{ 
                         fontSize: '18px', 
                         marginBottom: '10px',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '10px'
-                    }
-                },
-                    React.createElement('span', null, 'Health:'),
-                    React.createElement('div', {
-                        style: {
+                    }}>
+                        <span>Health:</span>
+                        <div style={{
                             width: '200px',
                             height: '25px',
                             background: 'rgba(0,0,0,0.5)',
                             border: '2px solid #FFD700',
                             borderRadius: '5px',
                             overflow: 'hidden'
-                        }
-                    },
-                        React.createElement('div', {
-                            style: {
+                        }}>
+                            <div style={{
                                 width: `${playerHealth}%`,
                                 height: '100%',
                                 background: playerHealth > 50 ? '#4CAF50' : playerHealth > 25 ? '#FFA500' : '#F44336',
                                 transition: 'width 0.3s, background 0.3s'
-                            }
-                        })
-                    )
-                )
+                            }} />
+                        </div>
+                    </div>
+                </div>
             );
-        };
+        }
 
-        const MenuScreen = () => {
+        function MenuScreen() {
             const { setGameState, setLevel } = useGameStore();
             
             const startGame = () => {
@@ -702,8 +687,8 @@
                 setGameState('PLAYING');
             };
             
-            return React.createElement('div', {
-                style: {
+            return (
+                <div style={{
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -717,94 +702,101 @@
                     zIndex: 2000,
                     fontFamily: '"Cinzel", serif',
                     color: '#fff'
-                }
-            },
-                React.createElement('div', { style: { textAlign: 'center' }},
-                    React.createElement('h1', {
-                        style: {
+                }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <h1 style={{
                             fontSize: '48px',
                             marginBottom: '20px',
                             color: '#FFD700',
                             textShadow: '0 0 20px rgba(255,215,0,0.5)'
-                        }
-                    }, 'THE CHRONICLES OF NARNIA'),
-                    React.createElement('h2', {
-                        style: {
+                        }}>
+                            THE CHRONICLES OF NARNIA
+                        </h1>
+                        <h2 style={{
                             fontSize: '24px',
                             marginBottom: '50px',
-                            fontStyle: 'italic'
-                        }
-                    }, 'The Lion, the Witch and the Wardrobe'),
-                    React.createElement('button', {
-                        onClick: startGame,
-                        style: {
-                            background: '#FFD700',
-                            border: 'none',
-                            padding: '20px 60px',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            fontFamily: '"Cinzel", serif',
-                            color: '#000',
-                            borderRadius: '10px',
-                            fontWeight: 'bold'
-                        }
-                    }, 'Begin Adventure'),
-                    React.createElement('div', {
-                        style: { marginTop: '50px', fontSize: '16px', color: '#AAA' }
-                    },
-                        React.createElement('p', null, 'Controls: WASD to move, E to interact'),
-                        React.createElement('p', { style: { marginTop: '10px' }}, 'A 3D Adventure Game')
-                    )
-                )
-            );
-        };
-
-        // ==================== SCENE ====================
-        const Scene = () => {
-            const [playerPosition, setPlayerPosition] = React.useState([0, 0, 5]);
-            const { gameState } = useGameStore();
-            
-            return React.createElement(React.Fragment, null,
-                React.createElement(PerspectiveCamera, { makeDefault: true, position: [0, 5, 10] }),
-                React.createElement(CameraController, { target: playerPosition }),
-                React.createElement(Player, { 
-                    position: playerPosition, 
-                    onPositionChange: setPlayerPosition
-                }),
-                React.createElement(LevelManager, { playerPosition: playerPosition })
-            );
-        };
-
-        // ==================== MAIN APP ====================
-        function NarniaAdventure() {
-            const { gameState } = useGameStore();
-            
-            return React.createElement('div', { 
-                style: { width: '100vw', height: '100vh', margin: 0, padding: 0, overflow: 'hidden' }
-            },
-                gameState === 'MENU' && React.createElement(MenuScreen),
-                React.createElement(KeyboardControls, {
-                    map: [
-                        { name: 'forward', keys: ['ArrowUp', 'KeyW', 'w', 'W'] },
-                        { name: 'backward', keys: ['ArrowDown', 'KeyS', 's', 'S'] },
-                        { name: 'left', keys: ['ArrowLeft', 'KeyA', 'a', 'A'] },
-                        { name: 'right', keys: ['ArrowRight', 'KeyD', 'd', 'D'] }
-                    ]
-                },
-                    React.createElement(Canvas, { shadows: true },
-                        React.createElement(Scene)
-                    )
-                ),
-                gameState === 'PLAYING' && React.createElement(React.Fragment, null,
-                    React.createElement(HUD),
-                    React.createElement(DialogueUI)
-                )
+                            fontStyle: 'italic',
+                            color: '#E8E8E8'
+                        }}>
+                            The Lion, the Witch and the Wardrobe
+                        </h2>
+                        <button
+                            onClick={startGame}
+                            style={{
+                                background: '#FFD700',
+                                border: 'none',
+                                padding: '20px 60px',
+                                fontSize: '24px',
+                                cursor: 'pointer',
+                                fontFamily: '"Cinzel", serif',
+                                color: '#000',
+                                borderRadius: '10px',
+                                fontWeight: 'bold',
+                                boxShadow: '0 8px 30px rgba(255,215,0,0.4)',
+                                transition: 'all 0.3s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.transform = 'scale(1.05)';
+                                e.target.style.boxShadow = '0 12px 40px rgba(255,215,0,0.6)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.transform = 'scale(1)';
+                                e.target.style.boxShadow = '0 8px 30px rgba(255,215,0,0.4)';
+                            }}
+                        >
+                            Begin Adventure
+                        </button>
+                        <div style={{ marginTop: '50px', fontSize: '16px', color: '#AAA' }}>
+                            <p>Controls: WASD to move, E to interact</p>
+                            <p style={{ marginTop: '10px' }}>A 3D Adventure Game</p>
+                        </div>
+                    </div>
+                </div>
             );
         }
 
+// ==================== SCENE ====================
+function Scene() {
+    // O estado da posição deve começar onde o jogador spawna no Level 0
+    const [playerPosition, setPlayerPosition] = useState([0, 0, 2]);
+
+    return (
+        <>
+            {/* A câmera precisa de um componente que a gerencie via useThree */}
+            <CameraController target={playerPosition} />
+            <Player position={playerPosition} onPositionChange={setPlayerPosition} />
+            <LevelManager playerPosition={playerPosition} />
+        </>
+    );
+}
+
+// ==================== MAIN APP ====================
+function NarniaAdventure() {
+    const { gameState } = useGameStore();
+
+    return (
+        <div style={{ width: '100vw', height: '100vh', background: '#000' }}>
+            {gameState === 'MENU' && <MenuScreen />}
+            
+            {/* O Canvas deve ser o container pai de tudo que for 3D */}
+            <Canvas shadows camera={{ position: [0, 5, 10], fov: 50 }}>
+                <Scene />
+            </Canvas>
+
+            {/* UI deve ficar fora do Canvas */}
+            {gameState === 'PLAYING' && (
+                <>
+                    <HUD />
+                    <DialogueUI />
+                </>
+            )}
+        </div>
+    );
+}
+
         // ==================== RENDER ====================
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(NarniaAdventure));
+        root.render(<NarniaAdventure />);
     </script>
 </body>
 </html>
