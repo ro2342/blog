@@ -68,19 +68,29 @@
 
     <!-- Import map for ES modules -->
 
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/three@0.152.0/build/three.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<script type="importmap">
-{
-    "imports": {
-        "react": "https://cdn.skypack.dev/react@18.2.0",
-        "react-dom": "https://cdn.skypack.dev/react-dom@18.2.0",
-        "three": "https://cdn.skypack.dev/three@0.152.0",
-        "@react-three/fiber": "https://cdn.skypack.dev/@react-three/fiber@8.13.0",
-        "@react-three/drei": "https://cdn.skypack.dev/@react-three/drei@9.70.0",
-        "zustand": "https://cdn.skypack.dev/zustand@4.4.7"
-    }
-}
+<script src="https://unpkg.com/@react-three/fiber@8.13.0/dist/react-three-fiber.umd.js"></script>
+<script src="https://unpkg.com/@react-three/drei@9.70.0/dist/index-umd.js"></script>
+<script src="https://unpkg.com/zustand@4.4.7/umd/index.js"></script>
+
+<script type="text/babel">
+    // 3. Mapeando as globais para os nomes que seu código já usa
+    const { useRef, useState, useEffect, useMemo } = React;
+    const { Canvas, useFrame, useThree } = ReactThreeFiber;
+    const { PerspectiveCamera, Text } = Drei; // O Drei em UMD geralmente se chama 'Drei'
+    const { create } = Zustand; 
+
+    // Agora seu código original deve funcionar, pois não há mais "imports" de arquivos
+    // mas sim o uso das constantes acima.
+    
+    // ... (restante do seu código: useGameStore, Player, etc) ...
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<NarniaAdventure />);
 </script>
 
 <script type="text/babel" data-type="module">
