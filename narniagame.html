@@ -1,483 +1,810 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Narnia: Breath of the Wild Style</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Chronicles of Narnia - 3D Adventure</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #87CEEB; font-family: 'Cinzel', serif; user-select: none; touch-action: none; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        /* UI Estilo Zelda */
-        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        body {
+            overflow: hidden;
+            font-family: 'Cinzel', serif;
+        }
         
-        .stamina-wheel {
-            position: absolute; top: 20px; left: 20px; width: 50px; height: 50px;
-            border-radius: 50%; border: 4px solid rgba(0,255,0,0.5);
-            background: rgba(0,0,0,0.3);
+        #root {
+            width: 100vw;
+            height: 100vh;
         }
-
-        .hearts {
-            position: absolute; top: 20px; left: 80px; font-size: 24px; color: #ff3333;
-            text-shadow: 2px 2px 0 #000;
+        
+        /* Loading screen */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: #FFD700;
         }
-
-        #quest-msg {
-            position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%);
-            color: #fff; font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-            text-align: center; font-weight: bold; font-family: sans-serif;
-            opacity: 0; transition: opacity 2s;
+        
+        #loading h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(255,215,0,0.5);
         }
-
-        /* Controles Virtuais */
-        #controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
-        #joystick-zone {
-            position: absolute; bottom: 50px; left: 50px; width: 120px; height: 120px;
-            background: rgba(255, 255, 255, 0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); pointer-events: auto;
-        }
-        #joystick-knob {
-            position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
-            background: rgba(100, 255, 218, 0.8); border-radius: 50%; transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px rgba(100, 255, 218, 0.6);
-        }
-        #btn-jump {
-            position: absolute; bottom: 60px; right: 40px; width: 80px; height: 80px;
-            background: rgba(255, 255, 255, 0.2); border-radius: 50%; border: 2px solid #fff;
-            pointer-events: auto; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;
-        }
-        #btn-attack {
-            position: absolute; bottom: 160px; right: 40px; width: 60px; height: 60px;
-            background: rgba(255, 50, 50, 0.4); border-radius: 50%; border: 2px solid #fff;
-            pointer-events: auto; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;
-        }
-
-        /* Tela de Loading */
-        #loader {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 100; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: #d4af37;
-        }
+        
         .spinner {
-            width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid #d4af37;
-            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,215,0,0.3);
+            border-top-color: #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <div id="loader">
+    <div id="loading">
+        <h1>Loading Narnia...</h1>
         <div class="spinner"></div>
-        <h1>Gerando Nárnia...</h1>
-        <p>Criando montanhas e florestas proceduralmente</p>
-        <button onclick="startGame()" style="padding:10px 30px; margin-top:20px; font-size:18px; cursor:pointer;">ACORDAR</button>
+        <p style="margin-top: 20px; font-size: 16px; color: #AAA;">This may take a moment</p>
     </div>
+    <div id="root"></div>
 
-    <div id="ui-layer">
-        <div class="stamina-wheel"></div>
-        <div class="hearts">❤❤❤❤❤</div>
-        <div id="quest-msg">O Ermo do Lampião</div>
-    </div>
-
-    <div id="controls">
-        <div id="joystick-zone"><div id="joystick-knob"></div></div>
-        <div id="btn-jump">PULAR</div>
-        <div id="btn-attack">⚔️</div>
-    </div>
-
-<script>
-    // --- ENGINE CONFIG ---
-    const WORLD_SIZE = 200; // Tamanho do mundo gerado
-    const CHUNK_RES = 60; // Resolução do terreno (quanto maior, mais liso)
-    const COLORS = {
-        sky: 0x87CEEB,
-        grassLight: 0x7cfc00,
-        grassDark: 0x3e8e41,
-        dirt: 0x8B4513,
-        stone: 0x808080,
-        fog: 0xcfecec
-    };
-
-    let scene, camera, renderer, clock, simplex;
-    let player, terrainMesh, grassSystem;
-    let input = { x: 0, y: 0 };
-    let playerVelocity = new THREE.Vector3();
-    let isJumping = false;
-
-    // --- INICIALIZAÇÃO ---
-    function init() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(COLORS.sky);
-        // Fog para dar sensação de profundidade e esconder o fim do mapa (Estilo Zelda)
-        scene.fog = new THREE.FogExp2(COLORS.fog, 0.015);
-
-        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    <!-- React and dependencies from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/@react-three/fiber@8.15.12/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/@react-three/drei@9.92.7/dist/index.umd.js"></script>
+    <script src="https://unpkg.com/zustand@4.4.7/esm/index.mjs" type="module"></script>
+    
+    <script type="text/babel" data-type="module">
+        import { create } from 'https://unpkg.com/zustand@4.4.7/esm/index.mjs';
         
-        renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Sombras suaves
-        // Renderização de tons estilo cinema
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.8;
-        document.body.appendChild(renderer.domElement);
-
-        clock = new THREE.Clock();
-        simplex = new SimplexNoise(); // Biblioteca de ruído
-
-        // Iluminação "Breath of the Wild" (Sol forte + Luz ambiente azulada)
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-        hemiLight.position.set(0, 50, 0);
-        scene.add(hemiLight);
-
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        dirLight.position.set(50, 100, 50);
-        dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 2048;
-        dirLight.shadow.mapSize.height = 2048;
-        dirLight.shadow.camera.near = 0.5;
-        dirLight.shadow.camera.far = 200;
-        dirLight.shadow.camera.left = -50;
-        dirLight.shadow.camera.right = 50;
-        dirLight.shadow.camera.top = 50;
-        dirLight.shadow.camera.bottom = -50;
-        scene.add(dirLight);
-
-        createProceduralTerrain();
-        createGrass();
-        createScenery(); // Árvores, Pedras
-        createPlayer();
-        createLampPost(); // O ícone de Nárnia
-
-        setupControls();
+        const { Canvas, useFrame, useThree } = window.ReactThreeFiber;
+        const { 
+            PerspectiveCamera, 
+            useKeyboardControls, 
+            KeyboardControls,
+            Text,
+            Sky
+        } = window.DreiExports;
         
-        window.addEventListener('resize', onWindowResize, false);
-    }
-
-    // --- GERAÇÃO DE TERRENO (PROCEDURAL) ---
-    function createProceduralTerrain() {
-        const geometry = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE, CHUNK_RES, CHUNK_RES);
-        geometry.rotateX(-Math.PI / 2);
-
-        const positions = geometry.attributes.position.array;
-        const colors = [];
-        const colorAttribute = new THREE.BufferAttribute(new Float32Array(positions.length), 3);
-
-        for (let i = 0; i < positions.length; i += 3) {
-            const x = positions[i];
-            const z = positions[i + 2];
-            
-            // Matemática para criar montanhas suaves
-            // Combinamos várias camadas de ruído (Noise)
-            let y = 0;
-            y += simplex.noise2D(x * 0.02, z * 0.02) * 4; // Colinas grandes
-            y += simplex.noise2D(x * 0.1, z * 0.1) * 1;   // Detalhes pequenos
-            
-            // Elevar as bordas para criar um vale fechado
-            const dist = Math.sqrt(x*x + z*z);
-            if(dist > 70) y += (dist - 70) * 0.5;
-
-            positions[i + 1] = y;
-
-            // Pintar o terreno baseado na altura
-            const color = new THREE.Color();
-            if (y > 15) color.setHex(COLORS.stone); // Topo da montanha
-            else if (y > 10) color.setHex(COLORS.dirt); // Encosta
-            else color.setHex(COLORS.grassLight); // Vales
-            
-            // Variação de cor aleatória para parecer grama
-            if(y <= 10) color.offsetHSL(0, 0, (Math.random() - 0.5) * 0.05);
-
-            colors.push(color.r, color.g, color.b);
-        }
-
-        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        geometry.computeVertexNormals();
-
-        const material = new THREE.MeshStandardMaterial({
-            vertexColors: true,
-            roughness: 0.8,
-            flatShading: true // Estilo Low Poly bonito
+        // Hide loading screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 2000);
         });
 
-        terrainMesh = new THREE.Mesh(geometry, material);
-        terrainMesh.receiveShadow = true;
-        scene.add(terrainMesh);
-    }
+        // ==================== ZUSTAND STORE ====================
+        const useGameStore = create((set, get) => ({
+            currentLevel: 0,
+            inventory: [],
+            playerHealth: 100,
+            isDialogueOpen: false,
+            currentDialogue: null,
+            dialogueText: '',
+            dialogueIndex: 0,
+            gameState: 'MENU',
+            playerPosition: [0, 0, 0],
+            enemies: [],
+            
+            setLevel: (level) => set({ currentLevel: level }),
+            addItem: (item) => set((state) => ({ inventory: [...state.inventory, item] })),
+            takeDamage: (amount) => set((state) => {
+                const newHealth = Math.max(0, state.playerHealth - amount);
+                if (newHealth === 0) {
+                    return { playerHealth: 0, gameState: 'GAMEOVER' };
+                }
+                return { playerHealth: newHealth };
+            }),
+            openDialogue: (dialogue) => set({ 
+                isDialogueOpen: true, 
+                currentDialogue: dialogue,
+                dialogueText: '',
+                dialogueIndex: 0
+            }),
+            closeDialogue: () => set({ 
+                isDialogueOpen: false, 
+                currentDialogue: null,
+                dialogueText: '',
+                dialogueIndex: 0
+            }),
+            setGameState: (state) => set({ gameState: state }),
+            setPlayerPosition: (pos) => set({ playerPosition: pos }),
+            updateDialogueText: (text, index) => set({ dialogueText: text, dialogueIndex: index }),
+            addEnemy: (enemy) => set((state) => ({ enemies: [...state.enemies, enemy] })),
+            removeEnemy: (id) => set((state) => ({ 
+                enemies: state.enemies.filter(e => e.id !== id) 
+            })),
+            resetGame: () => set({
+                currentLevel: 0,
+                inventory: [],
+                playerHealth: 100,
+                isDialogueOpen: false,
+                currentDialogue: null,
+                dialogueText: '',
+                dialogueIndex: 0,
+                gameState: 'MENU',
+                playerPosition: [0, 0, 0],
+                enemies: []
+            })
+        }));
 
-    // --- SISTEMA DE GRAMA (INSTANCING) ---
-    function createGrass() {
-        // Criamos 1 brizna de grama e repetimos ela 5000 vezes sem pesar o processador
-        const grassGeo = new THREE.ConeGeometry(0.1, 0.4, 3);
-        grassGeo.translate(0, 0.2, 0); // Pivô na base
-        const grassMat = new THREE.MeshLambertMaterial({ color: COLORS.grassDark });
-        
-        const count = 6000;
-        const mesh = new THREE.InstancedMesh(grassGeo, grassMat, count);
-        mesh.receiveShadow = true;
-        mesh.castShadow = true;
-
-        const dummy = new THREE.Object3D();
-        let index = 0;
-
-        for(let i=0; i<count; i++) {
-            const x = (Math.random() - 0.5) * WORLD_SIZE * 0.8;
-            const z = (Math.random() - 0.5) * WORLD_SIZE * 0.8;
-            const y = getTerrainHeight(x, z);
-
-            // Só colocar grama se não for muito alto (neve/pedra)
-            if (y < 8) {
-                dummy.position.set(x, y, z);
-                dummy.rotation.y = Math.random() * Math.PI;
-                dummy.scale.setScalar(0.8 + Math.random() * 0.5);
-                dummy.updateMatrix();
-                mesh.setMatrix(index++, dummy.matrix);
+        // ==================== DIALOGUE DATA ====================
+        const DIALOGUE_DATA = {
+            tumnus: {
+                id: 'tumnus',
+                name: 'Mr. Tumnus',
+                lines: [
+                    "Good evening! How delightful to meet you!",
+                    "I am a Faun. My name is Tumnus.",
+                    "Welcome to Narnia, though these are dark times...",
+                    "The White Witch has made it always winter.",
+                    "You must be careful, her spies are everywhere!"
+                ]
+            },
+            beaver: {
+                id: 'beaver',
+                name: 'Mr. Beaver',
+                lines: [
+                    "Quick! Before the wolves spot you!",
+                    "The White Witch's Secret Police are everywhere.",
+                    "But there's hope - Aslan is on the move!",
+                    "When he appears, everything will change."
+                ]
+            },
+            aslan: {
+                id: 'aslan',
+                name: 'Aslan',
+                lines: [
+                    "Welcome, child. Do not be afraid.",
+                    "The long winter is ending. Spring is coming.",
+                    "You have been brave. Your journey has begun.",
+                    "Go forth with courage. Narnia needs you."
+                ]
             }
-        }
-        mesh.instanceMatrix.needsUpdate = true;
-        scene.add(mesh);
-        grassSystem = mesh;
-    }
-
-    // --- CENÁRIO (ÁRVORES E PEDRAS) ---
-    function createScenery() {
-        // Árvores estilo Zelda (Pinheiros estilizados)
-        for(let i=0; i<40; i++) {
-            const x = (Math.random() - 0.5) * WORLD_SIZE * 0.7;
-            const z = (Math.random() - 0.5) * WORLD_SIZE * 0.7;
-            const y = getTerrainHeight(x, z);
-            
-            if(y > 10) continue; // Não plantar no topo da montanha
-
-            const tree = new THREE.Group();
-            
-            // Tronco
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.5, 2, 6), new THREE.MeshStandardMaterial({color: 0x5d4037}));
-            trunk.position.y = 1;
-            trunk.castShadow = true;
-            tree.add(trunk);
-
-            // Folhas (3 camadas)
-            const leavesMat = new THREE.MeshStandardMaterial({color: 0x228B22});
-            const l1 = new THREE.Mesh(new THREE.ConeGeometry(2, 3, 6), leavesMat); l1.position.y = 3; l1.castShadow = true;
-            const l2 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.5, 6), leavesMat); l2.position.y = 4.5; l2.castShadow = true;
-            
-            tree.add(l1); tree.add(l2);
-            tree.position.set(x, y, z);
-            
-            // Escala aleatória
-            const s = 1 + Math.random();
-            tree.scale.set(s,s,s);
-            scene.add(tree);
-        }
-    }
-
-    function createLampPost() {
-        // O famoso Lampião de Nárnia
-        const group = new THREE.Group();
-        
-        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 4, 8), new THREE.MeshStandardMaterial({color: 0x111}));
-        post.position.y = 2;
-        group.add(post);
-
-        const lightCase = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), new THREE.MeshStandardMaterial({color: 0x111}));
-        lightCase.position.y = 4;
-        group.add(lightCase);
-
-        const light = new THREE.PointLight(0xffaa00, 2, 15);
-        light.position.set(0, 4, 0);
-        group.add(light);
-        
-        // Brilho visual
-        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshBasicMaterial({color: 0xffaa00}));
-        bulb.position.y = 4;
-        group.add(bulb);
-
-        // Posicionar num lugar bonito
-        const h = getTerrainHeight(5, 5);
-        group.position.set(5, h, 5);
-        scene.add(group);
-    }
-
-    // --- JOGADOR ---
-    function createPlayer() {
-        player = new THREE.Group();
-
-        // Modelo simplificado do Link/Pevensie
-        // Corpo
-        const bodyMat = new THREE.MeshStandardMaterial({color: 0x3498db}); // Túnica Azul
-        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.2, 0.8), bodyMat);
-        body.position.y = 0.4;
-        player.add(body);
-
-        // Cabeça
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.25), new THREE.MeshStandardMaterial({color: 0xffdbac}));
-        head.position.y = 0.95;
-        player.add(head);
-
-        // Capuz/Cabelo (Balança com vento)
-        const hair = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.5), new THREE.MeshStandardMaterial({color: 0xDAA520})); // Loiro
-        hair.position.y = 1.1;
-        hair.rotation.x = -0.2;
-        player.add(hair);
-
-        // Espada nas costas
-        const sword = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.8, 0.05), new THREE.MeshStandardMaterial({color: 0x999}));
-        sword.position.set(0, 0.6, -0.25);
-        sword.rotation.z = 0.5;
-        player.add(sword);
-
-        player.traverse(c => c.castShadow = true);
-        scene.add(player);
-    }
-
-    // --- FÍSICA E MOVIMENTO ---
-    function getTerrainHeight(x, z) {
-        // Recalcula a altura exata do terreno naquela posição (mesma fórmula da geração)
-        let y = 0;
-        y += simplex.noise2D(x * 0.02, z * 0.02) * 4;
-        y += simplex.noise2D(x * 0.1, z * 0.1) * 1;
-        const dist = Math.sqrt(x*x + z*z);
-        if(dist > 70) y += (dist - 70) * 0.5;
-        return y;
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        const dt = clock.getDelta();
-        const time = clock.getElapsedTime();
-
-        // 1. Movimento do Jogador
-        if (input.x !== 0 || input.y !== 0) {
-            // Direção da câmera
-            const camDir = new THREE.Vector3();
-            camera.getWorldDirection(camDir);
-            camDir.y = 0;
-            camDir.normalize();
-            
-            const camSide = new THREE.Vector3();
-            camSide.crossVectors(camera.up, camDir).normalize();
-
-            // Vetor de movimento relativo à câmera
-            const moveVec = new THREE.Vector3();
-            moveVec.add(camSide.multiplyScalar(input.x));
-            moveVec.add(camDir.multiplyScalar(-input.y));
-            moveVec.normalize();
-
-            player.position.add(moveVec.multiplyScalar(6 * dt)); // Velocidade 6
-            
-            // Girar personagem para onde anda
-            const angle = Math.atan2(moveVec.x, moveVec.z);
-            player.rotation.y = angle;
-        }
-
-        // 2. Física de Terreno (Gravity & Collision)
-        const groundHeight = getTerrainHeight(player.position.x, player.position.z);
-        
-        if (player.position.y < groundHeight) {
-            player.position.y = groundHeight;
-            playerVelocity.y = 0;
-            isJumping = false;
-        } else {
-            playerVelocity.y -= 20 * dt; // Gravidade
-            player.position.y += playerVelocity.y * dt;
-            if(player.position.y < groundHeight) player.position.y = groundHeight;
-        }
-
-        // 3. Câmera (Third Person - Breath of the Wild style)
-        // A câmera segue o jogador com suavidade (Lerp) e fica um pouco elevada
-        const targetCamPos = player.position.clone().add(new THREE.Vector3(0, 3, 6)); // Atrás e acima
-        camera.position.lerp(targetCamPos, 0.1); // Suavização
-        camera.lookAt(player.position.clone().add(new THREE.Vector3(0, 1, 0))); // Olha para cabeça
-
-        // 4. Animação da Grama (Vento)
-        // Truque: Movemos a posição dos vértices no shader ou rotacionamos levemente
-        // Como é InstancedMesh, vamos simplificar rotacionando o grupo todo levemente
-        // Para uma animação real de shader precisaríamos de shaderMaterial customizado (complexo para um arquivo)
-        
-        renderer.render(scene, camera);
-    }
-
-    // --- CONTROLES ---
-    function setupControls() {
-        const joyZone = document.getElementById('joystick-zone');
-        const joyKnob = document.getElementById('joystick-knob');
-        const btnJump = document.getElementById('btn-jump');
-
-        let startX, startY;
-
-        joyZone.addEventListener('touchstart', e => {
-            e.preventDefault();
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        }, {passive: false});
-
-        joyZone.addEventListener('touchmove', e => {
-            e.preventDefault();
-            const x = e.touches[0].clientX - startX;
-            const y = e.touches[0].clientY - startY;
-            const dist = Math.min(Math.sqrt(x*x+y*y), 40);
-            const angle = Math.atan2(y, x);
-            
-            const kx = Math.cos(angle) * dist;
-            const ky = Math.sin(angle) * dist;
-            
-            joyKnob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
-            
-            input.x = kx / 40;
-            input.y = ky / 40;
-        }, {passive: false});
-
-        const resetJoy = () => {
-            joyKnob.style.transform = `translate(-50%, -50%)`;
-            input.x = 0; input.y = 0;
         };
 
-        joyZone.addEventListener('touchend', resetJoy);
-        
-        // Pulo
-        btnJump.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if(!isJumping) {
-                playerVelocity.y = 8; // Força do pulo
-                isJumping = true;
+        // ==================== PLAYER ====================
+        const Player = ({ position, onPositionChange }) => {
+            const meshRef = React.useRef();
+            const velocity = React.useRef([0, 0, 0]);
+            const { currentLevel, isDialogueOpen, gameState } = useGameStore();
+            const [, get] = useKeyboardControls();
+            
+            const speed = 0.08;
+            const friction = 0.85;
+            
+            useFrame(() => {
+                if (!meshRef.current || gameState !== 'PLAYING' || isDialogueOpen) return;
+                
+                const { forward, backward, left, right } = get();
+                
+                if (forward) velocity.current[2] -= speed;
+                if (backward) velocity.current[2] += speed;
+                if (left) velocity.current[0] -= speed;
+                if (right) velocity.current[0] += speed;
+                
+                velocity.current[0] *= friction;
+                velocity.current[2] *= friction;
+                
+                meshRef.current.position.x += velocity.current[0];
+                meshRef.current.position.z += velocity.current[2];
+                
+                const bounds = { min: -20, max: 20 };
+                meshRef.current.position.x = Math.max(bounds.min, Math.min(bounds.max, meshRef.current.position.x));
+                meshRef.current.position.z = Math.max(bounds.min, Math.min(bounds.max, meshRef.current.position.z));
+                
+                if (Math.abs(velocity.current[0]) > 0.01 || Math.abs(velocity.current[2]) > 0.01) {
+                    const angle = Math.atan2(velocity.current[0], velocity.current[2]);
+                    meshRef.current.rotation.y = angle;
+                }
+                
+                onPositionChange([
+                    meshRef.current.position.x,
+                    meshRef.current.position.y,
+                    meshRef.current.position.z
+                ]);
+            });
+            
+            return React.createElement('group', { ref: meshRef, position: position },
+                React.createElement('mesh', { castShadow: true, position: [0, 0.5, 0] },
+                    React.createElement('capsuleGeometry', { args: [0.3, 0.6, 8, 16] }),
+                    React.createElement('meshStandardMaterial', { color: "#8B4513" })
+                ),
+                React.createElement('mesh', { position: [0, 0.5, 0.4], castShadow: true },
+                    React.createElement('sphereGeometry', { args: [0.15, 16, 16] }),
+                    React.createElement('meshStandardMaterial', { 
+                        color: "#FFA500", 
+                        emissive: "#FF8C00", 
+                        emissiveIntensity: 0.5 
+                    })
+                ),
+                React.createElement('mesh', { position: [0, 1.2, 0], castShadow: true },
+                    React.createElement('sphereGeometry', { args: [0.25, 16, 16] }),
+                    React.createElement('meshStandardMaterial', { color: "#FFE4C4" })
+                )
+            );
+        };
+
+        // ==================== CAMERA CONTROLLER ====================
+        const CameraController = ({ target }) => {
+            const { camera } = useThree();
+            const offset = React.useRef(new THREE.Vector3(0, 5, 8));
+            
+            useFrame(() => {
+                const targetPos = new THREE.Vector3(target[0], target[1], target[2]);
+                const desiredPos = targetPos.clone().add(offset.current);
+                camera.position.lerp(desiredPos, 0.1);
+                const lookTarget = targetPos.clone();
+                lookTarget.y += 1;
+                camera.lookAt(lookTarget);
+            });
+            
+            return null;
+        };
+
+        // ==================== SNOW PARTICLES ====================
+        const SnowParticles = ({ count = 1000 }) => {
+            const points = React.useRef();
+            
+            const particles = React.useMemo(() => {
+                const positions = new Float32Array(count * 3);
+                const velocities = [];
+                
+                for (let i = 0; i < count; i++) {
+                    positions[i * 3] = (Math.random() - 0.5) * 50;
+                    positions[i * 3 + 1] = Math.random() * 20;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+                    velocities.push(Math.random() * 0.02 + 0.01);
+                }
+                
+                return { positions, velocities };
+            }, [count]);
+            
+            useFrame(() => {
+                if (!points.current) return;
+                const positions = points.current.geometry.attributes.position.array;
+                
+                for (let i = 0; i < count; i++) {
+                    positions[i * 3 + 1] -= particles.velocities[i];
+                    if (positions[i * 3 + 1] < 0) {
+                        positions[i * 3 + 1] = 20;
+                        positions[i * 3] = (Math.random() - 0.5) * 50;
+                        positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+                    }
+                }
+                points.current.geometry.attributes.position.needsUpdate = true;
+            });
+            
+            return React.createElement('points', { ref: points },
+                React.createElement('bufferGeometry', null,
+                    React.createElement('bufferAttribute', {
+                        attach: "attributes-position",
+                        count: count,
+                        array: particles.positions,
+                        itemSize: 3
+                    })
+                ),
+                React.createElement('pointsMaterial', {
+                    size: 0.1,
+                    color: "#FFFFFF",
+                    transparent: true,
+                    opacity: 0.8,
+                    sizeAttenuation: true
+                })
+            );
+        };
+
+        // ==================== LAMP POST ====================
+        const LampPost = ({ position }) => {
+            return React.createElement('group', { position: position },
+                React.createElement('mesh', { castShadow: true },
+                    React.createElement('cylinderGeometry', { args: [0.15, 0.15, 4, 8] }),
+                    React.createElement('meshStandardMaterial', { 
+                        color: "#2C2C2C", 
+                        metalness: 0.8, 
+                        roughness: 0.2 
+                    })
+                ),
+                React.createElement('mesh', { position: [0, 2.5, 0], castShadow: true },
+                    React.createElement('sphereGeometry', { args: [0.4, 16, 16] }),
+                    React.createElement('meshStandardMaterial', { 
+                        color: "#FFD700",
+                        emissive: "#FFD700",
+                        emissiveIntensity: 2,
+                        toneMapped: false
+                    })
+                ),
+                React.createElement('pointLight', { 
+                    position: [0, 2.5, 0], 
+                    color: "#FFD700", 
+                    intensity: 10, 
+                    distance: 15, 
+                    castShadow: true 
+                })
+            );
+        };
+
+        // ==================== NPC ====================
+        const NPC = ({ position, npcId, playerPosition, name = "NPC" }) => {
+            const meshRef = React.useRef();
+            const { openDialogue, isDialogueOpen, currentDialogue } = useGameStore();
+            const [isNearby, setIsNearby] = React.useState(false);
+            
+            useFrame(() => {
+                if (!meshRef.current) return;
+                const dist = Math.sqrt(
+                    Math.pow(playerPosition[0] - position[0], 2) +
+                    Math.pow(playerPosition[2] - position[2], 2)
+                );
+                setIsNearby(dist < 2.5);
+            });
+            
+            React.useEffect(() => {
+                const handleKeyPress = (e) => {
+                    if (e.key === 'e' || e.key === 'E') {
+                        if (isNearby && !isDialogueOpen && DIALOGUE_DATA[npcId]) {
+                            openDialogue(DIALOGUE_DATA[npcId]);
+                        }
+                    }
+                };
+                window.addEventListener('keydown', handleKeyPress);
+                return () => window.removeEventListener('keydown', handleKeyPress);
+            }, [isNearby, isDialogueOpen, npcId, openDialogue]);
+            
+            const isTalking = currentDialogue?.id === npcId;
+            
+            return React.createElement('group', { ref: meshRef, position: position },
+                React.createElement('mesh', { castShadow: true, position: [0, 1, 0] },
+                    React.createElement('capsuleGeometry', { args: [0.3, 0.8, 8, 16] }),
+                    React.createElement('meshStandardMaterial', { color: "#8B7355" })
+                ),
+                React.createElement('mesh', { castShadow: true, position: [0, 1.8, 0] },
+                    React.createElement('sphereGeometry', { args: [0.3, 16, 16] }),
+                    React.createElement('meshStandardMaterial', { color: "#D2B48C" })
+                ),
+                isNearby && !isDialogueOpen && React.createElement(Text, {
+                    position: [0, 2.5, 0],
+                    fontSize: 0.3,
+                    color: "#FFD700",
+                    anchorX: "center",
+                    anchorY: "middle",
+                    outlineWidth: 0.05,
+                    outlineColor: "#000000"
+                }, "Press E"),
+                isNearby && React.createElement(Text, {
+                    position: [0, 2.8, 0],
+                    fontSize: 0.2,
+                    color: "#FFFFFF",
+                    anchorX: "center",
+                    anchorY: "middle",
+                    outlineWidth: 0.03,
+                    outlineColor: "#000000"
+                }, name)
+            );
+        };
+
+        // ==================== WARDROBE ====================
+        const Wardrobe = ({ position, playerPosition }) => {
+            const [isNearby, setIsNearby] = React.useState(false);
+            const { setLevel, setGameState } = useGameStore();
+            
+            useFrame(() => {
+                const dist = Math.sqrt(
+                    Math.pow(playerPosition[0] - position[0], 2) +
+                    Math.pow(playerPosition[2] - position[2], 2)
+                );
+                setIsNearby(dist < 1.5);
+            });
+            
+            React.useEffect(() => {
+                const handleKeyPress = (e) => {
+                    if (e.key === 'e' || e.key === 'E') {
+                        if (isNearby) {
+                            setGameState('CUTSCENE');
+                            setTimeout(() => {
+                                setLevel(1);
+                                setGameState('PLAYING');
+                            }, 2000);
+                        }
+                    }
+                };
+                window.addEventListener('keydown', handleKeyPress);
+                return () => window.removeEventListener('keydown', handleKeyPress);
+            }, [isNearby, setLevel, setGameState]);
+            
+            return React.createElement('group', { position: position },
+                React.createElement('mesh', { castShadow: true, receiveShadow: true },
+                    React.createElement('boxGeometry', { args: [2, 3, 1] }),
+                    React.createElement('meshStandardMaterial', { color: "#3E2723", roughness: 0.8 })
+                ),
+                isNearby && React.createElement(Text, {
+                    position: [0, 2, 0.6],
+                    fontSize: 0.3,
+                    color: "#87CEEB",
+                    anchorX: "center",
+                    anchorY: "middle",
+                    outlineWidth: 0.05,
+                    outlineColor: "#000000"
+                }, "Press E to Enter")
+            );
+        };
+
+        // ==================== LEVELS ====================
+        const Level0_Wardrobe = ({ playerPosition }) => {
+            return React.createElement(React.Fragment, null,
+                React.createElement('mesh', { 
+                    receiveShadow: true, 
+                    rotation: [-Math.PI / 2, 0, 0], 
+                    position: [0, 0, 0] 
+                },
+                    React.createElement('planeGeometry', { args: [15, 15] }),
+                    React.createElement('meshStandardMaterial', { color: "#8B4513" })
+                ),
+                React.createElement(Wardrobe, { position: [0, 1.5, -5], playerPosition: playerPosition }),
+                React.createElement('ambientLight', { intensity: 0.4 }),
+                React.createElement('pointLight', { position: [0, 5, 0], intensity: 1 })
+            );
+        };
+
+        const Level1_LanternWaste = ({ playerPosition }) => {
+            return React.createElement(React.Fragment, null,
+                React.createElement('mesh', { 
+                    receiveShadow: true, 
+                    rotation: [-Math.PI / 2, 0, 0], 
+                    position: [0, 0, 0] 
+                },
+                    React.createElement('planeGeometry', { args: [50, 50] }),
+                    React.createElement('meshStandardMaterial', { color: "#E8E8E8", roughness: 0.9 })
+                ),
+                React.createElement(SnowParticles, { count: 1000 }),
+                React.createElement(LampPost, { position: [0, 2, -8] }),
+                React.createElement(NPC, { 
+                    position: [-2, 0, -10], 
+                    npcId: "tumnus", 
+                    playerPosition: playerPosition, 
+                    name: "Mr. Tumnus" 
+                }),
+                React.createElement(Sky, { sunPosition: [0, -1, 0] }),
+                React.createElement('ambientLight', { intensity: 0.2 }),
+                React.createElement('directionalLight', { 
+                    position: [5, 10, 5], 
+                    intensity: 0.3, 
+                    castShadow: true 
+                })
+            );
+        };
+
+        const Level2_Journey = ({ playerPosition }) => {
+            return React.createElement(React.Fragment, null,
+                React.createElement('mesh', { 
+                    receiveShadow: true, 
+                    rotation: [-Math.PI / 2, 0, 0], 
+                    position: [0, 0, 0] 
+                },
+                    React.createElement('planeGeometry', { args: [60, 60] }),
+                    React.createElement('meshStandardMaterial', { color: "#F0F0F0", roughness: 0.9 })
+                ),
+                React.createElement(SnowParticles, { count: 800 }),
+                React.createElement(Sky, { sunPosition: [100, 20, 100] }),
+                React.createElement('ambientLight', { intensity: 0.5 }),
+                React.createElement('directionalLight', { 
+                    position: [10, 10, 5], 
+                    intensity: 0.8, 
+                    castShadow: true 
+                })
+            );
+        };
+
+        const Level3_StoneTable = ({ playerPosition }) => {
+            return React.createElement(React.Fragment, null,
+                React.createElement('mesh', { 
+                    receiveShadow: true, 
+                    rotation: [-Math.PI / 2, 0, 0], 
+                    position: [0, 0, 0] 
+                },
+                    React.createElement('planeGeometry', { args: [60, 60] }),
+                    React.createElement('meshStandardMaterial', { color: "#90EE90", roughness: 0.9 })
+                ),
+                React.createElement(Sky, { sunPosition: [100, 50, 100], turbidity: 8, rayleigh: 2 }),
+                React.createElement('ambientLight', { intensity: 0.6 }),
+                React.createElement('directionalLight', { 
+                    position: [10, 10, 5], 
+                    intensity: 1, 
+                    castShadow: true 
+                })
+            );
+        };
+
+        // ==================== LEVEL MANAGER ====================
+        const LevelManager = ({ playerPosition }) => {
+            const { currentLevel } = useGameStore();
+            
+            switch (currentLevel) {
+                case 0: return React.createElement(Level0_Wardrobe, { playerPosition });
+                case 1: return React.createElement(Level1_LanternWaste, { playerPosition });
+                case 2: return React.createElement(Level2_Journey, { playerPosition });
+                case 3: return React.createElement(Level3_StoneTable, { playerPosition });
+                default: return React.createElement(Level1_LanternWaste, { playerPosition });
             }
-        });
+        };
 
-        // Mouse (PC Debug)
-        let mouseDown = false;
-        joyZone.addEventListener('mousedown', e => { mouseDown=true; startX=e.clientX; startY=e.clientY; });
-        window.addEventListener('mousemove', e => {
-            if(mouseDown) {
-                const x = e.clientX - startX; const y = e.clientY - startY;
-                const dist = Math.min(Math.sqrt(x*x+y*y), 40);
-                const angle = Math.atan2(y, x);
-                input.x = (Math.cos(angle)*dist)/40; input.y = (Math.sin(angle)*dist)/40;
-                joyKnob.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
-            }
-        });
-        window.addEventListener('mouseup', () => { mouseDown=false; resetJoy(); });
-    }
+        // ==================== UI COMPONENTS ====================
+        const DialogueUI = () => {
+            const { 
+                isDialogueOpen, 
+                currentDialogue, 
+                dialogueText, 
+                dialogueIndex,
+                closeDialogue,
+                updateDialogueText 
+            } = useGameStore();
+            
+            React.useEffect(() => {
+                if (!isDialogueOpen || !currentDialogue) return;
+                
+                const currentLine = currentDialogue.lines[dialogueIndex];
+                if (!currentLine) {
+                    closeDialogue();
+                    return;
+                }
+                
+                let charIndex = 0;
+                const typewriterInterval = setInterval(() => {
+                    if (charIndex < currentLine.length) {
+                        updateDialogueText(currentLine.substring(0, charIndex + 1), dialogueIndex);
+                        charIndex++;
+                    } else {
+                        clearInterval(typewriterInterval);
+                    }
+                }, 30);
+                
+                return () => clearInterval(typewriterInterval);
+            }, [isDialogueOpen, currentDialogue, dialogueIndex]);
+            
+            const handleNext = () => {
+                if (dialogueIndex < currentDialogue.lines.length - 1) {
+                    updateDialogueText('', dialogueIndex + 1);
+                } else {
+                    closeDialogue();
+                }
+            };
+            
+            if (!isDialogueOpen || !currentDialogue) return null;
+            
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    bottom: '0',
+                    left: '0',
+                    right: '0',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.7))',
+                    padding: '30px',
+                    color: '#fff',
+                    fontFamily: '"Cinzel", serif',
+                    zIndex: 1000,
+                    borderTop: '3px solid #FFD700'
+                }
+            },
+                React.createElement('div', {
+                    style: { 
+                        fontSize: '20px', 
+                        color: '#FFD700', 
+                        marginBottom: '10px',
+                        textShadow: '0 0 10px rgba(255,215,0,0.5)'
+                    }
+                }, currentDialogue.name),
+                React.createElement('div', {
+                    style: { 
+                        fontSize: '18px', 
+                        minHeight: '60px',
+                        lineHeight: '1.6',
+                        marginBottom: '15px'
+                    }
+                }, dialogueText),
+                React.createElement('button', {
+                    onClick: handleNext,
+                    style: {
+                        background: '#FFD700',
+                        border: 'none',
+                        padding: '12px 30px',
+                        fontSize: '16px',
+                        cursor: 'pointer',
+                        fontFamily: '"Cinzel", serif',
+                        color: '#000',
+                        borderRadius: '5px',
+                        fontWeight: 'bold'
+                    }
+                }, dialogueIndex < currentDialogue.lines.length - 1 ? 'Next' : 'Close')
+            );
+        };
 
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
+        const HUD = () => {
+            const { playerHealth, currentLevel } = useGameStore();
+            const levelNames = ['The Wardrobe', 'Lantern Waste', 'The Journey', 'Stone Table'];
+            
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    top: '20px',
+                    left: '20px',
+                    color: '#fff',
+                    fontFamily: '"Cinzel", serif',
+                    zIndex: 999,
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+                }
+            },
+                React.createElement('div', {
+                    style: { 
+                        fontSize: '24px', 
+                        marginBottom: '15px',
+                        color: '#FFD700'
+                    }
+                }, levelNames[currentLevel]),
+                React.createElement('div', {
+                    style: { 
+                        fontSize: '18px', 
+                        marginBottom: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px'
+                    }
+                },
+                    React.createElement('span', null, 'Health:'),
+                    React.createElement('div', {
+                        style: {
+                            width: '200px',
+                            height: '25px',
+                            background: 'rgba(0,0,0,0.5)',
+                            border: '2px solid #FFD700',
+                            borderRadius: '5px',
+                            overflow: 'hidden'
+                        }
+                    },
+                        React.createElement('div', {
+                            style: {
+                                width: `${playerHealth}%`,
+                                height: '100%',
+                                background: playerHealth > 50 ? '#4CAF50' : playerHealth > 25 ? '#FFA500' : '#F44336',
+                                transition: 'width 0.3s, background 0.3s'
+                            }
+                        })
+                    )
+                )
+            );
+        };
 
-    function startGame() {
-        document.getElementById('loader').style.display = 'none';
-        init();
-        animate();
-        setTimeout(() => {
-            document.getElementById('quest-msg').style.opacity = 1;
-            setTimeout(() => document.getElementById('quest-msg').style.opacity = 0, 4000);
-        }, 1000);
-    }
+        const MenuScreen = () => {
+            const { setGameState, setLevel } = useGameStore();
+            
+            const startGame = () => {
+                setLevel(0);
+                setGameState('PLAYING');
+            };
+            
+            return React.createElement('div', {
+                style: {
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000,
+                    fontFamily: '"Cinzel", serif',
+                    color: '#fff'
+                }
+            },
+                React.createElement('div', { style: { textAlign: 'center' }},
+                    React.createElement('h1', {
+                        style: {
+                            fontSize: '48px',
+                            marginBottom: '20px',
+                            color: '#FFD700',
+                            textShadow: '0 0 20px rgba(255,215,0,0.5)'
+                        }
+                    }, 'THE CHRONICLES OF NARNIA'),
+                    React.createElement('h2', {
+                        style: {
+                            fontSize: '24px',
+                            marginBottom: '50px',
+                            fontStyle: 'italic'
+                        }
+                    }, 'The Lion, the Witch and the Wardrobe'),
+                    React.createElement('button', {
+                        onClick: startGame,
+                        style: {
+                            background: '#FFD700',
+                            border: 'none',
+                            padding: '20px 60px',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            fontFamily: '"Cinzel", serif',
+                            color: '#000',
+                            borderRadius: '10px',
+                            fontWeight: 'bold'
+                        }
+                    }, 'Begin Adventure'),
+                    React.createElement('div', {
+                        style: { marginTop: '50px', fontSize: '16px', color: '#AAA' }
+                    },
+                        React.createElement('p', null, 'Controls: WASD to move, E to interact'),
+                        React.createElement('p', { style: { marginTop: '10px' }}, 'A 3D Adventure Game')
+                    )
+                )
+            );
+        };
 
-</script>
+        // ==================== SCENE ====================
+        const Scene = () => {
+            const [playerPosition, setPlayerPosition] = React.useState([0, 0, 5]);
+            const { gameState } = useGameStore();
+            
+            return React.createElement(React.Fragment, null,
+                React.createElement(PerspectiveCamera, { makeDefault: true, position: [0, 5, 10] }),
+                React.createElement(CameraController, { target: playerPosition }),
+                React.createElement(Player, { 
+                    position: playerPosition, 
+                    onPositionChange: setPlayerPosition
+                }),
+                React.createElement(LevelManager, { playerPosition: playerPosition })
+            );
+        };
+
+        // ==================== MAIN APP ====================
+        function NarniaAdventure() {
+            const { gameState } = useGameStore();
+            
+            return React.createElement('div', { 
+                style: { width: '100vw', height: '100vh', margin: 0, padding: 0, overflow: 'hidden' }
+            },
+                gameState === 'MENU' && React.createElement(MenuScreen),
+                React.createElement(KeyboardControls, {
+                    map: [
+                        { name: 'forward', keys: ['ArrowUp', 'KeyW', 'w', 'W'] },
+                        { name: 'backward', keys: ['ArrowDown', 'KeyS', 's', 'S'] },
+                        { name: 'left', keys: ['ArrowLeft', 'KeyA', 'a', 'A'] },
+                        { name: 'right', keys: ['ArrowRight', 'KeyD', 'd', 'D'] }
+                    ]
+                },
+                    React.createElement(Canvas, { shadows: true },
+                        React.createElement(Scene)
+                    )
+                ),
+                gameState === 'PLAYING' && React.createElement(React.Fragment, null,
+                    React.createElement(HUD),
+                    React.createElement(DialogueUI)
+                )
+            );
+        }
+
+        // ==================== RENDER ====================
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(NarniaAdventure));
+    </script>
 </body>
 </html>
