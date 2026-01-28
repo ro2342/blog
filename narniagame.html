@@ -67,23 +67,26 @@
     <div id="root"></div>
 
     <!-- Import map for ES modules -->
-    <script type="importmap">
-    {
-        "imports": {
-            "react": "https://esm.sh/react@18.2.0",
-            "react-dom": "https://esm.sh/react-dom@18.2.0",
-            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-            "three": "https://esm.sh/three@0.160.0",
-            "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.15.0",
-            "@react-three/drei": "https://esm.sh/@react-three/drei@9.92.0",
-            "zustand": "https://esm.sh/zustand@4.4.7"
-        }
-    }
-    </script>
 
-    <script type="module">
-        import React, { useRef, useState, useEffect, useMemo } from 'react';
-        import ReactDOM from 'react-dom/client';
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="importmap">
+{
+    "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom": "https://esm.sh/react-dom@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "three": "https://esm.sh/three@0.160.0",
+        "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.15.0",
+        "@react-three/drei": "https://esm.sh/@react-three/drei@9.92.0",
+        "zustand": "https://esm.sh/zustand@4.4.7"
+    }
+}
+</script>
+
+<script type="text/babel" data-type="module">
+    import React, { useRef, useState, useEffect, useMemo } from 'react';
+    import ReactDOM from 'react-dom/client';
         import { Canvas, useFrame, useThree } from '@react-three/fiber';
         import { PerspectiveCamera, Text } from '@react-three/drei';
         import { create } from 'zustand';
