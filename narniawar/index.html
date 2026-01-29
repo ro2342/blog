@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Narnia: The Eternal Cycle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Main Game Container -->
+    <div id="game-container">
+        
+        <!-- Era Transition Overlay -->
+        <div id="era-transition" class="hidden">
+            <div class="book-page left-page"></div>
+            <div class="book-page right-page">
+                <div class="era-content">
+                    <h1 class="era-title"></h1>
+                    <p class="era-subtitle"></p>
+                    <div class="era-description"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div id="game-board">
+            <canvas id="map-canvas"></canvas>
+            
+            <!-- Territory Overlays (for interactive regions) -->
+            <div id="territory-overlay"></div>
+            
+            <!-- Map Effects Layer -->
+            <div id="map-effects">
+                <div class="snowfall"></div>
+                <div class="fog-of-war"></div>
+                <div class="burning-edge"></div>
+            </div>
+        </div>
+
+        <!-- UI Panel -->
+        <div id="ui-panel">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="era-indicator">
+                    <span class="era-number">Era 1</span>
+                    <span class="era-name">The Magician's Nephew</span>
+                </div>
+                <div class="turn-counter">
+                    <span class="turn-label">Turn</span>
+                    <span class="turn-number">1</span>
+                </div>
+            </div>
+
+            <!-- Player Info -->
+            <div class="player-info">
+                <div class="player-card active" id="player-1-card">
+                    <div class="player-avatar"></div>
+                    <div class="player-details">
+                        <h3 class="player-name">Player 1</h3>
+                        <div class="player-stats">
+                            <span class="stat territories"><span class="stat-value">0</span> Territories</span>
+                            <span class="stat units"><span class="stat-value">0</span> Units</span>
+                        </div>
+                    </div>
+                    <div class="legacy-traits" id="player-1-legacy"></div>
+                </div>
+                <div class="player-card" id="player-2-card">
+                    <div class="player-avatar"></div>
+                    <div class="player-details">
+                        <h3 class="player-name">Player 2</h3>
+                        <div class="player-stats">
+                            <span class="stat territories"><span class="stat-value">0</span> Territories</span>
+                            <span class="stat units"><span class="stat-value">0</span> Units</span>
+                        </div>
+                    </div>
+                    <div class="legacy-traits" id="player-2-legacy"></div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-panel">
+                <button class="btn-primary" id="btn-end-turn">End Turn</button>
+                <button class="btn-secondary" id="btn-special-action">Special Action</button>
+            </div>
+
+            <!-- Card Hand (for special abilities/events) -->
+            <div class="card-hand" id="card-hand">
+                <div class="hand-label">Hand</div>
+                <div class="cards-container"></div>
+            </div>
+        </div>
+
+        <!-- Unit Selection Modal -->
+        <div id="unit-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 class="modal-title">Deploy Units</h2>
+                <div class="unit-selection" id="unit-selection"></div>
+                <button class="btn-close" id="btn-close-modal">Close</button>
+            </div>
+        </div>
+
+        <!-- Event Notification -->
+        <div id="event-notification" class="hidden">
+            <div class="notification-content">
+                <h3 class="notification-title"></h3>
+                <p class="notification-message"></p>
+            </div>
+        </div>
+
+        <!-- Victory Screen -->
+        <div id="victory-screen" class="hidden">
+            <div class="victory-content">
+                <h1 class="victory-title">The Cycle Ends</h1>
+                <div class="victory-details">
+                    <h2 class="victor-name"></h2>
+                    <p class="victory-message">has triumphed in this age</p>
+                    <div class="legacy-earned">
+                        <h3>Legacy Earned</h3>
+                        <div class="legacy-trait-card"></div>
+                    </div>
+                </div>
+                <button class="btn-primary btn-restart" id="btn-restart">Begin the Next Cycle</button>
+            </div>
+        </div>
+
+        <!-- Intro Screen -->
+        <div id="intro-screen">
+            <div class="intro-content">
+                <h1 class="game-title">Narnia</h1>
+                <h2 class="game-subtitle">The Eternal Cycle</h2>
+                <p class="game-description">
+                    A strategy of ages, where empires rise and fall through the seven eras of Narnia.
+                    What happens when the final battle ends? The world begins anew, and legends become legacies.
+                </p>
+                <button class="btn-primary btn-large" id="btn-start-game">Begin Your Journey</button>
+                <button class="btn-secondary" id="btn-view-legacy">View Legacy</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
