@@ -100,6 +100,29 @@ body {
     display: flex;
 }
 
+/* Fullscreen specific styles */
+#game-container:fullscreen,
+#game-container:-webkit-full-screen,
+#game-container:-moz-full-screen,
+#game-container:-ms-fullscreen {
+    width: 100vw;
+    height: 100vh;
+}
+
+#game-container:fullscreen #game-board,
+#game-container:-webkit-full-screen #game-board,
+#game-container:-moz-full-screen #game-board,
+#game-container:-ms-fullscreen #game-board {
+    height: 100vh;
+}
+
+#game-container:fullscreen #ui-panel,
+#game-container:-webkit-full-screen #ui-panel,
+#game-container:-moz-full-screen #ui-panel,
+#game-container:-ms-fullscreen #ui-panel {
+    height: 100vh;
+}
+
 /* === GAME BOARD === */
 #game-board {
     flex: 1;
@@ -234,7 +257,15 @@ body {
     align-items: center;
     box-shadow: 0 4px 10px var(--shadow);
     transition: background 0.5s ease;
+    position: relative;
 }
+
+/* Force text to always be visible regardless of era */
+.top-bar * {
+    color: var(--parchment) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
 
 .era-indicator {
     display: flex;
@@ -355,9 +386,18 @@ body {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: #CD1C18;
     border: 3px solid var(--gold-leaf);
     box-shadow: 0 4px 8px var(--shadow);
+}
+
+/* Player 1 avatar - Blue to match blue territories */
+#player-1-card .player-avatar {
+    background: linear-gradient(135deg, #5a7c9d 0%, #2d3d52 100%);
+}
+
+/* Player 2 avatar - Red to match red territories */
+#player-2-card .player-avatar {
+    background: linear-gradient(135deg, #b85a5a 0%, #6b3333 100%);
 }
 
 .player1-avatar {
@@ -378,6 +418,7 @@ body {
     font-size: 18px;
     margin-bottom: 6px;
     color: var(--ink);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .player-stats {
@@ -385,7 +426,7 @@ body {
     flex-direction: column;
     gap: 4px;
     font-size: 14px;
-    color: var(--current-secondary);
+    color: var(--ink);
 }
 
 .stat-value {
@@ -439,6 +480,42 @@ body {
     letter-spacing: 1px;
     margin-bottom: 8px;
     box-shadow: 0 2px 6px var(--shadow);
+}
+
+/* Fullscreen button in action panel */
+.btn-fullscreen {
+    background: var(--parchment);
+    color: var(--current-primary);
+    border: 2px solid var(--current-primary);
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 44px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-fullscreen:hover:not(:disabled) {
+    background: var(--current-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--shadow);
+}
+
+.btn-fullscreen:active {
+    transform: translateY(0);
+}
+
+.fullscreen-icon {
+    font-size: 18px;
 }
 
 button {

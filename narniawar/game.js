@@ -278,45 +278,46 @@ class MapRenderer {
             this.ctx.drawImage(this.mapImage, 0, 0, w, h);
             
             // Apply era-specific color overlay
-            this.ctx.globalCompositeOperation = 'multiply';
+            this.ctx.globalCompositeOperation = 'overlay';
+            this.ctx.globalAlpha = 0.4;
             
-            const gradient = this.ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+            const overlay = this.ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
             
             switch (era.id) {
-                case 1: // Genesis - Purple mystical overlay
-                    gradient.addColorStop(0, '#4a3a5a');
-                    gradient.addColorStop(1, '#2a1a3d');
+                case 1: // Genesis - Deep purple mystical
+                    overlay.addColorStop(0, '#6a4a8a');
+                    overlay.addColorStop(1, '#3a2a5a');
                     break;
-                case 2: // Winter - Blue icy overlay
-                    gradient.addColorStop(0, '#c8e0f0');
-                    gradient.addColorStop(1, '#8bb4cc');
+                case 2: // Winter - Icy blue-white
+                    overlay.addColorStop(0, '#e8f4f8');
+                    overlay.addColorStop(1, '#b8d4e0');
                     break;
-                case 3: // Golden Age - Warm golden overlay
-                    gradient.addColorStop(0, '#f5deb3');
-                    gradient.addColorStop(1, '#d4a574');
+                case 3: // Golden Age - Warm golden glow
+                    overlay.addColorStop(0, '#f5e5c5');
+                    overlay.addColorStop(1, '#e4c594');
                     break;
-                case 4: // Dark Age - Green forest overlay
-                    gradient.addColorStop(0, '#7a8a6a');
-                    gradient.addColorStop(1, '#4a5a4a');
+                case 4: // Dark Age - Deep forest green
+                    overlay.addColorStop(0, '#6a7a5a');
+                    overlay.addColorStop(1, '#4a5a3a');
                     break;
-                case 5: // Seafarer - Ocean blue overlay
-                    gradient.addColorStop(0, '#9fcfdf');
-                    gradient.addColorStop(1, '#5a9ab8');
+                case 5: // Seafarer - Ocean blue
+                    overlay.addColorStop(0, '#afdfef');
+                    overlay.addColorStop(1, '#7abacd');
                     break;
-                case 6: // Underland - Deep purple overlay
-                    gradient.addColorStop(0, '#5a4a6a');
-                    gradient.addColorStop(1, '#2d1f3d');
+                case 6: // Underland - Purple shadow
+                    overlay.addColorStop(0, '#7a6a8a');
+                    overlay.addColorStop(1, '#4a3a6a');
                     break;
-                case 7: // Apocalypse - Dark fading overlay
-                    gradient.addColorStop(0, '#6a5a76');
-                    gradient.addColorStop(1, '#3d2955');
+                case 7: // Apocalypse - Darkening purple-black
+                    overlay.addColorStop(0, '#8a7a96');
+                    overlay.addColorStop(1, '#5a4a76');
                     break;
                 default:
-                    gradient.addColorStop(0, '#e8dcc8');
-                    gradient.addColorStop(1, '#c4b8a0');
+                    overlay.addColorStop(0, '#f8ecca');
+                    overlay.addColorStop(1, '#d4c8a0');
             }
             
-            this.ctx.fillStyle = gradient;
+            this.ctx.fillStyle = overlay;
             this.ctx.fillRect(0, 0, w, h);
             
             // Reset composite operation
@@ -735,198 +736,457 @@ class MapRenderer {
     }
 
     drawTerritory(territory, era) {
-        const radius = 45;
         const isSelected = this.parent && 
                           (this.parent.selectedTerritory === territory || 
                            this.parent.attackFromTerritory === territory);
         
-        // Determine color based on owner with rich, saturated colors
-        let fillColor = '#8b7a6a'; // Neutral parchment
-        let strokeColor = '#3d3126';
+        // Draw territory as a region polygon (like a country border)
+        this.drawTerritoryRegion(territory, era, isSelected);
+        
+        // Draw iconic landmark for the territory
+        this.drawTerritoryLandmark(territory, era);
+        
+        // Draw unit count and info
+        this.drawTerritoryInfo(territory, era);
+    }
+    
+    /**
+     * Draw territory as a region with borders (like Risk countries)
+     */
+    drawTerritoryRegion(territory, era, isSelected) {
+        // Define region size - MUCH LARGER for visibility
+        const regionSize = 80; // Increased from 60
+        
+        // Determine colors
+        let fillColor = 'rgba(139, 122, 106, 0.4)'; // Neutral parchment - more opaque
+        let strokeColor = '#5a4a3a';
         let glowColor = 'transparent';
         
         if (territory.owner === 1) {
-            fillColor = '#5a7c9d'; // Rich blue
+            fillColor = 'rgba(90, 124, 157, 0.65)'; // Player 1 blue overlay - more opaque
             strokeColor = '#2d3d52';
             glowColor = 'rgba(90, 124, 157, 0.4)';
         } else if (territory.owner === 2) {
-            fillColor = '#b85a5a'; // Rich red
+            fillColor = 'rgba(184, 90, 90, 0.65)'; // Player 2 red overlay - more opaque
             strokeColor = '#6b3333';
             glowColor = 'rgba(184, 90, 90, 0.4)';
         }
         
-        // Special styling for Genesis (blooming effect)
-        if (era.id === 1 && !territory.owner) {
-            fillColor = 'rgba(120, 100, 140, 0.3)';
-            strokeColor = 'rgba(150, 120, 170, 0.5)';
-        }
-        
-        // Special styling for Era 7 (Stable)
-        if (era.id === 7 && territory.isStable) {
-            fillColor = '#d4af37'; // Gold
-            strokeColor = '#8b7500';
-            glowColor = 'rgba(212, 175, 55, 0.6)';
-        }
-        
         // Selection glow
         if (isSelected) {
-            this.ctx.shadowBlur = 25;
+            this.ctx.shadowBlur = 30;
             this.ctx.shadowColor = '#d4af37';
         }
         
-        // Draw territory glow
-        if (glowColor !== 'transparent') {
+        // Draw region glow first
+        if (territory.owner) {
             this.ctx.beginPath();
-            this.ctx.arc(territory.x, territory.y, radius + 10, 0, Math.PI * 2);
+            this.ctx.arc(territory.x, territory.y, regionSize + 15, 0, Math.PI * 2);
             this.ctx.fillStyle = glowColor;
             this.ctx.fill();
         }
         
-        // Draw main territory circle with hand-drawn effect
+        // Draw irregular region shape (like a country)
         this.ctx.beginPath();
-        
-        // Create irregular hand-drawn circle
-        const points = 16;
+        const points = 8;
         for (let i = 0; i < points; i++) {
             const angle = (i / points) * Math.PI * 2;
-            const variance = (Math.sin(i * 2.3) * 3) + (Math.cos(i * 1.7) * 2);
-            const r = radius + variance;
+            const variance = (Math.sin(i * 2.1 + territory.id) * 15) + (Math.cos(i * 1.8 + territory.id) * 12);
+            const r = regionSize + variance;
             const x = territory.x + Math.cos(angle) * r;
             const y = territory.y + Math.sin(angle) * r;
             
             if (i === 0) {
                 this.ctx.moveTo(x, y);
             } else {
-                this.ctx.lineTo(x, y);
+                // Smooth curves between points
+                const prevAngle = ((i - 1) / points) * Math.PI * 2;
+                const prevVariance = (Math.sin((i-1) * 2.1 + territory.id) * 15) + (Math.cos((i-1) * 1.8 + territory.id) * 12);
+                const prevR = regionSize + prevVariance;
+                const prevX = territory.x + Math.cos(prevAngle) * prevR;
+                const prevY = territory.y + Math.sin(prevAngle) * prevR;
+                
+                const cpX = (prevX + x) / 2 + (Math.random() - 0.5) * 10;
+                const cpY = (prevY + y) / 2 + (Math.random() - 0.5) * 10;
+                this.ctx.quadraticCurveTo(cpX, cpY, x, y);
             }
         }
         this.ctx.closePath();
         
-        // Fill with gradient
-        const gradient = this.ctx.createRadialGradient(
-            territory.x - 10, territory.y - 10, 0,
-            territory.x, territory.y, radius
-        );
-        gradient.addColorStop(0, this.lightenColor(fillColor, 20));
-        gradient.addColorStop(1, fillColor);
-        
-        this.ctx.fillStyle = gradient;
+        // Fill the region
+        this.ctx.fillStyle = fillColor;
         this.ctx.fill();
         
-        // Stroke with texture
+        // Border with thick stroke
         this.ctx.strokeStyle = strokeColor;
         this.ctx.lineWidth = 4;
         this.ctx.stroke();
         
-        // Reset shadow
-        this.ctx.shadowBlur = 0;
-        
-        // Draw inner detail circle
-        this.ctx.beginPath();
-        this.ctx.arc(territory.x, territory.y, radius - 8, 0, Math.PI * 2);
-        this.ctx.strokeStyle = `${strokeColor}40`;
-        this.ctx.lineWidth = 1;
-        this.ctx.stroke();
-        
-        // Draw territory icon based on type
-        this.drawTerritoryIcon(territory, era);
-        
-        // Draw territory name with elegant text
-        this.ctx.fillStyle = strokeColor;
-        this.ctx.font = 'bold 13px Cinzel, serif';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        
-        // Text shadow for readability
-        this.ctx.shadowBlur = 4;
-        this.ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-        this.ctx.fillText(territory.name, territory.x, territory.y - radius - 18);
-        this.ctx.shadowBlur = 0;
-        
-        // Draw unit count with larger, more visible numbers
-        if (territory.units.length > 0) {
-            const unitCount = territory.units.filter(u => !u.isPetrified).length;
-            
-            // Unit count background
-            this.ctx.beginPath();
-            this.ctx.arc(territory.x, territory.y, 20, 0, Math.PI * 2);
-            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            this.ctx.fill();
-            this.ctx.strokeStyle = strokeColor;
+        // Inner highlight
+        if (territory.owner) {
+            this.ctx.strokeStyle = `${strokeColor}60`;
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
-            
-            // Unit count number
-            this.ctx.fillStyle = territory.owner === 1 ? '#2d3d52' : '#6b3333';
-            this.ctx.font = 'bold 22px Cinzel, serif';
-            this.ctx.fillText(unitCount, territory.x, territory.y + 2);
         }
         
-        // Draw petrified units indicator
-        const petrifiedCount = territory.units.filter(u => u.isPetrified).length;
-        if (petrifiedCount > 0) {
-            this.ctx.fillStyle = '#e8f4f8';
-            this.ctx.font = 'bold 14px serif';
-            this.ctx.fillText(`❄️${petrifiedCount}`, territory.x + 25, territory.y + 25);
-        }
-        
-        // Draw territory type badge
-        const typeEmoji = {
-            'FOREST': '🌲',
-            'MOUNTAIN': '⛰️',
-            'COASTAL': '🌊',
-            'DESERT': '🏜️',
-            'LAND': '🌿'
-        };
-        
-        if (typeEmoji[territory.type]) {
-            this.ctx.font = '16px serif';
-            this.ctx.fillText(typeEmoji[territory.type], territory.x + 30, territory.y - 30);
-        }
+        // Reset shadow
+        this.ctx.shadowBlur = 0;
     }
     
-    drawTerritoryIcon(territory, era) {
-        // Draw small decorative icon in center based on type/era
+    /**
+     * Draw iconic landmarks for each territory
+     */
+    drawTerritoryLandmark(territory, era) {
         this.ctx.save();
-        this.ctx.globalAlpha = 0.2;
-        this.ctx.strokeStyle = '#3d3126';
-        this.ctx.lineWidth = 2;
         
-        // Simple decorative pattern
-        switch(territory.type) {
-            case 'FOREST':
-                // Tree pattern
-                this.ctx.beginPath();
-                this.ctx.moveTo(territory.x, territory.y - 10);
-                this.ctx.lineTo(territory.x - 8, territory.y + 10);
-                this.ctx.lineTo(territory.x + 8, territory.y + 10);
-                this.ctx.closePath();
-                this.ctx.stroke();
+        switch(territory.name) {
+            case 'Lantern Waste':
+                this.drawLampPost(territory.x, territory.y);
                 break;
-            case 'MOUNTAIN':
-                // Peak pattern
-                this.ctx.beginPath();
-                this.ctx.moveTo(territory.x - 10, territory.y + 10);
-                this.ctx.lineTo(territory.x, territory.y - 10);
-                this.ctx.lineTo(territory.x + 10, territory.y + 10);
-                this.ctx.stroke();
+            case 'Cair Paravel':
+                this.drawCastle(territory.x, territory.y);
                 break;
+            case 'The Stone Table':
+                this.drawStoneTable(territory.x, territory.y);
+                break;
+            case 'Beaversdam':
+                this.drawDam(territory.x, territory.y);
+                break;
+            case 'Ettinsmoor':
+            case 'Archenland':
+                this.drawMountain(territory.x, territory.y);
+                break;
+            case 'The Lone Islands':
+            case 'Galma':
+                this.drawIsland(territory.x, territory.y);
+                break;
+            case 'Calormen':
+            case 'Tashbaan':
+                this.drawDesertCity(territory.x, territory.y);
+                break;
+            case 'The Great Desert':
+                this.drawDesertDune(territory.x, territory.y);
+                break;
+            case 'Dancing Lawn':
+                this.drawTrees(territory.x, territory.y);
+                break;
+            case 'The Western Wild':
+                this.drawWilderness(territory.x, territory.y);
+                break;
+            case 'Witch\'s Castle':
+                this.drawWitchCastle(territory.x, territory.y);
+                break;
+            default:
+                // Generic landmark
+                this.drawGenericLandmark(territory.x, territory.y);
         }
         
         this.ctx.restore();
     }
     
-    lightenColor(color, percent) {
-        // Simple color lightening
-        const num = parseInt(color.replace('#', ''), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) + amt;
-        const G = (num >> 8 & 0x00FF) + amt;
-        const B = (num & 0x0000FF) + amt;
-        return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-                     (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-                     (B < 255 ? B < 1 ? 0 : B : 255))
-                     .toString(16).slice(1);
+    // Landmark drawing methods
+    drawLampPost(x, y) {
+        this.ctx.fillStyle = '#8b7a6a';
+        this.ctx.strokeStyle = '#4a3a2a';
+        this.ctx.lineWidth = 2;
+        
+        // Post
+        this.ctx.fillRect(x - 3, y - 15, 6, 30);
+        this.ctx.strokeRect(x - 3, y - 15, 6, 30);
+        
+        // Lamp top
+        this.ctx.beginPath();
+        this.ctx.arc(x, y - 18, 8, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#f4d03f';
+        this.ctx.fill();
+        this.ctx.strokeStyle = '#8b7500';
+        this.ctx.stroke();
+        
+        // Glow
+        this.ctx.beginPath();
+        this.ctx.arc(x, y - 18, 12, 0, Math.PI * 2);
+        this.ctx.fillStyle = 'rgba(244, 208, 63, 0.3)';
+        this.ctx.fill();
+    }
+    
+    drawCastle(x, y) {
+        this.ctx.fillStyle = '#8b7a6a';
+        this.ctx.strokeStyle = '#4a3a2a';
+        this.ctx.lineWidth = 2;
+        
+        // Main tower
+        this.ctx.fillRect(x - 12, y - 8, 24, 20);
+        this.ctx.strokeRect(x - 12, y - 8, 24, 20);
+        
+        // Left turret
+        this.ctx.fillRect(x - 18, y - 2, 8, 14);
+        this.ctx.strokeRect(x - 18, y - 2, 8, 14);
+        
+        // Right turret
+        this.ctx.fillRect(x + 10, y - 2, 8, 14);
+        this.ctx.strokeRect(x + 10, y - 2, 8, 14);
+        
+        // Flags
+        this.ctx.fillStyle = '#d4af37';
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y - 8);
+        this.ctx.lineTo(x + 8, y - 5);
+        this.ctx.lineTo(x, y - 2);
+        this.ctx.fill();
+    }
+    
+    drawStoneTable(x, y) {
+        this.ctx.fillStyle = '#9b9b9b';
+        this.ctx.strokeStyle = '#5a5a5a';
+        this.ctx.lineWidth = 2;
+        
+        // Table top
+        this.ctx.fillRect(x - 20, y - 5, 40, 8);
+        this.ctx.strokeRect(x - 20, y - 5, 40, 8);
+        
+        // Legs
+        this.ctx.fillRect(x - 18, y + 3, 4, 10);
+        this.ctx.fillRect(x + 14, y + 3, 4, 10);
+        
+        // Cracks
+        this.ctx.strokeStyle = '#4a4a4a';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - 10, y - 5);
+        this.ctx.lineTo(x - 5, y + 3);
+        this.ctx.stroke();
+    }
+    
+    drawDam(x, y) {
+        this.ctx.fillStyle = '#8b6a3d';
+        this.ctx.strokeStyle = '#5a4a2d';
+        this.ctx.lineWidth = 2;
+        
+        // Dam structure
+        for (let i = 0; i < 4; i++) {
+            this.ctx.fillRect(x - 15 + i * 8, y - 8 + i * 3, 8, 15 - i * 3);
+        }
+        
+        // Water
+        this.ctx.fillStyle = 'rgba(90, 154, 184, 0.5)';
+        this.ctx.fillRect(x - 20, y - 10, 15, 8);
+    }
+    
+    drawMountain(x, y) {
+        this.ctx.fillStyle = '#7a7a7a';
+        this.ctx.strokeStyle = '#4a4a4a';
+        this.ctx.lineWidth = 2;
+        
+        // Mountain peak
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - 15, y + 10);
+        this.ctx.lineTo(x, y - 15);
+        this.ctx.lineTo(x + 15, y + 10);
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        // Snow cap
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - 5, y - 5);
+        this.ctx.lineTo(x, y - 15);
+        this.ctx.lineTo(x + 5, y - 5);
+        this.ctx.fill();
+    }
+    
+    drawIsland(x, y) {
+        this.ctx.fillStyle = '#8b7a5a';
+        this.ctx.strokeStyle = '#f4e8d4';
+        this.ctx.lineWidth = 2;
+        
+        // Island shape
+        this.ctx.beginPath();
+        this.ctx.ellipse(x, y, 20, 12, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        // Palm tree
+        this.ctx.strokeStyle = '#5a4a2a';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y);
+        this.ctx.lineTo(x + 2, y - 12);
+        this.ctx.stroke();
+        
+        // Palm leaves
+        this.ctx.strokeStyle = '#4a7a3a';
+        for (let i = 0; i < 5; i++) {
+            const angle = (i / 5) * Math.PI * 2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + 2, y - 12);
+            this.ctx.lineTo(x + 2 + Math.cos(angle) * 8, y - 12 + Math.sin(angle) * 8);
+            this.ctx.stroke();
+        }
+    }
+    
+    drawDesertCity(x, y) {
+        this.ctx.fillStyle = '#d4a574';
+        this.ctx.strokeStyle = '#8b5a2b';
+        this.ctx.lineWidth = 2;
+        
+        // Domed building
+        this.ctx.fillRect(x - 12, y - 2, 24, 15);
+        this.ctx.strokeRect(x - 12, y - 2, 24, 15);
+        
+        // Dome
+        this.ctx.beginPath();
+        this.ctx.arc(x, y - 2, 12, Math.PI, 0, false);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        // Spire
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - 2, y - 14);
+        this.ctx.lineTo(x, y - 20);
+        this.ctx.lineTo(x + 2, y - 14);
+        this.ctx.fill();
+    }
+    
+    drawDesertDune(x, y) {
+        this.ctx.fillStyle = 'rgba(222, 184, 135, 0.6)';
+        
+        // Dunes
+        this.ctx.beginPath();
+        this.ctx.ellipse(x - 10, y + 5, 15, 8, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        this.ctx.beginPath();
+        this.ctx.ellipse(x + 8, y + 8, 12, 6, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+    
+    drawTrees(x, y) {
+        this.ctx.fillStyle = '#3a5a3a';
+        
+        // Multiple trees
+        for (let i = 0; i < 3; i++) {
+            const offsetX = (i - 1) * 12;
+            // Tree trunk
+            this.ctx.fillStyle = '#5a4a2a';
+            this.ctx.fillRect(x + offsetX - 2, y, 4, 10);
+            
+            // Tree top
+            this.ctx.fillStyle = '#3a5a3a';
+            this.ctx.beginPath();
+            this.ctx.arc(x + offsetX, y - 3, 8, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+    }
+    
+    drawWilderness(x, y) {
+        this.ctx.fillStyle = '#4a5a4a';
+        
+        // Rough terrain
+        for (let i = 0; i < 5; i++) {
+            const offsetX = (Math.random() - 0.5) * 20;
+            const offsetY = (Math.random() - 0.5) * 15;
+            this.ctx.beginPath();
+            this.ctx.arc(x + offsetX, y + offsetY, 5, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+    }
+    
+    drawGenericLandmark(x, y) {
+        // Simple marker
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 5, 0, Math.PI * 2);
+        this.ctx.fillStyle = '#8b7a6a';
+        this.ctx.fill();
+        this.ctx.strokeStyle = '#4a3a2a';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+    }
+    
+    drawWitchCastle(x, y) {
+        // Dark, foreboding castle
+        this.ctx.fillStyle = '#3a3a4a';
+        this.ctx.strokeStyle = '#1a1a2a';
+        this.ctx.lineWidth = 2;
+        
+        // Main dark tower
+        this.ctx.fillRect(x - 15, y - 10, 30, 25);
+        this.ctx.strokeRect(x - 15, y - 10, 30, 25);
+        
+        // Pointed towers
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - 15, y - 10);
+        this.ctx.lineTo(x - 8, y - 20);
+        this.ctx.lineTo(x - 1, y - 10);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + 1, y - 10);
+        this.ctx.lineTo(x + 8, y - 20);
+        this.ctx.lineTo(x + 15, y - 10);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        // Icy effect
+        this.ctx.strokeStyle = '#c8e0f0';
+        this.ctx.lineWidth = 1;
+        for (let i = 0; i < 3; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x - 15 + i * 10, y - 10);
+            this.ctx.lineTo(x - 15 + i * 10, y + 15);
+            this.ctx.stroke();
+        }
+    }
+    
+    /**
+     * Draw territory name and unit count
+     */
+    drawTerritoryInfo(territory, era) {
+        const strokeColor = territory.owner === 1 ? '#2d3d52' : territory.owner === 2 ? '#6b3333' : '#5a4a3a';
+        
+        // Territory name
+        this.ctx.fillStyle = strokeColor;
+        this.ctx.font = 'bold 12px Cinzel, serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        // Text background
+        this.ctx.shadowBlur = 4;
+        this.ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.fillText(territory.name, territory.x, territory.y + 45);
+        this.ctx.shadowBlur = 0;
+        
+        // Unit count with circular badge
+        if (territory.units.length > 0) {
+            const unitCount = territory.units.filter(u => !u.isPetrified).length;
+            
+            // Badge position (top right of territory)
+            const badgeX = territory.x + 35;
+            const badgeY = territory.y - 30;
+            
+            // Badge background
+            this.ctx.beginPath();
+            this.ctx.arc(badgeX, badgeY, 18, 0, Math.PI * 2);
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            this.ctx.fill();
+            this.ctx.strokeStyle = strokeColor;
+            this.ctx.lineWidth = 3;
+            this.ctx.stroke();
+            
+            // Unit icon/number
+            this.ctx.fillStyle = strokeColor;
+            this.ctx.font = 'bold 18px Cinzel, serif';
+            this.ctx.fillText(unitCount, badgeX, badgeY + 1);
+        }
+        
+        // Petrified units indicator
+        const petrifiedCount = territory.units.filter(u => u.isPetrified).length;
+        if (petrifiedCount > 0) {
+            this.ctx.fillStyle = '#e8f4f8';
+            this.ctx.font = 'bold 12px serif';
+            this.ctx.fillText(`❄️${petrifiedCount}`, territory.x + 35, territory.y + 35);
+        }
     }
 }
 
@@ -1047,6 +1307,7 @@ class GameLoop {
         this.unclaimedTerritories = this.territories.filter(t => !t.owner);
         this.reinforcementsToPlace = 0;
         this.hasAttacked = false;
+        this.resizeTimeout = null;
         
         this.initializeUI();
         this.applyEraTheme();
@@ -1054,49 +1315,70 @@ class GameLoop {
     }
 
     initializeTerritories() {
-        // Create territories positioned on the actual Narnia map
-        // Coordinates are percentages of canvas size to match map features
+        // Create territories positioned EXACTLY on the actual Narnia map
+        // Coordinates carefully matched to the map image
         const canvas = document.getElementById('map-canvas');
         const w = canvas.parentElement.clientWidth || 800;
         const h = canvas.parentElement.clientHeight || 600;
         
-        // Strategic map layout based on the actual Narnia map
+        // Territories positioned to match the actual Pauline Baynes map
         const territories = [
-            // Western Narnia - Forests
-            new Territory(1, 'Lantern Waste', w * 0.20, h * 0.35, [2, 5, 8], 'FOREST'),
-            new Territory(2, 'The Western Wild', w * 0.15, h * 0.55, [1, 8, 13], 'FOREST'),
+            // Far Northwest - Lantern Waste (where Lucy enters)
+            new Territory(1, 'Lantern Waste', w * 0.18, h * 0.32, [2, 5, 16], 'FOREST'),
             
-            // Northern Narnia - Mountains and wilderness
-            new Territory(3, 'Ettinsmoor', w * 0.45, h * 0.20, [4, 6], 'MOUNTAIN'),
-            new Territory(4, 'The Wild Lands', w * 0.65, h * 0.25, [3, 6, 7], 'FOREST'),
+            // West - The Western Wild
+            new Territory(2, 'The Western Wild', w * 0.12, h * 0.50, [1, 8], 'FOREST'),
             
-            // Central Narnia - Heartland
-            new Territory(5, 'Beaversdam', w * 0.35, h * 0.45, [1, 6, 8, 10], 'FOREST'),
-            new Territory(6, 'Dancing Lawn', w * 0.50, h * 0.45, [3, 4, 5, 7, 11], 'LAND'),
-            new Territory(7, 'Cair Paravel', w * 0.70, h * 0.45, [4, 6, 9, 11], 'COASTAL'),
+            // Far North - Ettinsmoor (giant country)
+            new Territory(3, 'Ettinsmoor', w * 0.42, h * 0.18, [4, 6, 16], 'MOUNTAIN'),
             
-            // Southern Central - Stone Table region
-            new Territory(8, 'The Stone Table', w * 0.25, h * 0.65, [1, 2, 5, 10], 'MOUNTAIN'),
-            new Territory(9, 'The Lone Islands', w * 0.80, h * 0.60, [7, 12], 'COASTAL'),
+            // Northeast - Wild Lands of the North
+            new Territory(4, 'The Wild Lands', w * 0.62, h * 0.22, [3, 6, 7], 'FOREST'),
             
-            // Southern Narnia - Archenland border
-            new Territory(10, 'Archenland', w * 0.35, h * 0.75, [5, 8, 11, 13, 14], 'MOUNTAIN'),
-            new Territory(11, 'Glasswater Creek', w * 0.55, h * 0.70, [6, 7, 10, 12, 15], 'LAND'),
-            new Territory(12, 'Galma', w * 0.75, h * 0.75, [9, 11, 15], 'COASTAL'),
+            // Central West - Beaversdam (Mr. & Mrs. Beaver)
+            new Territory(5, 'Beaversdam', w * 0.28, h * 0.42, [1, 6, 8], 'FOREST'),
             
-            // Far South - Desert kingdoms
-            new Territory(13, 'The Great Desert', w * 0.25, h * 0.88, [2, 10, 14], 'DESERT'),
-            new Territory(14, 'Tashbaan', w * 0.45, h * 0.90, [10, 13, 15], 'DESERT'),
-            new Territory(15, 'Calormen', w * 0.65, h * 0.88, [11, 12, 14], 'DESERT')
+            // Central - Dancing Lawn (heart of Old Narnia)
+            new Territory(6, 'Dancing Lawn', w * 0.45, h * 0.45, [3, 4, 5, 7, 10, 11, 16], 'LAND'),
+            
+            // East Coast - Cair Paravel (castle by the sea)
+            new Territory(7, 'Cair Paravel', w * 0.72, h * 0.42, [4, 6, 9], 'COASTAL'),
+            
+            // Southwest - Stone Table region
+            new Territory(8, 'The Stone Table', w * 0.22, h * 0.58, [2, 5, 10, 13], 'MOUNTAIN'),
+            
+            // Far East - The Lone Islands (in the ocean)
+            new Territory(9, 'The Lone Islands', w * 0.82, h * 0.52, [7, 12], 'COASTAL'),
+            
+            // South Central - Archenland (mountain pass)
+            new Territory(10, 'Archenland', w * 0.38, h * 0.68, [6, 8, 11, 13, 14], 'MOUNTAIN'),
+            
+            // Central South - Glasswater Creek
+            new Territory(11, 'Glasswater Creek', w * 0.52, h * 0.62, [6, 10, 12, 15], 'LAND'),
+            
+            // Southeast Coast - Galma
+            new Territory(12, 'Galma', w * 0.72, h * 0.68, [9, 11, 15], 'COASTAL'),
+            
+            // Far Southwest - Mountain border (near desert)
+            new Territory(13, 'The Great Desert', w * 0.28, h * 0.82, [8, 10, 14], 'DESERT'),
+            
+            // South - Tashbaan (desert capital)
+            new Territory(14, 'Tashbaan', w * 0.45, h * 0.85, [10, 13, 15], 'DESERT'),
+            
+            // Far South - Calormen (southern empire)
+            new Territory(15, 'Calormen', w * 0.62, h * 0.82, [11, 12, 14], 'DESERT'),
+            
+            // North Central - Witch's Castle (between Lantern Waste and Ettinsmoor)
+            new Territory(16, 'Witch\'s Castle', w * 0.32, h * 0.26, [1, 3, 6], 'MOUNTAIN')
         ];
         
-        // Set starting territories - North vs South divide
-        territories[0].owner = 1; // Lantern Waste (Northwest)
+        // Set starting territories - Northwest vs Far South
+        territories[0].owner = 1; // Lantern Waste (Player 1)
         territories[0].addUnit(new Unit('FAUN', 1, 1));
         territories[0].addUnit(new Unit('FAUN', 1, 1));
         territories[0].addUnit(new Unit('FAUN', 1, 1));
         
-        territories[14].owner = 2; // Calormen (Far South)
+        territories[14].owner = 2; // Calormen (Player 2)
         territories[14].addUnit(new Unit('FAUN', 2, 15));
         territories[14].addUnit(new Unit('FAUN', 2, 15));
         territories[14].addUnit(new Unit('FAUN', 2, 15));
@@ -1108,6 +1390,11 @@ class GameLoop {
         // Start Game button
         document.getElementById('btn-start-game').addEventListener('click', () => {
             this.startGame();
+        });
+        
+        // Fullscreen button
+        document.getElementById('btn-fullscreen').addEventListener('click', () => {
+            this.toggleFullscreen();
         });
         
         // End Turn button
@@ -1128,6 +1415,115 @@ class GameLoop {
         // Canvas click for territory selection
         document.getElementById('map-canvas').addEventListener('click', (e) => {
             this.handleCanvasClick(e);
+        });
+        
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            this.onFullscreenChange();
+        });
+        document.addEventListener('webkitfullscreenchange', () => {
+            this.onFullscreenChange();
+        });
+        
+        // Listen for window resize
+        window.addEventListener('resize', () => {
+            this.onWindowResize();
+        });
+    }
+    
+    onWindowResize() {
+        // Debounce resize to avoid too many updates
+        clearTimeout(this.resizeTimeout);
+        this.resizeTimeout = setTimeout(() => {
+            this.updateTerritoryPositions();
+            this.mapRenderer.resizeCanvas();
+            this.render();
+        }, 150);
+    }
+    
+    toggleFullscreen() {
+        const container = document.getElementById('game-container');
+        
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            // Enter fullscreen
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            } else if (container.mozRequestFullScreen) {
+                container.mozRequestFullScreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            }
+        } else {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+    }
+    
+    onFullscreenChange() {
+        const btn = document.getElementById('btn-fullscreen');
+        const icon = btn.querySelector('.fullscreen-icon');
+        
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            // In fullscreen - show exit icon
+            icon.textContent = '⛶';
+            this.showNotification('📱 Fullscreen Mode', 'Press the button again or ESC to exit fullscreen', 2000);
+        } else {
+            // Not in fullscreen - show enter icon
+            icon.textContent = '⛶';
+        }
+        
+        // Wait for resize to complete, then update territory positions
+        setTimeout(() => {
+            this.updateTerritoryPositions();
+            this.mapRenderer.resizeCanvas();
+            this.render();
+        }, 100);
+    }
+    
+    /**
+     * Update territory positions to match new canvas dimensions
+     */
+    updateTerritoryPositions() {
+        const canvas = document.getElementById('map-canvas');
+        const w = canvas.parentElement.clientWidth;
+        const h = canvas.parentElement.clientHeight;
+        
+        // Update each territory's position based on new dimensions
+        // These match the actual Narnia map locations
+        const positions = [
+            { x: 0.18, y: 0.32 }, // 0: Lantern Waste (northwest)
+            { x: 0.12, y: 0.50 }, // 1: Western Wild (west)
+            { x: 0.42, y: 0.18 }, // 2: Ettinsmoor (far north)
+            { x: 0.62, y: 0.22 }, // 3: Wild Lands (northeast)
+            { x: 0.28, y: 0.42 }, // 4: Beaversdam (central west)
+            { x: 0.45, y: 0.45 }, // 5: Dancing Lawn (center)
+            { x: 0.72, y: 0.42 }, // 6: Cair Paravel (east coast)
+            { x: 0.22, y: 0.58 }, // 7: Stone Table (southwest)
+            { x: 0.82, y: 0.52 }, // 8: Lone Islands (far east)
+            { x: 0.38, y: 0.68 }, // 9: Archenland (south central)
+            { x: 0.52, y: 0.62 }, // 10: Glasswater Creek (central south)
+            { x: 0.72, y: 0.68 }, // 11: Galma (southeast coast)
+            { x: 0.28, y: 0.82 }, // 12: Great Desert (far southwest)
+            { x: 0.45, y: 0.85 }, // 13: Tashbaan (south)
+            { x: 0.62, y: 0.82 }, // 14: Calormen (far south)
+            { x: 0.32, y: 0.26 }  // 15: Witch's Castle (north central)
+        ];
+        
+        this.territories.forEach((territory, index) => {
+            if (positions[index]) {
+                territory.x = w * positions[index].x;
+                territory.y = h * positions[index].y;
+            }
         });
     }
 
