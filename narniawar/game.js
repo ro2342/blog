@@ -1332,6 +1332,44 @@ class SoundManager {
 }
 
 // ============================================
+// WAKE LOCK MANAGER CLASS (Prevents screen lock)
+// ============================================
+
+class WakeLockManager {
+    constructor() {
+        this.wakeLock = null;
+    }
+
+    async request() {
+        if ('wakeLock' in navigator) {
+            try {
+                this.wakeLock = await navigator.wakeLock.request('screen');
+                console.log('🛡️ Screen Wake Lock acquired.');
+
+                this.wakeLock.addEventListener('release', () => {
+                    console.log('🛡️ Screen Wake Lock was released.');
+                });
+            } catch (err) {
+                console.error(`🛡️ Failed to acquire Wake Lock: ${err.name}, ${err.message}`);
+            }
+        } else {
+            console.warn('🛡️ Screen Wake Lock API not supported in this browser.');
+        }
+    }
+
+    async release() {
+        if (this.wakeLock) {
+            try {
+                await this.wakeLock.release();
+                this.wakeLock = null;
+            } catch (err) {
+                console.error(`🛡️ Failed to release Wake Lock: ${err.name}, ${err.message}`);
+            }
+        }
+    }
+}
+
+// ============================================
 // GAME LOOP CLASS (Main State Machine)
 // ============================================
 
@@ -1347,6 +1385,7 @@ class GameLoop {
         this.mapRenderer = new MapRenderer(document.getElementById('map-canvas'), this);
         this.cycleManager = new CycleManager();
         this.soundManager = new SoundManager();
+        this.wakeLockManager = new WakeLockManager();
 
         this.selectedTerritory = null;
         this.attackFromTerritory = null;
@@ -1474,6 +1513,13 @@ class GameLoop {
         // Listen for window resize
         window.addEventListener('resize', () => {
             this.onWindowResize();
+        });
+
+        // Re-acquire wake lock on visibility change
+        document.addEventListener('visibilitychange', async () => {
+            if (this.wakeLockManager && document.visibilityState === 'visible' && this.state !== 'INTRO') {
+                await this.wakeLockManager.request();
+            }
         });
     }
 
@@ -1610,6 +1656,9 @@ class GameLoop {
         this.soundManager.play('gentleWind');
         this.updatePhaseUI();
         this.render();
+
+        // Request screen wake lock when game starts
+        this.wakeLockManager.request();
     }
 
     showTutorial() {
