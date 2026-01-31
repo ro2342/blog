@@ -754,8 +754,8 @@ class MapRenderer {
      * Draw territory as a region with borders (like Risk countries)
      */
     drawTerritoryRegion(territory, era, isSelected) {
-        // Define region size - MUCH LARGER for visibility
-        const regionSize = 80; // Increased from 60
+        // Define region size - optimized for tablet to prevent overlap
+        const regionSize = 50; // Reduced for 25 territories
         
         // Determine colors
         let fillColor = 'rgba(139, 122, 106, 0.4)'; // Neutral parchment - more opaque
@@ -1510,7 +1510,7 @@ class GameLoop {
         if (document.fullscreenElement || document.webkitFullscreenElement) {
             // In fullscreen - show exit icon
             icon.textContent = '⛶';
-            this.showNotification('📱 Fullscreen Mode', 'Press the button again or ESC to exit fullscreen', 2000);
+            this.showNotification('📱 Fullscreen Mode', 'Press the button again or ESC to exit fullscreen');
         } else {
             // Not in fullscreen - show enter icon
             icon.textContent = '⛶';
@@ -1633,11 +1633,11 @@ class GameLoop {
         let step = 0;
         const showStep = () => {
             if (step < tutorialSteps.length) {
-                this.showNotification(tutorialSteps[step].title, tutorialSteps[step].message, 15000);
+                this.showNotification(tutorialSteps[step].title, tutorialSteps[step].message);
                 step++;
                 setTimeout(showStep, 5500);
             } else {
-                this.showNotification('🎮 Player 1\'s Turn', 'Click a gray territory to claim it!', 15000);
+                this.showNotification('🎮 Player 1\'s Turn', 'Click a gray territory to claim it!');
             }
         };
         
@@ -1723,11 +1723,11 @@ class GameLoop {
                     this.state = 'PLAYING';
                     this.phase = 'DEPLOYMENT';
                     this.calculateReinforcements();
-                    this.showNotification('🎖️ Claiming Complete!', 'Now begins the age of conquest. Place your reinforcements!', 15000);
+                    this.showNotification('🎖️ Claiming Complete!', 'Now begins the age of conquest. Place your reinforcements!');
                 } else {
                     // Switch to next player
                     this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
-                    this.showNotification(`Player ${this.currentPlayer}'s Turn`, `Claim a territory! ${this.unclaimedTerritories.length} remaining.`, 15000);
+                    this.showNotification(`Player ${this.currentPlayer}'s Turn`, `Claim a territory! ${this.unclaimedTerritories.length} remaining.`);
                 }
                 
                 this.updatePhaseUI();
@@ -1742,17 +1742,17 @@ class GameLoop {
                 territory.addUnit(new Unit('FAUN', this.currentPlayer, territory.id));
                 this.reinforcementsToPlace--;
                 
-                this.showNotification('Unit Deployed', `${territory.name} reinforced! ${this.reinforcementsToPlace} remaining.`, 15000);
+                this.showNotification('Unit Deployed', `${territory.name} reinforced! ${this.reinforcementsToPlace} remaining.`);
                 
                 if (this.reinforcementsToPlace === 0) {
                     this.phase = 'ATTACK';
-                    this.showNotification('⚔️ Attack Phase', 'Select your territory, then click an enemy adjacent territory to attack!', 15000);
+                    this.showNotification('⚔️ Attack Phase', 'Select your territory, then click an enemy adjacent territory to attack!');
                 }
                 
                 this.updatePhaseUI();
                 this.render();
             } else if (territory.owner !== this.currentPlayer) {
-                this.showNotification('❌ Invalid', 'You can only deploy to your own territories!', 15000);
+                this.showNotification('❌ Invalid', 'You can only deploy to your own territories!');
             }
             return;
         }
@@ -1763,10 +1763,10 @@ class GameLoop {
                 // First click: Select attacking territory
                 if (territory.owner === this.currentPlayer && territory.units.length > 1) {
                     this.attackFromTerritory = territory;
-                    this.showNotification('Attacker Selected', `${territory.name} ready to attack! Select an adjacent enemy territory.`, 15000);
+                    this.showNotification('Attacker Selected', `${territory.name} ready to attack! Select an adjacent enemy territory.`);
                     this.render();
                 } else if (territory.owner === this.currentPlayer) {
-                    this.showNotification('❌ Cannot Attack', 'Need at least 2 units to attack (1 must stay behind)!', 15000);
+                    this.showNotification('❌ Cannot Attack', 'Need at least 2 units to attack (1 must stay behind)!');
                 }
             } else {
                 // Second click: Select defending territory
@@ -1780,10 +1780,10 @@ class GameLoop {
                 } else if (territory.owner === this.currentPlayer) {
                     // Clicked own territory - cancel attack
                     this.attackFromTerritory = null;
-                    this.showNotification('Attack Cancelled', 'Select a territory to attack from.', 15000);
+                    this.showNotification('Attack Cancelled', 'Select a territory to attack from.');
                     this.render();
                 } else {
-                    this.showNotification('❌ Invalid Target', 'Must attack an adjacent enemy territory!', 15000);
+                    this.showNotification('❌ Invalid Target', 'Must attack an adjacent enemy territory!');
                 }
             }
             return;
@@ -1794,7 +1794,7 @@ class GameLoop {
             if (!this.selectedTerritory) {
                 if (territory.owner === this.currentPlayer && territory.units.length > 1) {
                     this.selectedTerritory = territory;
-                    this.showNotification('Fortify From', `${territory.name} selected. Click an adjacent friendly territory to move units.`, 15000);
+                    this.showNotification('Fortify From', `${territory.name} selected. Click an adjacent friendly territory to move units.`);
                     this.render();
                 }
             } else {
@@ -1806,7 +1806,7 @@ class GameLoop {
                     this.render();
                 } else {
                     this.selectedTerritory = null;
-                    this.showNotification('Fortify Cancelled', '', 15000);
+                    this.showNotification('Fortify Cancelled', '');
                     this.render();
                 }
             }
@@ -1868,7 +1868,7 @@ class GameLoop {
         }
         
         // Show combat notification
-        this.showNotification('⚔️ BATTLE!', `${attacker.name} attacks ${defender.name}!`, 2000);
+        this.showNotification('⚔️ BATTLE!', `${attacker.name} attacks ${defender.name}!`);
         
         // Dice-based combat (like Risk)
         const attackDice = Math.min(3, attacker.units.length - 1); // Keep 1 behind
@@ -1932,8 +1932,7 @@ class GameLoop {
                 
                 this.showNotification(
                     '🎖️ VICTORY!', 
-                    `${conqueredName} conquered!\n🎲 ATK: [${attackRolls.join(', ')}] vs DEF: [${defendRolls.join(', ')}]\nLosses - Attacker: ${attackerLosses} | Defender: ${defenderLosses}`, 
-                    5000
+                    `${conqueredName} conquered!\n🎲 ATK: [${attackRolls.join(', ')}] vs DEF: [${defendRolls.join(', ')}]\nLosses - Attacker: ${attackerLosses} | Defender: ${defenderLosses}`
                 );
                 
                 // Check for total victory
@@ -1941,8 +1940,7 @@ class GameLoop {
             } else {
                 this.showNotification(
                     '⚔️ Battle Result', 
-                    `🎲 ATK: [${attackRolls.join(', ')}] vs DEF: [${defendRolls.join(', ')}]\nLosses - Attacker: ${attackerLosses} | Defender: ${defenderLosses}`, 
-                    4000
+                    `🎲 ATK: [${attackRolls.join(', ')}] vs DEF: [${defendRolls.join(', ')}]\nLosses - Attacker: ${attackerLosses} | Defender: ${defenderLosses}`
                 );
             }
             
@@ -1958,7 +1956,7 @@ class GameLoop {
                 unit.position = to.id;
                 to.addUnit(unit);
             }
-            this.showNotification('🛡️ Fortified', `Moved ${unitsToMove} units from ${from.name} to ${to.name}.`, 2500);
+            this.showNotification('🛡️ Fortified', `Moved ${unitsToMove} units from ${from.name} to ${to.name}.`);
         }
     }
     
@@ -1979,7 +1977,7 @@ class GameLoop {
             this.reinforcementsToPlace += 2;
         }
         
-        this.showNotification('📦 Reinforcements', `You have ${this.reinforcementsToPlace} units to deploy!`, 15000);
+        this.showNotification('📦 Reinforcements', `You have ${this.reinforcementsToPlace} units to deploy!`);
     }
     
     checkVictoryCondition() {
@@ -2045,13 +2043,13 @@ class GameLoop {
     endTurn() {
         // Handle different phases
         if (this.phase === 'DEPLOYMENT' && this.reinforcementsToPlace > 0) {
-            this.showNotification('⚠️ Deploy Units First', `You still have ${this.reinforcementsToPlace} units to deploy!`, 15000);
+            this.showNotification('⚠️ Deploy Units First', `You still have ${this.reinforcementsToPlace} units to deploy!`);
             return;
         }
         
         if (this.phase === 'DEPLOYMENT') {
             this.phase = 'ATTACK';
-            this.showNotification('⚔️ Attack Phase', 'Select your territory, then an enemy to attack. Or click End Attacks to skip.', 15000);
+            this.showNotification('⚔️ Attack Phase', 'Select your territory, then an enemy to attack. Or click End Attacks to skip.');
             this.updatePhaseUI();
             return;
         }
@@ -2059,7 +2057,7 @@ class GameLoop {
         if (this.phase === 'ATTACK') {
             this.phase = 'FORTIFY';
             this.attackFromTerritory = null;
-            this.showNotification('🛡️ Fortify Phase', 'Move units between your adjacent territories to strengthen defenses. Or click End Turn.', 15000);
+            this.showNotification('🛡️ Fortify Phase', 'Move units between your adjacent territories to strengthen defenses. Or click End Turn.');
             this.updatePhaseUI();
             return;
         }
@@ -2312,7 +2310,7 @@ class GameLoop {
         this.updateLegacyDisplay();
         this.updatePhaseUI();
         
-        this.showNotification('🦁 A New Cycle Begins', 'The world is reborn. Your legacy endures. Claim your territories!', 15000);
+        this.showNotification('🦁 A New Cycle Begins', 'The world is reborn. Your legacy endures. Claim your territories!');
         this.render();
     }
 
@@ -2373,7 +2371,7 @@ class GameLoop {
         p2Card.querySelector('.units .stat-value').textContent = p2Units;
     }
 
-    showNotification(title, message, duration = 0) {
+    showNotification(title, message) {
         const notification = document.getElementById('event-notification');
         const titleEl = notification.querySelector('.notification-title');
         const messageEl = notification.querySelector('.notification-message');
@@ -2387,7 +2385,7 @@ class GameLoop {
             existingBtn.remove();
         }
         
-        // Always add OK button so players can read the notification
+        // Always add OK button - ONLY way to dismiss
         const okButton = document.createElement('button');
         okButton.className = 'btn-primary btn-ok';
         okButton.textContent = 'OK';
@@ -2405,14 +2403,7 @@ class GameLoop {
         notification.querySelector('.notification-content').appendChild(okButton);
         notification.classList.remove('hidden');
         
-        // Auto-hide only if duration is set (for very minor notifications)
-        if (duration > 0) {
-            setTimeout(() => {
-                if (!notification.classList.contains('hidden')) {
-                    okButton.click();
-                }
-            }, duration);
-        }
+        // NO AUTO-DISMISS! User MUST click OK.
     }
 
     render() {
