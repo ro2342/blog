@@ -876,6 +876,13 @@ class MapRenderer {
             case 'Witch\'s Castle':
                 this.drawWitchCastle(territory.x, territory.y);
                 break;
+            case 'Tumnus Cave':
+            case 'Cauldron Pool':
+                this.drawCave(territory.x, territory.y);
+                break;
+            case 'Aslan\'s How':
+                this.drawHowMound(territory.x, territory.y);
+                break;
             default:
                 // Generic landmark
                 this.drawGenericLandmark(territory.x, territory.y);
@@ -1139,6 +1146,45 @@ class MapRenderer {
         }
     }
     
+    drawCave(x, y) {
+        // Cave entrance
+        this.ctx.fillStyle = '#3a3a2a';
+        this.ctx.strokeStyle = '#6a5a4a';
+        this.ctx.lineWidth = 2;
+        
+        // Cave opening (arch)
+        this.ctx.beginPath();
+        this.ctx.arc(x, y + 5, 12, Math.PI, 0, true);
+        this.ctx.lineTo(x + 12, y + 15);
+        this.ctx.lineTo(x - 12, y + 15);
+        this.ctx.closePath();
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        // Dark interior
+        this.ctx.fillStyle = '#1a1a1a';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y + 5, 8, Math.PI, 0, true);
+        this.ctx.fill();
+    }
+    
+    drawHowMound(x, y) {
+        // Grassy mound
+        this.ctx.fillStyle = '#5a7a4a';
+        this.ctx.strokeStyle = '#3a5a2a';
+        this.ctx.lineWidth = 2;
+        
+        // Mound shape
+        this.ctx.beginPath();
+        this.ctx.ellipse(x, y + 5, 18, 12, 0, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        // Entrance
+        this.ctx.fillStyle = '#2a2a2a';
+        this.ctx.fillRect(x - 5, y + 5, 10, 8);
+    }
+    
     /**
      * Draw territory name and unit count
      */
@@ -1307,6 +1353,8 @@ class GameLoop {
         this.unclaimedTerritories = this.territories.filter(t => !t.owner);
         this.reinforcementsToPlace = 0;
         this.hasAttacked = false;
+        this.hornUsedThisTurn = false;
+        this.hasExplainedCombat = false;
         this.resizeTimeout = null;
         
         this.initializeUI();
@@ -1315,73 +1363,59 @@ class GameLoop {
     }
 
     initializeTerritories() {
-        // Create territories positioned EXACTLY on the actual Narnia map
-        // Coordinates carefully matched to the map image
+        // Create 25 territories positioned across the Narnia map with good spacing
         const canvas = document.getElementById('map-canvas');
         const w = canvas.parentElement.clientWidth || 800;
         const h = canvas.parentElement.clientHeight || 600;
         
-        // Territories positioned to match the actual Pauline Baynes map
+        // 25 territories spread across the map to prevent overlap
         const territories = [
-            // Far Northwest - Lantern Waste (where Lucy enters)
-            new Territory(1, 'Lantern Waste', w * 0.18, h * 0.32, [2, 5, 16], 'FOREST'),
+            // FAR NORTHWEST (Row 1)
+            new Territory(1, 'Lantern Waste', w * 0.15, h * 0.20, [2, 6], 'FOREST'),
+            new Territory(2, 'The Shuddering Wood', w * 0.25, h * 0.15, [1, 3, 7], 'FOREST'),
+            new Territory(3, 'Witch\'s Castle', w * 0.35, h * 0.18, [2, 4, 8], 'MOUNTAIN'),
+            new Territory(4, 'Ettinsmoor', w * 0.48, h * 0.12, [3, 5, 9], 'MOUNTAIN'),
+            new Territory(5, 'The Wild Lands', w * 0.62, h * 0.15, [4, 10], 'FOREST'),
             
-            // West - The Western Wild
-            new Territory(2, 'The Western Wild', w * 0.12, h * 0.50, [1, 8], 'FOREST'),
+            // NORTHWEST (Row 2)
+            new Territory(6, 'The Western Wild', w * 0.10, h * 0.35, [1, 11], 'FOREST'),
+            new Territory(7, 'Tumnus Cave', w * 0.22, h * 0.32, [2, 8, 12], 'FOREST'),
+            new Territory(8, 'Beaversdam', w * 0.32, h * 0.35, [3, 7, 9, 13], 'FOREST'),
+            new Territory(9, 'The Great River', w * 0.45, h * 0.30, [4, 8, 10, 14], 'LAND'),
+            new Territory(10, 'Owlwood', w * 0.60, h * 0.28, [5, 9, 15], 'FOREST'),
             
-            // Far North - Ettinsmoor (giant country)
-            new Territory(3, 'Ettinsmoor', w * 0.42, h * 0.18, [4, 6, 16], 'MOUNTAIN'),
+            // CENTRAL (Row 3)
+            new Territory(11, 'Cauldron Pool', w * 0.08, h * 0.52, [6, 16], 'MOUNTAIN'),
+            new Territory(12, 'Dancing Lawn', w * 0.20, h * 0.50, [7, 13, 17], 'LAND'),
+            new Territory(13, 'Beruna Ford', w * 0.33, h * 0.52, [8, 12, 14, 18], 'LAND'),
+            new Territory(14, 'Aslan\'s How', w * 0.47, h * 0.48, [9, 13, 15, 19], 'MOUNTAIN'),
+            new Territory(15, 'Cair Paravel', w * 0.68, h * 0.45, [10, 14, 20], 'COASTAL'),
             
-            // Northeast - Wild Lands of the North
-            new Territory(4, 'The Wild Lands', w * 0.62, h * 0.22, [3, 6, 7], 'FOREST'),
+            // SOUTH CENTRAL (Row 4)
+            new Territory(16, 'The Stone Table', w * 0.12, h * 0.68, [11, 17, 21], 'MOUNTAIN'),
+            new Territory(17, 'Glasswater Creek', w * 0.25, h * 0.65, [12, 16, 18, 22], 'LAND'),
+            new Territory(18, 'The Fords', w * 0.38, h * 0.68, [13, 17, 19, 23], 'LAND'),
+            new Territory(19, 'The Lone Islands', w * 0.70, h * 0.62, [14, 15, 20, 24], 'COASTAL'),
+            new Territory(20, 'Galma', w * 0.78, h * 0.55, [15, 19], 'COASTAL'),
             
-            // Central West - Beaversdam (Mr. & Mrs. Beaver)
-            new Territory(5, 'Beaversdam', w * 0.28, h * 0.42, [1, 6, 8], 'FOREST'),
-            
-            // Central - Dancing Lawn (heart of Old Narnia)
-            new Territory(6, 'Dancing Lawn', w * 0.45, h * 0.45, [3, 4, 5, 7, 10, 11, 16], 'LAND'),
-            
-            // East Coast - Cair Paravel (castle by the sea)
-            new Territory(7, 'Cair Paravel', w * 0.72, h * 0.42, [4, 6, 9], 'COASTAL'),
-            
-            // Southwest - Stone Table region
-            new Territory(8, 'The Stone Table', w * 0.22, h * 0.58, [2, 5, 10, 13], 'MOUNTAIN'),
-            
-            // Far East - The Lone Islands (in the ocean)
-            new Territory(9, 'The Lone Islands', w * 0.82, h * 0.52, [7, 12], 'COASTAL'),
-            
-            // South Central - Archenland (mountain pass)
-            new Territory(10, 'Archenland', w * 0.38, h * 0.68, [6, 8, 11, 13, 14], 'MOUNTAIN'),
-            
-            // Central South - Glasswater Creek
-            new Territory(11, 'Glasswater Creek', w * 0.52, h * 0.62, [6, 10, 12, 15], 'LAND'),
-            
-            // Southeast Coast - Galma
-            new Territory(12, 'Galma', w * 0.72, h * 0.68, [9, 11, 15], 'COASTAL'),
-            
-            // Far Southwest - Mountain border (near desert)
-            new Territory(13, 'The Great Desert', w * 0.28, h * 0.82, [8, 10, 14], 'DESERT'),
-            
-            // South - Tashbaan (desert capital)
-            new Territory(14, 'Tashbaan', w * 0.45, h * 0.85, [10, 13, 15], 'DESERT'),
-            
-            // Far South - Calormen (southern empire)
-            new Territory(15, 'Calormen', w * 0.62, h * 0.82, [11, 12, 14], 'DESERT'),
-            
-            // North Central - Witch's Castle (between Lantern Waste and Ettinsmoor)
-            new Territory(16, 'Witch\'s Castle', w * 0.32, h * 0.26, [1, 3, 6], 'MOUNTAIN')
+            // FAR SOUTH (Row 5)
+            new Territory(21, 'Archenland', w * 0.18, h * 0.82, [16, 22], 'MOUNTAIN'),
+            new Territory(22, 'The Great Desert', w * 0.30, h * 0.85, [17, 21, 23], 'DESERT'),
+            new Territory(23, 'Tashbaan', w * 0.45, h * 0.88, [18, 22, 24, 25], 'DESERT'),
+            new Territory(24, 'Anvard', w * 0.60, h * 0.85, [19, 23, 25], 'MOUNTAIN'),
+            new Territory(25, 'Calormen', w * 0.72, h * 0.82, [23, 24], 'DESERT')
         ];
         
-        // Set starting territories - Northwest vs Far South
+        // Set starting territories - Northwest vs Far South (maximum distance)
         territories[0].owner = 1; // Lantern Waste (Player 1)
         territories[0].addUnit(new Unit('FAUN', 1, 1));
         territories[0].addUnit(new Unit('FAUN', 1, 1));
         territories[0].addUnit(new Unit('FAUN', 1, 1));
         
-        territories[14].owner = 2; // Calormen (Player 2)
-        territories[14].addUnit(new Unit('FAUN', 2, 15));
-        territories[14].addUnit(new Unit('FAUN', 2, 15));
-        territories[14].addUnit(new Unit('FAUN', 2, 15));
+        territories[24].owner = 2; // Calormen (Player 2)
+        territories[24].addUnit(new Unit('FAUN', 2, 25));
+        territories[24].addUnit(new Unit('FAUN', 2, 25));
+        territories[24].addUnit(new Unit('FAUN', 2, 25));
         
         return territories;
     }
@@ -1498,25 +1532,42 @@ class GameLoop {
         const w = canvas.parentElement.clientWidth;
         const h = canvas.parentElement.clientHeight;
         
-        // Update each territory's position based on new dimensions
-        // These match the actual Narnia map locations
+        // 25 territories in a grid layout to prevent overlap
         const positions = [
-            { x: 0.18, y: 0.32 }, // 0: Lantern Waste (northwest)
-            { x: 0.12, y: 0.50 }, // 1: Western Wild (west)
-            { x: 0.42, y: 0.18 }, // 2: Ettinsmoor (far north)
-            { x: 0.62, y: 0.22 }, // 3: Wild Lands (northeast)
-            { x: 0.28, y: 0.42 }, // 4: Beaversdam (central west)
-            { x: 0.45, y: 0.45 }, // 5: Dancing Lawn (center)
-            { x: 0.72, y: 0.42 }, // 6: Cair Paravel (east coast)
-            { x: 0.22, y: 0.58 }, // 7: Stone Table (southwest)
-            { x: 0.82, y: 0.52 }, // 8: Lone Islands (far east)
-            { x: 0.38, y: 0.68 }, // 9: Archenland (south central)
-            { x: 0.52, y: 0.62 }, // 10: Glasswater Creek (central south)
-            { x: 0.72, y: 0.68 }, // 11: Galma (southeast coast)
-            { x: 0.28, y: 0.82 }, // 12: Great Desert (far southwest)
-            { x: 0.45, y: 0.85 }, // 13: Tashbaan (south)
-            { x: 0.62, y: 0.82 }, // 14: Calormen (far south)
-            { x: 0.32, y: 0.26 }  // 15: Witch's Castle (north central)
+            // Row 1 (Far North)
+            { x: 0.15, y: 0.20 }, // 0: Lantern Waste
+            { x: 0.25, y: 0.15 }, // 1: Shuddering Wood
+            { x: 0.35, y: 0.18 }, // 2: Witch's Castle
+            { x: 0.48, y: 0.12 }, // 3: Ettinsmoor
+            { x: 0.62, y: 0.15 }, // 4: Wild Lands
+            
+            // Row 2 (Northwest)
+            { x: 0.10, y: 0.35 }, // 5: Western Wild
+            { x: 0.22, y: 0.32 }, // 6: Tumnus Cave
+            { x: 0.32, y: 0.35 }, // 7: Beaversdam
+            { x: 0.45, y: 0.30 }, // 8: Great River
+            { x: 0.60, y: 0.28 }, // 9: Owlwood
+            
+            // Row 3 (Central)
+            { x: 0.08, y: 0.52 }, // 10: Cauldron Pool
+            { x: 0.20, y: 0.50 }, // 11: Dancing Lawn
+            { x: 0.33, y: 0.52 }, // 12: Beruna Ford
+            { x: 0.47, y: 0.48 }, // 13: Aslan's How
+            { x: 0.68, y: 0.45 }, // 14: Cair Paravel
+            
+            // Row 4 (South Central)
+            { x: 0.12, y: 0.68 }, // 15: Stone Table
+            { x: 0.25, y: 0.65 }, // 16: Glasswater Creek
+            { x: 0.38, y: 0.68 }, // 17: The Fords
+            { x: 0.70, y: 0.62 }, // 18: Lone Islands
+            { x: 0.78, y: 0.55 }, // 19: Galma
+            
+            // Row 5 (Far South)
+            { x: 0.18, y: 0.82 }, // 20: Archenland
+            { x: 0.30, y: 0.85 }, // 21: Great Desert
+            { x: 0.45, y: 0.88 }, // 22: Tashbaan
+            { x: 0.60, y: 0.85 }, // 23: Anvard
+            { x: 0.72, y: 0.82 }  // 24: Calormen
         ];
         
         this.territories.forEach((territory, index) => {
@@ -1798,8 +1849,26 @@ class GameLoop {
         
         this.soundManager.play('swordClash');
         
+        // Show dice combat explanation on first battle
+        if (!this.hasExplainedCombat) {
+            this.showNotification(
+                '🎲 How Combat Works', 
+                'DICE BATTLE (like Risk):\n\n' +
+                '• Attacker rolls up to 3 dice (1 unit must stay behind)\n' +
+                '• Defender rolls up to 2 dice\n' +
+                '• Highest dice compare: Higher number wins\n' +
+                '• Ties go to the DEFENDER\n' +
+                '• Losers lose 1 unit per comparison\n\n' +
+                'Example: ATK [6,4,2] vs DEF [5,3]\n' +
+                '6 > 5: Defender loses 1\n' +
+                '4 > 3: Defender loses 1\n' +
+                'Result: Defender loses 2 units!'
+            );
+            this.hasExplainedCombat = true;
+        }
+        
         // Show combat notification
-        this.showNotification('⚔️ BATTLE!', `${attacker.name} attacks ${defender.name}!`, 15000);
+        this.showNotification('⚔️ BATTLE!', `${attacker.name} attacks ${defender.name}!`, 2000);
         
         // Dice-based combat (like Risk)
         const attackDice = Math.min(3, attacker.units.length - 1); // Keep 1 behind
@@ -1933,15 +2002,32 @@ class GameLoop {
         const ability = this.currentEra.mechanicName;
         
         switch (this.currentEra.id) {
-            case 4: // Era 4: The Horn
-                this.showNotification('The Horn of Narnia', 'Reinforcements emerge from the ancient forests!');
+            case 4: // Era 4: The Horn - ONE USE PER TURN, NO ATTACKS AFTER
+                if (this.hornUsedThisTurn) {
+                    this.showNotification('❌ Horn Already Used', 'You can only blow the Horn once per turn!');
+                    return;
+                }
+                
+                this.showNotification('📯 The Horn of Narnia!', 'Old Narnia awakens! Centaurs emerge from your forests. You cannot attack this turn.');
                 this.soundManager.play('hornCall');
+                
+                let unitsAdded = 0;
                 // Add units to forest territories owned by current player
                 this.territories.forEach(t => {
                     if (t.owner === this.currentPlayer && t.type === 'FOREST') {
                         t.addUnit(new Unit('CENTAUR', this.currentPlayer, t.id));
+                        unitsAdded++;
                     }
                 });
+                
+                if (unitsAdded === 0) {
+                    this.showNotification('❌ No Forests!', 'You don\'t control any forest territories to summon reinforcements!');
+                } else {
+                    // Mark horn as used and skip to fortify phase (no attacks)
+                    this.hornUsedThisTurn = true;
+                    this.phase = 'FORTIFY';
+                    this.updatePhaseUI();
+                }
                 break;
             
             case 6: // Era 6: Enchantment
@@ -1986,6 +2072,7 @@ class GameLoop {
         this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
         this.phase = 'DEPLOYMENT';
         this.hasAttacked = false;
+        this.hornUsedThisTurn = false;
         this.selectedTerritory = null;
         this.attackFromTerritory = null;
         
@@ -2058,8 +2145,64 @@ class GameLoop {
             setTimeout(() => {
                 transition.classList.add('hidden');
                 transition.classList.remove('fade-out');
+                
+                // Explain special mechanics after transition
+                this.explainEraMechanic();
             }, 500);
         }, 4000);
+    }
+    
+    explainEraMechanic() {
+        switch(this.currentEra.id) {
+            case 2: // Winter - Petrification
+                this.showNotification(
+                    '❄️ Petrification Mechanic',
+                    'THE LONG WINTER:\n\n' +
+                    'When you defeat enemy units, they turn to STONE instead of dying!\n\n' +
+                    '• Frozen units shown as ❄️ with a number\n' +
+                    '• They block the territory but can\'t fight\n' +
+                    '• They stay frozen until the era ends\n\n' +
+                    'The White Witch\'s curse preserves them in ice!'
+                );
+                break;
+            case 3: // Golden Age
+                this.showNotification(
+                    '🏇 Cavalry Raids',
+                    'THE GOLDEN AGE:\n\n' +
+                    'Cavalry units move faster and hit harder in this era of peace and prosperity!'
+                );
+                break;
+            case 4: // Dark Age
+                this.showNotification(
+                    '📯 The Horn of Narnia',
+                    'THE DARK AGE:\n\n' +
+                    'Use the Special Action button to blow the Horn!\n\n' +
+                    '• Summons Centaurs to all your FOREST territories\n' +
+                    '• Can only use ONCE per turn\n' +
+                    '• You CANNOT attack the same turn you use it\n\n' +
+                    'Choose wisely: reinforcements or conquest?'
+                );
+                break;
+            case 5: // Seafarer
+                this.showNotification(
+                    '⛵ Naval Supremacy',
+                    'THE VOYAGE:\n\n' +
+                    '• ALL coastal territories can now attack each other by sea!\n' +
+                    '• Islands are worth double points\n' +
+                    '• Control the oceans to control Narnia!'
+                );
+                break;
+            case 7: // Apocalypse
+                this.showNotification(
+                    '🔥 THE LAST BATTLE',
+                    'THE WORLD ENDS:\n\n' +
+                    '• The map will disappear from the edges inward\n' +
+                    '• Get your units to THE STABLE (center) to survive\n' +
+                    '• Most units saved = winner of the cycle\n\n' +
+                    'This is the end... and the beginning!'
+                );
+                break;
+        }
     }
 
     applyEraTheme() {
@@ -2230,20 +2373,46 @@ class GameLoop {
         p2Card.querySelector('.units .stat-value').textContent = p2Units;
     }
 
-    showNotification(title, message, duration = 15000) {
+    showNotification(title, message, duration = 0) {
         const notification = document.getElementById('event-notification');
-        notification.querySelector('.notification-title').textContent = title;
-        notification.querySelector('.notification-message').textContent = message;
+        const titleEl = notification.querySelector('.notification-title');
+        const messageEl = notification.querySelector('.notification-message');
         
-        notification.classList.remove('hidden');
+        titleEl.textContent = title;
+        messageEl.textContent = message;
         
-        setTimeout(() => {
+        // Remove any existing OK button
+        const existingBtn = notification.querySelector('.btn-ok');
+        if (existingBtn) {
+            existingBtn.remove();
+        }
+        
+        // Always add OK button so players can read the notification
+        const okButton = document.createElement('button');
+        okButton.className = 'btn-primary btn-ok';
+        okButton.textContent = 'OK';
+        okButton.style.marginTop = '16px';
+        okButton.style.width = '100%';
+        
+        okButton.onclick = () => {
             notification.classList.add('fade-out');
             setTimeout(() => {
                 notification.classList.add('hidden');
                 notification.classList.remove('fade-out');
-            }, 500);
-        }, duration);
+            }, 300);
+        };
+        
+        notification.querySelector('.notification-content').appendChild(okButton);
+        notification.classList.remove('hidden');
+        
+        // Auto-hide only if duration is set (for very minor notifications)
+        if (duration > 0) {
+            setTimeout(() => {
+                if (!notification.classList.contains('hidden')) {
+                    okButton.click();
+                }
+            }, duration);
+        }
     }
 
     render() {
