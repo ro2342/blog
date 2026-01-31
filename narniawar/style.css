@@ -5,54 +5,69 @@
 
 /* === CSS VARIABLES (ERA THEMING) === */
 :root {
-    /* Era 1: Genesis - Ethereal void blooming into creation */
+    /* Era 1: Genesis */
     --era1-primary: #2a1a3d;
     --era1-secondary: #6b4e8a;
     --era1-accent: #d4af37;
     --era1-bg: radial-gradient(circle at center, #1a0f2e, #0a0511);
-    
-    /* Era 2: Long Winter - Frozen whites and icy blues */
+    --era1-topbar-text: var(--parchment);
+
+    /* Era 2: Long Winter */
     --era2-primary: #e8f4f8;
     --era2-secondary: #5a8ea8;
     --era2-accent: #ffffff;
     --era2-bg: linear-gradient(180deg, #d0e8f0 0%, #8bb4cc 100%);
-    
-    /* Era 3: Golden Age - Warm ochres and desert sun */
+    --era2-topbar-text: #2c1810;
+    /* Dark text for light era */
+
+    /* Era 3: Golden Age */
     --era3-primary: #d4a574;
     --era3-secondary: #8b5a2b;
     --era3-accent: #f4d03f;
     --era3-bg: linear-gradient(180deg, #f5deb3 0%, #d2691e 100%);
-    
-    /* Era 4: Dark Age - Forest greens and crumbling stone */
+    --era3-topbar-text: #2c1810;
+
+    /* Era 4: Dark Age */
     --era4-primary: #3d5a3d;
     --era4-secondary: #1a2e1a;
     --era4-accent: #7a9d7a;
     --era4-bg: linear-gradient(180deg, #4a6741 0%, #2d3d2d 100%);
-    
-    /* Era 5: Seafarer - Deep ocean blues and coastal mist */
+    --era4-topbar-text: var(--parchment);
+
+    /* Era 5: Seafarer */
     --era5-primary: #2c5f7c;
     --era5-secondary: #1a3d52;
     --era5-accent: #7fc7d9;
     --era5-bg: linear-gradient(180deg, #5a9ab8 0%, #2c5f7c 100%);
-    
-    /* Era 6: Underland - Shadow purples and subterranean green */
+    --era5-topbar-text: var(--parchment);
+
+    /* Era 6: Underland */
     --era6-primary: #3d2955;
     --era6-secondary: #1e1433;
     --era6-accent: #8a6fa8;
     --era6-bg: radial-gradient(circle at center, #2d1f3d, #1a0f2e);
-    
-    /* Era 7: Apocalypse - Twilight purples fading to black */
+    --era6-topbar-text: var(--parchment);
+
+    /* Era 7: Apocalypse */
     --era7-primary: #4a3055;
     --era7-secondary: #2d1a3d;
     --era7-accent: #b87aa0;
     --era7-bg: linear-gradient(180deg, #5a4066 0%, #1a0f1e 100%);
-    
-    /* Current Era (defaults to Era 1) */
+    --era7-topbar-text: var(--parchment);
+
+    /* Current Era mappings */
     --current-primary: var(--era1-primary);
     --current-secondary: var(--era1-secondary);
     --current-accent: var(--era1-accent);
     --current-bg: var(--era1-bg);
-    
+    --current-topbar-text: var(--era1-topbar-text);
+
+    /* Player Themes (Always readable colors) */
+    --p1-color: #1a4d7a;
+    /* Stronger Blue */
+    --p2-color: #a31d1d;
+    /* Stronger Red */
+
     /* Universal Colors */
     --parchment: #f4e8d4;
     --ink: #2c1810;
@@ -172,7 +187,7 @@ body {
 .snowfall {
     opacity: 0;
     transition: opacity 1s;
-    background-image: 
+    background-image:
         radial-gradient(2px 2px at 20px 30px, white, transparent),
         radial-gradient(2px 2px at 40px 70px, white, transparent),
         radial-gradient(1px 1px at 90px 40px, white, transparent),
@@ -185,8 +200,13 @@ body {
 }
 
 @keyframes snowfall {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 200px; }
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 0 200px;
+    }
 }
 
 .fog-of-war {
@@ -199,10 +219,23 @@ body {
 }
 
 @keyframes fog-drift {
-    0%, 100% { transform: translateX(0) translateY(0); }
-    25% { transform: translateX(20px) translateY(-10px); }
-    50% { transform: translateX(-10px) translateY(15px); }
-    75% { transform: translateX(15px) translateY(-20px); }
+
+    0%,
+    100% {
+        transform: translateX(0) translateY(0);
+    }
+
+    25% {
+        transform: translateX(20px) translateY(-10px);
+    }
+
+    50% {
+        transform: translateX(-10px) translateY(15px);
+    }
+
+    75% {
+        transform: translateX(15px) translateY(-20px);
+    }
 }
 
 .burning-edge {
@@ -215,8 +248,17 @@ body {
 }
 
 @keyframes burning {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.02); opacity: 0.8; }
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 0.8;
+    }
 }
 
 /* === UI PANEL === */
@@ -240,30 +282,30 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
-        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
-        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
     pointer-events: none;
     opacity: 0.4;
 }
 
 /* === TOP BAR === */
+/* Contrast-aware top bar */
 .top-bar {
     padding: 20px;
     background: var(--current-primary);
-    color: var(--parchment);
+    color: var(--current-topbar-text);
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 4px 10px var(--shadow);
-    transition: background 0.5s ease;
+    transition: all 0.5s ease;
     position: relative;
 }
 
-/* Force text to always be visible regardless of era */
 .top-bar * {
-    color: var(--parchment) !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    color: var(--current-topbar-text) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -335,7 +377,7 @@ body {
     filter: grayscale(0%);
     border: 4px solid var(--gold-leaf);
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(244, 232, 212, 0.9));
-    box-shadow: 
+    box-shadow:
         0 0 30px rgba(212, 175, 55, 0.8),
         0 0 60px rgba(212, 175, 55, 0.5),
         inset 0 0 20px rgba(212, 175, 55, 0.2);
@@ -363,19 +405,27 @@ body {
 }
 
 @keyframes banner-wiggle {
-    0% { transform: translateX(-50%) rotate(-2deg); }
-    100% { transform: translateX(-50%) rotate(2deg); }
+    0% {
+        transform: translateX(-50%) rotate(-2deg);
+    }
+
+    100% {
+        transform: translateX(-50%) rotate(2deg);
+    }
 }
 
 @keyframes active-player-pulse {
-    0%, 100% { 
-        box-shadow: 
+
+    0%,
+    100% {
+        box-shadow:
             0 0 30px rgba(212, 175, 55, 0.8),
             0 0 60px rgba(212, 175, 55, 0.5),
             inset 0 0 20px rgba(212, 175, 55, 0.2);
     }
-    50% { 
-        box-shadow: 
+
+    50% {
+        box-shadow:
             0 0 40px rgba(212, 175, 55, 1),
             0 0 80px rgba(212, 175, 55, 0.7),
             inset 0 0 30px rgba(212, 175, 55, 0.3);
@@ -390,14 +440,14 @@ body {
     box-shadow: 0 4px 8px var(--shadow);
 }
 
-/* Player 1 avatar - Blue to match blue territories */
+/* Player 1 avatar - Blue */
 #player-1-card .player-avatar {
-    background: linear-gradient(135deg, #5a7c9d 0%, #2d3d52 100%);
+    background: linear-gradient(135deg, var(--p1-color) 0%, #102a43 100%);
 }
 
-/* Player 2 avatar - Red to match red territories */
+/* Player 2 avatar - Red */
 #player-2-card .player-avatar {
-    background: linear-gradient(135deg, #b85a5a 0%, #6b3333 100%);
+    background: linear-gradient(135deg, var(--p2-color) 0%, #4a1010 100%);
 }
 
 .player1-avatar {
@@ -676,8 +726,8 @@ button:disabled {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
-        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.02) 2px, rgba(0, 0, 0, 0.02) 4px);
     pointer-events: none;
 }
 
@@ -694,13 +744,23 @@ button:disabled {
 }
 
 @keyframes page-turn-left {
-    0% { transform: perspective(1000px) rotateY(0deg); }
-    100% { transform: perspective(1000px) rotateY(-180deg); }
+    0% {
+        transform: perspective(1000px) rotateY(0deg);
+    }
+
+    100% {
+        transform: perspective(1000px) rotateY(-180deg);
+    }
 }
 
 @keyframes page-turn-right {
-    0% { transform: perspective(1000px) rotateY(180deg); }
-    100% { transform: perspective(1000px) rotateY(0deg); }
+    0% {
+        transform: perspective(1000px) rotateY(180deg);
+    }
+
+    100% {
+        transform: perspective(1000px) rotateY(0deg);
+    }
 }
 
 .era-content {
@@ -792,8 +852,15 @@ button:disabled {
 }
 
 @keyframes notification-appear {
-    0% { transform: translate(-50%, -50%) scale(0.8) rotateX(20deg); opacity: 0; }
-    100% { transform: translate(-50%, -50%) scale(1) rotateX(0deg); opacity: 1; }
+    0% {
+        transform: translate(-50%, -50%) scale(0.8) rotateX(20deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(1) rotateX(0deg);
+        opacity: 1;
+    }
 }
 
 .notification-title {
@@ -807,9 +874,34 @@ button:disabled {
 
 .notification-message {
     font-size: 17px;
-    line-height: 1.7;
+    line-height: 1.6;
     color: var(--ink);
-    text-align: center;
+    text-align: left;
+    /* Better for reading lists/rules */
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.notification-message strong {
+    color: var(--current-primary);
+    font-weight: 700;
+}
+
+.notification-message ul {
+    margin: 12px 0;
+    padding-left: 20px;
+}
+
+.notification-message li {
+    margin-bottom: 8px;
+}
+
+.notification-message hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-leaf), transparent);
+    margin: 15px 0;
 }
 
 /* === VICTORY SCREEN === */
@@ -840,8 +932,15 @@ button:disabled {
 }
 
 @keyframes victory-appear {
-    0% { transform: scale(0.8) translateY(50px); opacity: 0; }
-    100% { transform: scale(1) translateY(0); opacity: 1; }
+    0% {
+        transform: scale(0.8) translateY(50px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
 }
 
 .victory-title {
@@ -904,8 +1003,13 @@ button:disabled {
 }
 
 @keyframes intro-fade-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 .intro-content {
@@ -925,8 +1029,15 @@ button:disabled {
 }
 
 @keyframes title-glow {
-    0%, 100% { text-shadow: 0 0 30px rgba(212, 175, 55, 0.8); }
-    50% { text-shadow: 0 0 50px rgba(212, 175, 55, 1); }
+
+    0%,
+    100% {
+        text-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+    }
+
+    50% {
+        text-shadow: 0 0 50px rgba(212, 175, 55, 1);
+    }
 }
 
 .game-subtitle {
@@ -961,5 +1072,7 @@ button:disabled {
 }
 
 @keyframes fade-out {
-    to { opacity: 0; }
+    to {
+        opacity: 0;
+    }
 }

@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Narnia: The Eternal Cycle</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <!-- Main Game Container -->
     <div id="game-container">
-        
+
         <!-- Era Transition Overlay -->
         <div id="era-transition" class="hidden">
             <div class="book-page left-page"></div>
@@ -25,10 +27,10 @@
         <!-- Game Board -->
         <div id="game-board">
             <canvas id="map-canvas"></canvas>
-            
+
             <!-- Territory Overlays (for interactive regions) -->
             <div id="territory-overlay"></div>
-            
+
             <!-- Map Effects Layer -->
             <div id="map-effects">
                 <div class="snowfall"></div>
@@ -81,6 +83,8 @@
             <div class="action-panel">
                 <button class="btn-primary" id="btn-end-turn">End Turn</button>
                 <button class="btn-secondary" id="btn-special-action">Special Action</button>
+                <button class="btn-secondary hidden" id="btn-auto-claim">Auto-Claim Territories</button>
+                <button class="btn-secondary" id="btn-show-rules">Game Rules</button>
                 <button class="btn-fullscreen" id="btn-fullscreen" title="Toggle Fullscreen">
                     <span class="fullscreen-icon">⛶</span>
                     <span>Fullscreen</span>
@@ -145,4 +149,5 @@
 
     <script src="game.js"></script>
 </body>
+
 </html>
