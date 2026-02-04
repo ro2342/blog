@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNO 3D - Rod Edition (Full + NoSleep)</title>
+    <title>UNO 3D - Rod Edition (Final Layout)</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -31,24 +31,6 @@
             perspective: 1200px;
         }
 
-        /* CORREÇÃO DO BOTÃO FULLSCREEN */
-        #fs-btn {
-            position: fixed; top: 20px; right: 20px;
-            background: #2d3436; /* Fundo escuro sólido */
-            color: white; 
-            border: 3px solid white; /* Borda grossa */
-            border-radius: 12px; padding: 12px 20px;
-            cursor: pointer; z-index: 99999; /* Máximo z-index */
-            font-weight: bold; font-family: 'Fredoka One', cursive;
-            font-size: 16px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            transition: all 0.2s;
-        }
-        #fs-btn:hover { 
-            background: #e74c3c; 
-            transform: scale(1.1); 
-        }
-
         /* Banner de Turno */
         #turn-banner {
             position: fixed; top: 20px;
@@ -59,6 +41,63 @@
             text-shadow: 0 0 20px var(--glow-color);
             z-index: 600;
             pointer-events: none;
+        }
+
+        /* BOTÃO FULLSCREEN (Agora ao lado do UNO) */
+        #fs-btn {
+            position: fixed; 
+            bottom: 250px; /* Alinhado verticalmente com o UNO */
+            right: calc(8% + 120px); /* 8% (pos do uno) + 120px pra esquerda */
+            
+            background: #2d3436; 
+            color: white; 
+            border: 3px solid white; 
+            border-radius: 50px; /* Mais arredondado pra combinar */
+            padding: 10px 20px;
+            cursor: pointer; 
+            z-index: 99999; 
+            font-weight: bold; 
+            font-family: 'Fredoka One', cursive;
+            font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        #fs-btn:hover { 
+            background: #e74c3c; 
+            transform: scale(1.1); 
+        }
+
+        /* BOTÃO UNO HUMANO */
+        #uno-btn {
+            position: fixed; bottom: 220px; right: 8%; 
+            width: 100px; height: 100px; 
+            background: radial-gradient(circle at 30% 30%, #ff7675, #d63031);
+            color: #fff; font-family: 'Fredoka One', cursive; font-size: 28px;
+            border: 5px solid white; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 9999; 
+            transition: transform 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        #uno-btn::before {
+            content: ''; position: absolute;
+            top: -30px; left: -30px; right: -30px; bottom: -30px;
+            border-radius: 50%; z-index: -1;
+        }
+
+        #uno-btn:active { transform: scale(0.95); }
+        #uno-btn.clicked { 
+            background: radial-gradient(circle at 30% 30%, #55efc4, #00b894); 
+            border-color: #aaffdd; font-size: 20px; box-shadow: 0 0 30px #00b894;
+        }
+        #uno-btn:not(.clicked) { animation: pulseBtn 2s infinite; }
+        
+        @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .game-board {
@@ -196,38 +235,6 @@
         
         .discard-pile-glow { box-shadow: 0 0 30px rgba(255, 255, 255, 0.4); transform: rotate(5deg); }
 
-        /* BOTÃO UNO HUMANO */
-        #uno-btn {
-            position: fixed; bottom: 220px; right: 8%; 
-            width: 100px; height: 100px; 
-            background: radial-gradient(circle at 30% 30%, #ff7675, #d63031);
-            color: #fff; font-family: 'Fredoka One', cursive; font-size: 28px;
-            border: 5px solid white; border-radius: 50%;
-            cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            z-index: 9999; 
-            transition: transform 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        
-        #uno-btn::before {
-            content: ''; position: absolute;
-            top: -30px; left: -30px; right: -30px; bottom: -30px;
-            border-radius: 50%; z-index: -1;
-        }
-
-        #uno-btn:active { transform: scale(0.95); }
-        #uno-btn.clicked { 
-            background: radial-gradient(circle at 30% 30%, #55efc4, #00b894); 
-            border-color: #aaffdd; font-size: 20px; box-shadow: 0 0 30px #00b894;
-        }
-        #uno-btn:not(.clicked) { animation: pulseBtn 2s infinite; }
-        
-        @keyframes pulseBtn {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
         #color-picker {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: white; padding: 20px; border-radius: 20px;
@@ -242,7 +249,7 @@
 
 <div id="turn-banner">Vez de Rod</div>
 
-<button id="fs-btn" onclick="toggleFullScreen()">⛶ TELA CHEIA</button>
+<button id="fs-btn" onclick="toggleFullScreen()">⛶ TELA</button>
 
 <div id="uno-btn" onclick="callUno()">UNO!</div>
 
@@ -330,13 +337,12 @@
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
-                document.getElementById('fs-btn').innerText = "⛶ TELA CHEIA";
+                document.getElementById('fs-btn').innerText = "⛶ TELA";
                 document.getElementById('fs-btn').style.background = "#2d3436";
             }
         }
     }
 
-    // Tenta reativar o wake lock se a visibilidade mudar
     document.addEventListener('visibilitychange', async () => {
         if (wakeLock !== null && document.visibilityState === 'visible') {
             await requestWakeLock();
