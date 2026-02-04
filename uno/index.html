@@ -31,17 +31,23 @@
             perspective: 1200px;
         }
 
-        /* Botão Tela Cheia */
+        /* CORREÇÃO DO BOTÃO FULLSCREEN */
         #fs-btn {
             position: fixed; top: 20px; right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white; border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 10px; padding: 10px 15px;
-            cursor: pointer; z-index: 2000;
-            font-weight: bold; font-family: 'Nunito', sans-serif;
-            transition: all 0.2s; backdrop-filter: blur(5px);
+            background: #2d3436; /* Fundo escuro sólido */
+            color: white; 
+            border: 3px solid white; /* Borda grossa */
+            border-radius: 12px; padding: 12px 20px;
+            cursor: pointer; z-index: 99999; /* Máximo z-index */
+            font-weight: bold; font-family: 'Fredoka One', cursive;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: all 0.2s;
         }
-        #fs-btn:hover { background: rgba(255,255,255,0.3); }
+        #fs-btn:hover { 
+            background: #e74c3c; 
+            transform: scale(1.1); 
+        }
 
         /* Banner de Turno */
         #turn-banner {
@@ -190,7 +196,7 @@
         
         .discard-pile-glow { box-shadow: 0 0 30px rgba(255, 255, 255, 0.4); transform: rotate(5deg); }
 
-        /* BOTÃO UNO HUMANO (FIXED) */
+        /* BOTÃO UNO HUMANO */
         #uno-btn {
             position: fixed; bottom: 220px; right: 8%; 
             width: 100px; height: 100px; 
@@ -305,12 +311,9 @@
         if ('wakeLock' in navigator) {
             try {
                 wakeLock = await navigator.wakeLock.request('screen');
-                console.log('Wake Lock ativo: Tela não desligará.');
-                wakeLock.addEventListener('release', () => {
-                    console.log('Wake Lock liberado.');
-                });
+                console.log('Wake Lock ativo.');
             } catch (err) {
-                console.error(`${err.name}, ${err.message}`);
+                console.log('Wake Lock erro:', err);
             }
         }
     }
@@ -318,20 +321,22 @@
     function toggleFullScreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().then(() => {
-                requestWakeLock(); // Ativa Wake Lock ao entrar em tela cheia
+                requestWakeLock();
             }).catch(err => {
-                alert(`Erro ao tentar tela cheia: ${err.message}`);
+                alert(`Erro: ${err.message}`);
             });
             document.getElementById('fs-btn').innerText = "❌ SAIR";
+            document.getElementById('fs-btn').style.background = "#e74c3c";
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
                 document.getElementById('fs-btn').innerText = "⛶ TELA CHEIA";
+                document.getElementById('fs-btn').style.background = "#2d3436";
             }
         }
     }
 
-    // Tenta reativar o wake lock se a visibilidade mudar (usuário trocou de aba e voltou)
+    // Tenta reativar o wake lock se a visibilidade mudar
     document.addEventListener('visibilitychange', async () => {
         if (wakeLock !== null && document.visibilityState === 'visible') {
             await requestWakeLock();
@@ -499,7 +504,6 @@
         if(currentPlayer === 0) {
             unoDeclared = true;
             updateUnoButtonState(); 
-            // Tenta ativar o Wake Lock no clique do UNO também, garantindo que a tela fique acesa
             requestWakeLock();
         }
     }
@@ -518,7 +522,6 @@
     function playCard(index) {
         if(currentPlayer !== 0) return;
         
-        // Garante WakeLock na primeira interação de jogo
         requestWakeLock();
 
         let needUno = (players[0].length === 2);
