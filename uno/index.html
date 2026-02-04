@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO 3D - Rod Edition (Full + NoSleep)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #e74c3c;
+            --blue: #3498db;
+            --green: #2ecc71;
+            --yellow: #f1c40f;
+            --black: #2c3e50;
+            --bg-gradient: radial-gradient(circle at center, #2c3e50 0%, #000000 100%);
+            --glow-color: #ffd700;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-gradient);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
+            perspective: 1200px;
+        }
+
+        /* Botão Tela Cheia */
+        #fs-btn {
+            position: fixed; top: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white; border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px; padding: 10px 15px;
+            cursor: pointer; z-index: 2000;
+            font-weight: bold; font-family: 'Nunito', sans-serif;
+            transition: all 0.2s; backdrop-filter: blur(5px);
+        }
+        #fs-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* Banner de Turno */
+        #turn-banner {
+            position: fixed; top: 20px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 32px;
+            text-transform: uppercase;
+            color: var(--glow-color);
+            text-shadow: 0 0 20px var(--glow-color);
+            z-index: 600;
+            pointer-events: none;
+        }
+
+        .game-board {
+            position: relative;
+            width: 900px; height: 600px;
+            transform-style: preserve-3d;
+            transform: rotateX(20deg);
+            margin-bottom: 50px;
+        }
+
+        .table-surface {
+            position: absolute; top: 50%; left: 50%;
+            width: 80%; height: 70%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            box-shadow: 0 0 80px rgba(0,0,0,0.8);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        /* Setas */
+        .direction-arrows {
+            position: absolute; top: 50%; left: 50%;
+            width: 350px; height: 350px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 5px dashed rgba(255,255,255,0.1);
+            animation: spin 10s linear infinite;
+            pointer-events: none; z-index: 0;
+        }
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes spin-rev { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+
+        /* JOGADORES */
+        .player-area { 
+            position: absolute; text-align: center; 
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            opacity: 0.6; 
+            transform-style: preserve-3d;
+        }
+        
+        .active-turn { opacity: 1; transform: scale(1.15) !important; z-index: 100; }
+        .active-turn .avatar { box-shadow: 0 0 40px var(--glow-color), inset 0 0 10px white; border-color: var(--glow-color); }
+        
+        .avatar {
+            width: 70px; height: 70px;
+            background: #fff; border-radius: 50%;
+            margin: 0 auto; display: flex; align-items: center; justify-content: center;
+            font-size: 35px; border: 5px solid #555;
+            position: relative; background: linear-gradient(135deg, #fff, #ddd);
+        }
+
+        .player-info {
+            background: rgba(0,0,0,0.8);
+            padding: 5px 15px; border-radius: 15px;
+            margin-top: 10px; display: inline-block;
+            border: 1px solid #555;
+        }
+        .player-name { font-size: 14px; color: #ccc; display: block;}
+        .card-count { 
+            font-size: 20px; font-weight: bold; color: #fff; display: block; 
+            font-family: 'Fredoka One', cursive; color: var(--yellow);
+        }
+
+        .bot-top { top: -20px; left: 50%; transform: translateX(-50%); }
+        .bot-left { top: 40%; left: -100px; }
+        .bot-right { top: 40%; right: -100px; }
+
+        .player-human { 
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            padding-bottom: 20px; z-index: 1000; opacity: 1; 
+        }
+        
+        .player-human.active-turn .hand { filter: drop-shadow(0 0 15px var(--glow-color)); }
+
+        .speech-bubble {
+            position: absolute; top: -40px; right: -20px;
+            background: white; color: black; padding: 5px 10px;
+            border-radius: 10px; font-weight: bold;
+            animation: popIn 0.3s forwards; display: none; z-index: 300;
+        }
+        
+        .report-btn {
+            position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+            background: #e74c3c; color: white; border: 2px solid white;
+            padding: 5px 10px; border-radius: 20px; cursor: pointer;
+            font-weight: bold; font-size: 14px;
+            animation: shake 0.5s infinite; display: none; z-index: 400; box-shadow: 0 0 10px red;
+        }
+        @keyframes shake { 0%{transform:translateX(-52%)} 50%{transform:translateX(-48%)} 100%{transform:translateX(-52%)} }
+
+        /* CARTAS */
+        .hand { display: flex; justify-content: center; align-items: flex-end; height: 140px; }
+        .card {
+            width: 70px; height: 100px;
+            border-radius: 10px; background-color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Fredoka One', cursive; font-size: 40px; color: white;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+            box-shadow: -2px 5px 10px rgba(0,0,0,0.4);
+            border: 4px solid white;
+            transition: transform 0.2s; position: relative; margin-left: -25px;
+        }
+        
+        .card.red { background: linear-gradient(135deg, #ff6b6b, var(--red)); }
+        .card.blue { background: linear-gradient(135deg, #54a0ff, var(--blue)); }
+        .card.green { background: linear-gradient(135deg, #55efc4, var(--green)); }
+        .card.yellow { background: linear-gradient(135deg, #ffeaa7, var(--yellow)); color: #d35400; text-shadow: none;}
+        .card.black { background: linear-gradient(135deg, #636e72, #2d3436); border-color: #b2bec3; }
+        .card.back { background: #2d3436; color: transparent; border: 2px solid white; }
+        .card.back::after {
+            content: ''; position: absolute; width: 80%; height: 60%;
+            background: #e74c3c; border-radius: 50% 20% 50% 20%; transform: rotate(-45deg);
+        }
+
+        .card.disabled { filter: brightness(0.7); cursor: default; }
+        .card.playable {
+            cursor: pointer; transform: translateY(-20px); z-index: 10;
+            box-shadow: 0 0 10px yellow; border-color: yellow;
+        }
+        .card.playable:hover { transform: translateY(-40px) scale(1.1); z-index: 100; }
+
+        /* MESA */
+        .center-table {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex; gap: 40px; z-index: 10;
+        }
+        .deck-container { width: 70px; height: 100px; cursor: pointer; position: relative; }
+        .deck-card-visual { width: 100%; height: 100%; transition: transform 0.2s; }
+        .deck-container:hover .deck-card-visual { transform: scale(1.05); }
+        .deck-container:active .deck-card-visual { transform: scale(0.95); }
+        .deck.pass-btn { background: #e74c3c !important; color: white !important; font-size: 16px; text-transform: uppercase; background-image: none !important; }
+        
+        .discard-pile-glow { box-shadow: 0 0 30px rgba(255, 255, 255, 0.4); transform: rotate(5deg); }
+
+        /* BOTÃO UNO HUMANO (FIXED) */
+        #uno-btn {
+            position: fixed; bottom: 220px; right: 8%; 
+            width: 100px; height: 100px; 
+            background: radial-gradient(circle at 30% 30%, #ff7675, #d63031);
+            color: #fff; font-family: 'Fredoka One', cursive; font-size: 28px;
+            border: 5px solid white; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 9999; 
+            transition: transform 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        #uno-btn::before {
+            content: ''; position: absolute;
+            top: -30px; left: -30px; right: -30px; bottom: -30px;
+            border-radius: 50%; z-index: -1;
+        }
+
+        #uno-btn:active { transform: scale(0.95); }
+        #uno-btn.clicked { 
+            background: radial-gradient(circle at 30% 30%, #55efc4, #00b894); 
+            border-color: #aaffdd; font-size: 20px; box-shadow: 0 0 30px #00b894;
+        }
+        #uno-btn:not(.clicked) { animation: pulseBtn 2s infinite; }
+        
+        @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #color-picker {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 20px; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 1000;
+            grid-template-columns: 1fr 1fr; gap: 15px;
+        }
+        .color-btn { width: 80px; height: 80px; border-radius: 15px; border: none; cursor: pointer; transition: transform 0.2s; }
+        .color-btn:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+<div id="turn-banner">Vez de Rod</div>
+
+<button id="fs-btn" onclick="toggleFullScreen()">⛶ TELA CHEIA</button>
+
+<div id="uno-btn" onclick="callUno()">UNO!</div>
+
+<div class="game-board">
+    <div class="table-surface"></div>
+    <div class="direction-arrows" id="arrows"></div>
+
+    <div class="player-area bot-top" id="area-2">
+        <div class="report-btn" id="report-2" onclick="penalizeBot(2)">🚨 DENUNCIAR!</div>
+        <div class="avatar">🤖 <div class="speech-bubble" id="bubble-2">UNO!</div></div>
+        <div class="player-info">
+            <span class="player-name">AI Hawking</span>
+            <span class="card-count" id="count-2">7 Cartas</span>
+        </div>
+        <div class="hand" id="hand-2" style="display:none"></div>
+    </div>
+
+    <div class="player-area bot-left" id="area-1">
+        <div class="report-btn" id="report-1" onclick="penalizeBot(1)">🚨 DENUNCIAR!</div>
+        <div class="avatar">🦊 <div class="speech-bubble" id="bubble-1">UNO!</div></div>
+        <div class="player-info">
+            <span class="player-name">AI Chomper</span>
+            <span class="card-count" id="count-1">7 Cartas</span>
+        </div>
+        <div class="hand" id="hand-1" style="display:none"></div>
+    </div>
+
+    <div class="player-area bot-right" id="area-3">
+        <div class="report-btn" id="report-3" onclick="penalizeBot(3)">🚨 DENUNCIAR!</div>
+        <div class="avatar">👽 <div class="speech-bubble" id="bubble-3">UNO!</div></div>
+        <div class="player-info">
+            <span class="player-name">AI Luna</span>
+            <span class="card-count" id="count-3">7 Cartas</span>
+        </div>
+        <div class="hand" id="hand-3" style="display:none"></div>
+    </div>
+
+    <div class="center-table">
+        <div class="deck-container" onclick="handleDeckClick()">
+            <div class="card back deck deck-card-visual" id="deck-card"></div>
+        </div>
+        <div class="card discard-pile-glow" id="discard-pile"></div>
+    </div>
+</div>
+
+<div class="player-area player-human" id="area-0">
+    <div class="hand" id="hand-0"></div>
+    <div class="player-info" style="margin-bottom: 5px;">
+        <span class="player-name">Rod (Você)</span>
+        <span class="card-count" id="count-0">7 Cartas</span>
+    </div>
+</div>
+
+<div id="color-picker">
+    <button class="color-btn" style="background:var(--red)" onclick="pickColor('red')"></button>
+    <button class="color-btn" style="background:var(--blue)" onclick="pickColor('blue')"></button>
+    <button class="color-btn" style="background:var(--green)" onclick="pickColor('green')"></button>
+    <button class="color-btn" style="background:var(--yellow)" onclick="pickColor('yellow')"></button>
+</div>
+
+<script>
+    /* WAKE LOCK E FULLSCREEN */
+    let wakeLock = null;
+
+    async function requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Wake Lock ativo: Tela não desligará.');
+                wakeLock.addEventListener('release', () => {
+                    console.log('Wake Lock liberado.');
+                });
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        }
+    }
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().then(() => {
+                requestWakeLock(); // Ativa Wake Lock ao entrar em tela cheia
+            }).catch(err => {
+                alert(`Erro ao tentar tela cheia: ${err.message}`);
+            });
+            document.getElementById('fs-btn').innerText = "❌ SAIR";
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                document.getElementById('fs-btn').innerText = "⛶ TELA CHEIA";
+            }
+        }
+    }
+
+    // Tenta reativar o wake lock se a visibilidade mudar (usuário trocou de aba e voltou)
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+            await requestWakeLock();
+        }
+    });
+
+    /* LÓGICA DO JOGO */
+    const colors = ['red', 'blue', 'green', 'yellow'];
+    const values = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+2', 'Ø', '⇄'];
+    
+    let deck = [];
+    let discardPile = [];
+    let players = [[], [], [], []]; 
+    let playerNames = ["Rod", "AI Chomper", "AI Hawking", "AI Luna"];
+    let currentPlayer = 0; 
+    let direction = 1; 
+    let currentColor = '';
+    let isGameOver = false;
+    let unoDeclared = false; 
+    let humanHasDrawn = false;
+
+    function initGame() {
+        createDeck();
+        shuffleDeck();
+        dealCards();
+        let firstCard = deck.pop();
+        while(firstCard.color === 'black' || firstCard.value === '+2' || firstCard.value === 'Ø' || firstCard.value === '⇄') { 
+            deck.unshift(firstCard);
+            firstCard = deck.pop();
+        }
+        discardPile.push(firstCard);
+        currentColor = firstCard.color;
+        updateUI();
+        highlightPlayer();
+        if(currentPlayer !== 0) setTimeout(botTurn, 2000); 
+    }
+
+    function createDeck() {
+        colors.forEach(color => {
+            values.forEach(val => {
+                deck.push({ color: color, value: val });
+                if(val !== '0') deck.push({ color: color, value: val });
+            });
+        });
+        for(let i=0; i<4; i++) {
+            deck.push({ color: 'black', value: '🌈' }); 
+            deck.push({ color: 'black', value: '🧨' }); 
+        }
+    }
+
+    function shuffleDeck() {
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+    }
+
+    function dealCards() {
+        for(let i=0; i<7; i++) {
+            for(let p=0; p<4; p++) {
+                if(deck.length > 0) players[p].push(deck.pop());
+            }
+        }
+    }
+
+    function isValidMove(card) {
+        let topCard = discardPile[discardPile.length - 1];
+        if (card.color === 'black') return true;
+        if (card.color === currentColor) return true;
+        if (card.value === topCard.value) return true;
+        return false;
+    }
+
+    function highlightPlayer() {
+        for(let i=0; i<4; i++) document.getElementById(`area-${i}`).classList.remove('active-turn');
+        document.getElementById(`area-${currentPlayer}`).classList.add('active-turn');
+        
+        let banner = document.getElementById('turn-banner');
+        banner.innerText = currentPlayer === 0 ? "SUA VEZ!" : `VEZ DE ${playerNames[currentPlayer]}`;
+        banner.style.color = currentPlayer === 0 ? "#ffd700" : "#fff";
+
+        let arrows = document.getElementById('arrows');
+        if(direction === 1) arrows.style.animationName = 'spin';
+        else arrows.style.animationName = 'spin-rev';
+    }
+
+    function resetTurnState() {
+        humanHasDrawn = false;
+        let deckEl = document.getElementById('deck-card');
+        deckEl.innerText = "";
+        deckEl.classList.remove('pass-btn');
+        deckEl.classList.add('back');
+        
+        for(let i=1; i<=3; i++) {
+            document.getElementById(`report-${i}`).style.display = 'none';
+            document.getElementById(`bubble-${i}`).style.display = 'none';
+        }
+    }
+
+    function nextTurn() {
+        if(isGameOver) return;
+        
+        if(players[currentPlayer].length === 0) {
+            isGameOver = true;
+            updateUI();
+            let winner = playerNames[currentPlayer];
+            alert(`🎉 ${winner} VENCEU! 🎉`);
+            location.reload();
+            return;
+        }
+
+        currentPlayer = (currentPlayer + direction + 4) % 4;
+        resetTurnState();
+        highlightPlayer();
+
+        if(currentPlayer === 0) {
+            unoDeclared = false; 
+            updateUnoButtonState(); 
+        } 
+
+        updateUI();
+
+        if (currentPlayer !== 0) {
+            setTimeout(botTurn, 2500); 
+        }
+    }
+
+    function applyCardEffect(card) {
+        if(card.value === 'Ø') { 
+            currentPlayer = (currentPlayer + direction + 4) % 4;
+        } else if (card.value === '⇄') {
+            direction *= -1;
+            if (players.length === 2) currentPlayer = (currentPlayer + direction + 4) % 4;
+        } else if (card.value === '+2') {
+            let nextP = (currentPlayer + direction + 4) % 4;
+            drawCards(nextP, 2);
+            currentPlayer = nextP; 
+        } else if (card.value === '🧨') { 
+            let nextP = (currentPlayer + direction + 4) % 4;
+            drawCards(nextP, 4);
+            currentPlayer = nextP;
+        }
+    }
+
+    function drawCards(playerIdx, count) {
+        for(let i=0; i<count; i++) {
+            if(deck.length === 0) {
+                if(discardPile.length > 1) {
+                    let top = discardPile.pop();
+                    deck = discardPile;
+                    discardPile = [top];
+                    shuffleDeck();
+                } else break;
+            }
+            players[playerIdx].push(deck.pop());
+        }
+        updateCardCounts();
+        
+        if(playerIdx !== 0 && players[playerIdx].length > 1) {
+             document.getElementById(`report-${playerIdx}`).style.display = 'none';
+        }
+    }
+
+    function callUno() {
+        if(currentPlayer === 0) {
+            unoDeclared = true;
+            updateUnoButtonState(); 
+            // Tenta ativar o Wake Lock no clique do UNO também, garantindo que a tela fique acesa
+            requestWakeLock();
+        }
+    }
+    
+    function updateUnoButtonState() {
+        let btn = document.getElementById('uno-btn');
+        if(unoDeclared) {
+            btn.classList.add('clicked');
+            btn.innerHTML = "UNO!<br><small>ATIVADO</small>";
+        } else {
+            btn.classList.remove('clicked');
+            btn.innerHTML = "UNO!";
+        }
+    }
+
+    function playCard(index) {
+        if(currentPlayer !== 0) return;
+        
+        // Garante WakeLock na primeira interação de jogo
+        requestWakeLock();
+
+        let needUno = (players[0].length === 2);
+        let card = players[0][index];
+        
+        if(isValidMove(card)) {
+            players[0].splice(index, 1);
+            discardPile.push(card);
+            
+            if (needUno && !unoDeclared) {
+                alert("Esqueceu de gritar UNO! +2 Cartas!");
+                drawCards(0, 2);
+            }
+
+            if(card.color === 'black') {
+                document.getElementById('color-picker').style.display = 'grid';
+            } else {
+                currentColor = card.color;
+                applyCardEffect(card);
+                nextTurn();
+            }
+            updateUI();
+        }
+    }
+
+    function handleDeckClick() {
+        if(currentPlayer !== 0) return;
+        requestWakeLock();
+
+        if (!humanHasDrawn) {
+            drawCards(0, 1);
+            humanHasDrawn = true;
+            let newCard = players[0][players[0].length - 1];
+            updateUI(); 
+
+            if (isValidMove(newCard)) {
+                let deckEl = document.getElementById('deck-card');
+                deckEl.innerText = "PASSAR";
+                deckEl.classList.remove('back');
+                deckEl.classList.add('pass-btn');
+            } else {
+                setTimeout(nextTurn, 1000);
+            }
+        } else {
+            nextTurn();
+        }
+    }
+
+    function pickColor(color) {
+        currentColor = color;
+        document.getElementById('color-picker').style.display = 'none';
+        let topCard = discardPile[discardPile.length - 1];
+        applyCardEffect(topCard);
+        nextTurn();
+        updateUI();
+    }
+
+    function botTurn() {
+        let hand = players[currentPlayer];
+        let played = false;
+        let botIndex = currentPlayer;
+
+        for(let i=0; i<hand.length; i++) {
+            if(isValidMove(hand[i])) {
+                let card = hand.splice(i, 1)[0];
+                discardPile.push(card);
+                
+                if(hand.length === 1) {
+                    let forgot = Math.random() > 0.5;
+                    if(!forgot) {
+                        let bubble = document.getElementById(`bubble-${botIndex}`);
+                        bubble.style.display = 'block';
+                    } else {
+                        let btn = document.getElementById(`report-${botIndex}`);
+                        btn.style.display = 'block';
+                    }
+                }
+
+                if(card.color === 'black') {
+                    let counts = {red:0, blue:0, green:0, yellow:0};
+                    hand.forEach(c => { if(c.color !== 'black') counts[c.color]++; });
+                    currentColor = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+                } else {
+                    currentColor = card.color;
+                }
+                
+                applyCardEffect(card);
+                played = true;
+                break;
+            }
+        }
+
+        if(!played) {
+            drawCards(currentPlayer, 1);
+            let newCard = hand[hand.length - 1];
+            if(isValidMove(newCard)) {
+                 hand.pop();
+                 discardPile.push(newCard);
+                 if(newCard.color === 'black') { currentColor = 'red'; }
+                 else { currentColor = newCard.color; }
+                 
+                 if(hand.length === 1) {
+                     let forgot = Math.random() > 0.5;
+                     if(!forgot) document.getElementById(`bubble-${botIndex}`).style.display = 'block';
+                     else document.getElementById(`report-${botIndex}`).style.display = 'block';
+                 }
+                 
+                 applyCardEffect(newCard);
+            }
+        }
+
+        updateUI();
+        nextTurn();
+    }
+
+    function penalizeBot(botIdx) {
+        let btn = document.getElementById(`report-${botIdx}`);
+        if(btn.style.display === 'block') {
+            alert(`Você denunciou ${playerNames[botIdx]}! Ele comprou 2 cartas.`);
+            drawCards(botIdx, 2);
+            btn.style.display = 'none'; 
+            updateUI();
+        }
+    }
+
+    function updateCardCounts() {
+        for(let i=0; i<4; i++) {
+            let label = document.getElementById(`count-${i}`);
+            let count = players[i].length;
+            label.innerText = count === 1 ? "1 CARTA!" : `${count} Cartas`;
+            label.style.color = count === 1 ? "#e74c3c" : "#f1c40f"; 
+        }
+    }
+
+    function updateUI() {
+        let topCard = discardPile[discardPile.length - 1];
+        let pileEl = document.getElementById('discard-pile');
+        
+        pileEl.className = 'card discard-pile-glow';
+        if (topCard.color !== 'black') pileEl.classList.add(topCard.color);
+        else pileEl.classList.add('black');
+        
+        if(topCard.color === 'black') pileEl.style.borderColor = `var(--${currentColor})`;
+        else pileEl.style.borderColor = 'white';
+        
+        pileEl.innerText = topCard.value;
+
+        let humanDiv = document.getElementById('hand-0');
+        humanDiv.innerHTML = '';
+        players[0].forEach((card, idx) => {
+            let el = document.createElement('div');
+            el.className = `card ${card.color}`;
+            el.innerText = card.value;
+            let rot = (idx - players[0].length/2) * 3;
+            el.style.transform = `rotate(${rot}deg)`;
+
+            if(isValidMove(card) && currentPlayer === 0) {
+                el.classList.add('playable');
+                el.onclick = () => playCard(idx);
+            } else {
+                el.classList.add('disabled');
+            }
+            humanDiv.appendChild(el);
+        });
+        
+        updateUnoButtonState();
+        updateCardCounts();
+    }
+
+    initGame();
+</script>
+</body>
+</html>
